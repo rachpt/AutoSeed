@@ -8,7 +8,7 @@ Pt auto seed.
 
 可以自动清理种子，不会爆仓。
 
-[![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/Rhilip/Pt-Autoseed/master/LICENSE)
+[![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
 |  源站点（from）   |        转至（to）         | 时间（time） |
 | :---------------: | :-----------------------: | :----------: |
