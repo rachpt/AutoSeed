@@ -2,57 +2,50 @@
 # FileName: auto_main.sh
 #
 # Author: rachpt@126.com
-# Version: 1.0v
-# Date: 2018-05-17
-# Environmental requirements:
-# - transmission-[show,remote,daemon or gtk]
-# - httpie, head, awk, sed, find, grep, curl
-# - cut, cat, mktemp, html2bbcode 
-#----------------设置------------------#
-trans_show="transmission-show"
+# Version: 1.2v
+# Date: 2018-05-19
+#
+#-----------import settings-------------#
 
-#---include "/" end---#
-flexget_path="/home/rc/Downloads/tmp/"
+. ./settings.sh
 
-#moveTotPath="/home/rc/Downloads/finish/"
-#logoPath="/home/rc/Downloads/finish/info"
-
-#----------------日志函数---------------#
-#function printLogo {
-	#echo "=================================" >> $logoPath
-	#echo "匹配成功"  >> $logoPath
-	#echo "下载到了："$TR_TORRENT_DIR >> $logoPath
-	#echo "种子编号："$TR_TORRENT_ID >> $logoPath
-	#echo -e "于："$TR_TIME_LOCALTIME " \c" >> $logoPath
-	#echo "完成对："$TR_TORRENT_NAME" 的移动！" >> $logoPath
-#}
+#----------------log func---------------#
+function printLogo {
+	echo "+++++++++++++++++++++++++++++++++"   >> $logoPath
+	echo -e "[`date '+%Y-%m-%d %H:%M:%S'`] \c" >> $logoPath
+	echo "发布了：[$TR_TORRENT_NAME]"          >> $logoPath
+	echo "================================="    >> $logoPath
+}
 
 #----------rename torrent file-----------#
 function rename_torrent()
 {
-    IFS_OLD=$IFS
+IFS_OLD=$IFS
     IFS=$'\n'
     
-    for i in $(find $flexget_path -iname *.torrent* |awk -F "/" '{print $NF}')
+    for i in $(find $flexget_path -iname "*.torrent*" |awk -F "/" '{print $NF}')
     do  
-    	new_torrent_name=`$trans_show "$i" |awk 'BEGIN{FS=":"} /Name/{print $2}' |head -n 1`
-        if [ "$i" != "$new_torrent_name" ]; then
-            mv "${flexget_path}${i}" "${flexget_path}${new_torrent_name}"
+    	new_torrent_name=`$trans_show "${flexget_path}$i" |awk 'BEGIN{FS=": "} /Name/{print $2}' |head -n 1`
+        if [ "$i" != "${new_torrent_name}.torrent" ]; then
+            mv "${flexget_path}${i}" "${flexget_path}${new_torrent_name}.torrent"
         fi
 
     	if [ "$new_torrent_name" = "$TR_TORRENT_NAME" ]
         then
             IFS=$IFS_OLD
             up_status=1
-            . ./auto_uplaod.sh "$new_torrent_name" "$up_status"
+	    	echo "[`date '+%Y-%m-%d %H:%M:%S'`] 准备发布 [$TR_TORRENT_NAME]" >> $logoPath
+            . ./auto_post.sh
+	        printLogo          # end
         fi
     done
 
     IFS=$IFS_OLD
 }
-#----------------start---------------#
+#-------------start function------------#
 
-if [ "$(find $flexget_path -iname *.torrent*)" ]; then
+if [ "$(find $flexget_path -iname "*.torrent*")" ]; then
+    echo "+++++++++++++[start]+++++++++++++" >> $logoPath
     rename_torrent
 fi
 
