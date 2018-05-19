@@ -57,7 +57,7 @@ function get_descr()
         all_item_lists_B[$j]=$i
         j=`expr $j + 1`
     done
-    #echo step 3 "${all_item_lists_A[@]}">> $logoPath
+
     #---get current item---#
     
     torrent_location_line=`grep -n "$name" $html_page|cut -d: -f1|head -n 1`
@@ -69,10 +69,16 @@ function get_descr()
             max_item_line=${all_item_lists_B[$j]}
             break
         fi
-        #echo in it $j >> $logoPath
+
         j=`expr $j + 1`
     done
     echo $torrent_location_line == $j step 4 $min_item_line $max_item_line >> $logoPath
+    
+    if [ -z "$torrent_location_line" ]; then
+        name=`echo "$name"|sed 's/DD2 0/DD2.0/g;s/H 26/H.26/g;s/5 1/5.1/g;s/7 1/7.1/g'`
+        torrent_location_line=`grep -n "$name" $html_page|cut -d: -f1|head -n 1`
+    fi
+    
     #---extral item's descr---#
 
     descr_page=`mktemp /tmp/TorrentDescr.XXXXXXXXXX`
@@ -115,8 +121,13 @@ function get_descr()
     fi
     
     #---join descr---#
-    des="${descrCom}
-    `cat $descr_bbcode`"
+    fi [ -s $descr_bbcode ]; then
+        des="${descrCom}
+        `cat $descr_bbcode`"
+    else
+        des="${descrCom}
+        ${failed_to_get_des}"
+    fi
     
     #---log---#
     echo "+++++++++++[post data]+++++++++++" >> $logoPath
