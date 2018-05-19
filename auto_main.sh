@@ -2,7 +2,7 @@
 # FileName: auto_main.sh
 #
 # Author: rachpt@126.com
-# Version: 1.2v
+# Version: 1.3v
 # Date: 2018-05-19
 #
 #-----------import settings-------------#
@@ -14,7 +14,7 @@ function printLogo {
 	echo "+++++++++++++++++++++++++++++++++"   >> $logoPath
 	echo -e "[`date '+%Y-%m-%d %H:%M:%S'`] \c" >> $logoPath
 	echo "发布了：[$TR_TORRENT_NAME]"          >> $logoPath
-	echo "================================="    >> $logoPath
+	echo "================================="   >> $logoPath
 }
 
 #----------rename torrent file-----------#
@@ -29,7 +29,7 @@ IFS_OLD=$IFS
         if [ "$i" != "${new_torrent_name}.torrent" ]; then
             mv "${flexget_path}${i}" "${flexget_path}${new_torrent_name}.torrent"
         fi
-
+        . ./get_tr.sh
     	if [ "$new_torrent_name" = "$TR_TORRENT_NAME" ]
         then
             IFS=$IFS_OLD
@@ -44,8 +44,9 @@ IFS_OLD=$IFS
 }
 #-------------start function------------#
 
-if [ "$(find $flexget_path -iname "*.torrent*")" ]; then
+if [ "$(find $flexget_path -iname '*.torrent*')" ]; then
     echo "+++++++++++++[start]+++++++++++++" >> $logoPath
+    echo  "[`date '+%Y-%m-%d %H:%M:%S'`]" >> $logoPath
     rename_torrent
 fi
 

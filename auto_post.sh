@@ -2,7 +2,7 @@
 # FileName: auto_post.sh
 #
 # Author: rachpt@126.com
-# Version: 1.2v
+# Version: 1.3v
 # Date: 2018-05-19
 #
 #-------------settings---------------#
@@ -40,7 +40,8 @@ function get_descr()
             standardSel='1' ;;
         *)
             standardSel="$default_standard"  ;;
-    esac 
+    esac
+            
     
     #---get item arrar---#
     html_page=`mktemp /tmp/RssTempPage.XXXXXXXXXX`
@@ -61,6 +62,12 @@ function get_descr()
     #---get current item---#
     
     torrent_location_line=`grep -n "$name" $html_page|cut -d: -f1|head -n 1`
+    
+    if [ -z "$torrent_location_line" ]; then
+        name=`echo "$name"|sed 's/DD2 0/DD2.0/g;s/H 26/H.26/g;s/5 1/5.1/g;s/7 1/7.1/g'`
+        torrent_location_line=`grep -n "$name" $html_page|cut -d: -f1|head -n 1`
+    fi
+    
     j=0
     while [ $j -lt 50 ]
     do
@@ -73,12 +80,6 @@ function get_descr()
         j=`expr $j + 1`
     done
     echo $torrent_location_line == $j step 4 $min_item_line $max_item_line >> $logoPath
-    
-    if [ -z "$torrent_location_line" ]; then
-        name=`echo "$name"|sed 's/DD2 0/DD2.0/g;s/H 26/H.26/g;s/5 1/5.1/g;s/7 1/7.1/g'`
-        torrent_location_line=`grep -n "$name" $html_page|cut -d: -f1|head -n 1`
-    fi
-    
     #---extral item's descr---#
 
     descr_page=`mktemp /tmp/TorrentDescr.XXXXXXXXXX`
@@ -121,7 +122,7 @@ function get_descr()
     fi
     
     #---join descr---#
-    fi [ -s $descr_bbcode ]; then
+    if [ -s $descr_bbcode ]; then
         des="${descrCom}
         `cat $descr_bbcode`"
     else

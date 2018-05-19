@@ -2,7 +2,7 @@
 # FileName: auto_clean.sh
 #
 # Author: rachpt@126.com
-# Version: 1.2v
+# Version: 1.3v
 # Date: 2018-05-19
 #-----------------------------#
 #
@@ -21,7 +21,7 @@ IS_SEEDING()
     if [ ! -n "$1" ]; then
         for eachTorrentID in `$trans_remote ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep %| awk '{print $1}'`
         do
-	    eachTorrent=`$trans_remote ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i |grep Name|awk '{print $2}'`
+	    eachTorrent=`$trans_remote ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i |grep 'Name'|head -n 1|awk '{print $2}'`
         if [ "$1" = "$eachTorrent" ]; then
 		    delete_commit=1
         fi
