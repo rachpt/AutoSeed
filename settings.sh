@@ -39,6 +39,8 @@ descrCom="[quote]
 [/li][/ul]
 [/quote]"
 
+failed_to_get_des='[size=5][color=Magenta]获取简介失败[/color][/size]         [em11]'
+
 default_imdb_url='tt1234567'
 
 #---default type---#
