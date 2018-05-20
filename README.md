@@ -2,7 +2,7 @@
 
 Pt auto seed.
 
-目前只适用于 从 HDSky 自动转载 iPad [普通 720p 也可以] 电影至 HUDBT 站。
+目前只适用于 从 HDSky 自动转载 iPad [普通 720p 也可以] 电影至 HUDBT/WHUPT 站。
 
 自动生成并提交简介，依赖原种简介。
 
@@ -13,6 +13,7 @@ Pt auto seed.
 |  源站点（from）   |        转至（to）         | 时间（time） |
 | :---------------: | :-----------------------: | :----------: |
 | https://hdsky.me/ | https://hudbt.hust.edu.cn |  2018-05-19  |
+| https://hdsky.me/ | https://pt.whu.edu.cn |  2018-05-21  |
 
 
 
@@ -28,9 +29,9 @@ Pt auto seed.
 ## 使用方法
 
 1. clone 本 repo 至本地；
-2. 修改设置文件`setting.sh`；
+2. 修改设置文件`setting.sh`(包括cookie、passkey，路径等)；
 3. 添加 `auto_main.sh` 脚本路径至 transmission 的 `script-torrent-done-filename`。具体可以参见 [这里](https://rachpt.github.io/2018/03/25/transmission-settings/) ；
-4. 如果 `transmission` 运行脚本诡异，可以将 `auto_main.sh` 添加到 `crontab`  之类的程序周期运行。
+4. 如果 `transmission` 运行脚本诡异，可以将 `auto_main.sh` 添加到  `crontab` 之类的程序周期运行。
 
 
 *其他：*
@@ -42,12 +43,6 @@ Pt auto seed.
 一个运行 log：
 
 ```sh
-+++++++++++++[start]+++++++++++++
-[2018-05-19 22:15:33]
-[2018-05-19 22:15:33] 准备发布 [Message.from.the.King.2016.BluRay.iPad.720p.AAC.x264-HDSPad]
-+++++++++++++++++++++++++++++++++
-[2018-05-19 22:15:33] 发布了：[Message.from.the.King.2016.BluRay.iPad.720p.AAC.x264-HDSPad]
-=================================
 +++++++++++++[start]+++++++++++++
 [2018-05-19 22:16:45]
 [2018-05-19 22:16:46] 准备发布 [Message.from.the.King.2016.BluRay.iPad.720p.AAC.x264-HDSPad]
@@ -69,3 +64,13 @@ t_id: [138696]
 
 ```
 
+## 更新日志
+
+- 2018-05-21
+  - 进一步模块化，添加对 WHUPT 的支持。
+
+- 2018-05-19
+  - 完成 debug 工作。
+
+- 2018-05-17
+  - 首次提交，错误较多。
