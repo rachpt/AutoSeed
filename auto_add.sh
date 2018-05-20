@@ -2,11 +2,11 @@
 # FileName: auto_add.sh
 #
 # Author: rachpt@126.com
-# Version: 1.3v
+# Version: 1.2v
 # Date: 2018-05-19
 #
 #-------------settings---------------#
-# Do not move it!
+
 torrent2add="${download_url}&passkey=${passkey}"
 
 #-------------functions---------------#
@@ -20,6 +20,7 @@ function set_ratio()
 		    $trans_remote ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $eachTorrentID -sr $ratio
         fi
     done
+    echo "+++++++++++++[added]+++++++++++++" >> $logoPath
 }
 
 function add_torrent()
@@ -30,9 +31,6 @@ function add_torrent()
 }
 
 #-------------call function---------------#
-
 if [ "$torrent2add" ]; then
-	echo "++++++++++++++[add]++++++++++++++" >> $logoPath
     add_torrent
-    . ./auto_clean.sh
 fi

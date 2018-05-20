@@ -2,8 +2,8 @@
 # FileName: settings.sh
 #
 # Author: rachpt@126.com
-# Version: 1.2v
-# Date: 2018-05-19
+# Version: 1.4v
+# Date: 2018-05-21
 #
 # Environmental requirements:
 # - transmission-[show,remote,daemon or gtk]
@@ -14,21 +14,56 @@
 #---path of transmission-show---#
 trans_show="transmission-show"
 
+#---path of transmissionreemote---#
+trans_remote='transmission-remote'
+
+#---path of html2bbcode---#
+h2b='/usr/local/bin/html2bbcode'
 #---include "/" end---#
-flexget_path="/home/rachpt/downloads/tmp/"
+AUTO_ROOT_PATH='/home/rachpt/shell/dev'
+#---flexget_path need slash(/) end---#
+flexget_path="/home/rachpt/Downloads/tmp/"
 
 #moveTotPath="/home/rc/Downloads/finish/"
-logoPath="/home/rachpt/shell/auto/log"
+logoPath="/home/rachpt/shell/dev/log"
 
 #----------------[post]----------------#
-#---path of html2bbcode---#
-h2b='html2bbcode'
 
-default_name="Default Title"
+#---[hudbt]---#
+enable_hds2hudbt='yes'
 
-default_subname="Default Subtitle"
+default_name_hudbt="Default Title"
+default_subname_hudbt="Default Subtitle"
+failed_to_get_des_hudbt='[size=5][color=Magenta]获取简介失败[/color][/size]         [em11]'
+default_imdb_url_hudbt='tt1234567'
+default_select_type_hudbt='415'
+default_standard_hudbt='3'
+anonymous_hudbt='yes'
+#---ratio of uploaded torrent---#
+ratio_hudbt='10'
 
-postUrl='https://hudbt.hust.edu.cn/takeupload.php'
+cookie_hudbt='Cookie:c_secure_uid=xxxxxx; c_secure_pass=xxxxxxx; c_secure_login=bm9wZQ=='
+#---you passkey---#
+passkey_hudbt='123456789969f82b673b01fc8b77'
+
+#---[whu]---#
+enable_hds2whu='yes'
+
+default_name_whu="Default Title"
+default_subname_whu="Default Subtitle"
+failed_to_get_des_whu='[size=5][color=Magenta]获取简介失败[/color][/size]         [em11]'
+default_imdb_url_whu='tt1234567'
+default_select_type_whu='415'
+default_standard_whu='0'
+anonymous_whu='yes'
+#---ratio of uploaded torrent---#
+ratio_whu='10'
+
+cookie_whu='Cookie:c_secure_uid=xxxxxx; c_secure_pass=xxxxxxx; c_secure_login=bm9wZQ==; c_session_id=xxxxxxxx'
+#---you passkey---#
+passkey_whu='123456789969f82b673b01fc8e3'
+
+#-------#
 
 descrCom="[quote]
 [b]这是一个自动发布的种子[/b]
@@ -39,32 +74,12 @@ descrCom="[quote]
 [/li][/ul]
 [/quote]"
 
-failed_to_get_des='[size=5][color=Magenta]获取简介失败[/color][/size]         [em11]'
-
-default_imdb_url='tt1234567'
-
-#---default type---#
-default_select_type='415'
-
-default_standard='3'
-#---anonymous upload---#
-anonymous='yes'
-
-#---cookie of forwarding site---#
-cookie="Cookie:c_secure_uid=xxxxxx; c_secure_pass=xxxxxxx; c_secure_login=xxxxxx"
-
 #----------------[add]----------------#
-#---path of transmissionreemote---#
-trans_remote='transmission-remote'
-#---ratio of uploaded torrent---#
-ratio='10'
 #---authoriz for transmission---#
 HOST='127.0.0.1'
-PORT='9090'
-USER='rach'
-PASSWORD='0511416752'
-#---you passkey, for add torrent---#
-passkey='123456789012345678902134567'
+PORT='9091'
+USER='username'
+PASSWORD='password'
 
 #----------------[clean]----------------#
 # Watch folder for clean.

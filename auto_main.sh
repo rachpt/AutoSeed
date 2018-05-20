@@ -2,10 +2,12 @@
 # FileName: auto_main.sh
 #
 # Author: rachpt@126.com
-# Version: 1.3v
-# Date: 2018-05-19
+# Version: 1.4v
+# Date: 2018-05-21
 #
 #-----------import settings-------------#
+
+cd "$AUTO_ROOT_PATH"
 
 . ./settings.sh
 
@@ -13,16 +15,16 @@
 function printLogo {
 	echo "+++++++++++++++++++++++++++++++++"   >> $logoPath
 	echo -e "[`date '+%Y-%m-%d %H:%M:%S'`] \c" >> $logoPath
-	echo "发布了：[$TR_TORRENT_NAME]"          >> $logoPath
+	echo "发布了：[$TR_TORRENT_NAME]"           >> $logoPath
 	echo "================================="   >> $logoPath
 }
 
 #----------rename torrent file-----------#
 function rename_torrent()
 {
-IFS_OLD=$IFS
-    IFS=$'\n'
-    
+    IFS_OLD=$IFS
+    IFS=$'\n'    
+    #---loop for torrent in flexget path ---#
     for i in $(find $flexget_path -iname "*.torrent*" |awk -F "/" '{print $NF}')
     do  
     	new_torrent_name=`$trans_show "${flexget_path}$i" |awk 'BEGIN{FS=": "} /Name/{print $2}' |head -n 1`
@@ -36,10 +38,10 @@ IFS_OLD=$IFS
             up_status=1
 	    	echo "[`date '+%Y-%m-%d %H:%M:%S'`] 准备发布 [$TR_TORRENT_NAME]" >> $logoPath
             . ./auto_post.sh
-	        printLogo          # end
+            rm -f "$torrentPath" # delete uploaded torrent
+	        printLogo            # end
         fi
     done
-
     IFS=$IFS_OLD
 }
 #-------------start function------------#
@@ -49,5 +51,3 @@ if [ "$(find $flexget_path -iname '*.torrent*')" ]; then
     echo  "[`date '+%Y-%m-%d %H:%M:%S'`]" >> $logoPath
     rename_torrent
 fi
-
-

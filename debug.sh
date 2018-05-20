@@ -2,13 +2,13 @@
 # FileName: debug.sh
 #
 # Author: rachpt@126.com
-# Version: 1.3v
+# Version: 1.2v
 # Date: 2018-05-19
 #
 #------------------------------------#
 #---path---#
-TR_TORRENT_DIR='/srv/ftp/mp4'
+TR_TORRENT_DIR='/srv/ftp/data'
 #---real name of torrent(inclode dot always)---#
-TR_TORRENT_NAME='Miracles.of.the.Namiya.General.Store.2017.Repack.BluRay.iPad.720p.AAC.x264-HDSPad'
+TR_TORRENT_NAME='One.on.One.2014.720p.BluRay.DD2.0.x264-HDS'
 
 . ./auto_main.sh
