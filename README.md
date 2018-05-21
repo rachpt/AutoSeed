@@ -17,6 +17,7 @@ Pt auto seed.
 
 
 
+
 ## 环境要求
 
 - GNU/Linux （在ubuntu 18.04 lts 测试通过）。
@@ -74,3 +75,47 @@ t_id: [138696]
 
 - 2018-05-17
   - 首次提交，错误较多。
+
+## 实现流程
+
+```flow
+st=>start: 导入settings
+cond1=>condition: 监控目录是否有torrent文件?
+cond2=>condition: 变量TR_TORRENT_NAME是否为空?
+op1=>operation: 使用transmission-show重命名tr文件
+op2=>operation: 遍历每个tr文件
+cond3=>condition: 种子Name与完成种子匹配?
+op3=>operation: 生成种子Name
+op4=>operation: 获取HDSky rss页面
+op5=>operation: 设置TR_TORRENT_NAME等于匹配项name
+op6=>operation: 根据 item 生成数组，用于截断简介
+cond4=>condition: Name遍历item，包含？
+op7=>operation: 过滤得到简介
+op8=>operation: 使用自定义消息代替
+op9=>operation: 根据enable项分别post发布
+cond5=>condition: 得到发布种子ID?
+op10=>operation: 构造下载链接（包含passkey）至tr-remote
+op11=>operation: 添加链接，设置下载位置至TR_TORRENT_DIR
+op12=>operation: 设置ratio，进入clean
+op13=>operation: 清理中间文件
+op14=>operation: 清理有问题的种子（红种），不删数据
+op15=>operation: 清理在TR_TORRENT_DIR中的不在tr列表的文件
+cond6=>condition: free空间是否符合settings值？
+op16=>operation: 清理tr中完成状态的种子
+
+e=>end: 退出
+
+st->cond1
+cond1(yes)->cond2
+cond1(no)->e
+cond2(yes)->op1->op3->op4->op6->cond4
+cond2(no)->op2->cond3
+cond3(no)->e
+cond3(yes)->op5->op1
+cond4(no)->op8->op9
+cond4(yes)->op7->op9->cond5
+cond5(no)->op13->e
+cond5(yes)->op10->op11->op12->op14->op15->cond6
+cond6(no)->op16->cond6
+cond6(yes)->e
+```
