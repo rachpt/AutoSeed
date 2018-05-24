@@ -18,7 +18,7 @@ ERROE_TR()
     for eachTorrentID in `$trans_remote ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep '[0-9]\*'|awk '{print $1}'|awk -F '*' '{print $1}'`
     do
         if [ "`$trans_remote ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i|grep 'torrent not registered with this tracker'`" ]; then
-                $trans_remote ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -r
+            $trans_remote ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -r
         fi
     done
 }
@@ -27,7 +27,7 @@ IS_SEEDING()
 {
     IFS=$IFS_OLD
     delete_commit=0
-    if [ ! -n "$1" ]; then
+    if [ -n "$1" ]; then
         for eachTorrentID in `$trans_remote ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep %| awk '{print $1}'`
         do
 	    eachTorrent=`$trans_remote ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i |grep Name|head -n 1|awk '{print $2}'`
@@ -35,11 +35,11 @@ IS_SEEDING()
 		    delete_commit=1
         fi
         done
-    fi
 
-    if [ $delete_commit -eq 0 ]; then
-        rm -rf "$FILE_PATH/$1"
-        echo "[`date '+%Y-%m-%d %H:%M:%S'`] deleted Torrent [$1]" >> $logoPath
+        if [ $delete_commit -eq 0 ]; then
+            rm -rf "$FILE_PATH/$1"
+            echo "[`date '+%Y-%m-%d %H:%M:%S'`] deleted Torrent [$1]" >> $log_Path
+        fi
     fi
 }
 
@@ -82,8 +82,8 @@ IS_OVER_USE()
     if [ "$DISK_OVER" = "1" ]; then
         for i in `$trans_remote ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep 100% |grep Done| awk '{print $1}'|grep -v ID`
         do
-            [ "$i" -gt "0" ] && echo -n "$(date '+%Y-%m-%d %H:%M:%S') [Done] " >> $logoPath
-            $trans_remote ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $i --remove-and-delete >> $logoPath 2>&1
+            [ "$i" -gt "0" ] && echo -n "$(date '+%Y-%m-%d %H:%M:%S') [Done] " >> $log_Path
+            $trans_remote ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $i --remove-and-delete >> $log_Path 2>&1
             [ "$i" -gt "0" ] && sleep 10 && DISK_CHECK
             [ "$DISK_OVER" = "0" ] && break
         done
@@ -91,7 +91,7 @@ IS_OVER_USE()
 }
 
 #----------call func--------------#
-echo "+++++++++++++[clean]+++++++++++++" >> $logoPath
+echo "+++++++++++++[clean]+++++++++++++" >> $log_Path
 
 if [ -z "$default_FILE_PATH" ]; then
         FILE_PATH="$TR_TORRENT_DIR"

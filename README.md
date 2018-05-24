@@ -38,6 +38,7 @@ Pt auto seed.
 *其他：*
 
 请使用 flexget 订阅下载，使用 [transmissionrpc](https://flexget.com/Plugins/transmission) 将源种传入 transmission。
+如果 `crontab` 无法运行，参考命令 `*/5 * * * * cd /home/rachpt/shell/auto && ./auto_main.sh >/dev/null 2>&1`。
 
 
 
@@ -47,25 +48,29 @@ Pt auto seed.
 +++++++++++++[start]+++++++++++++
 [2018-05-19 22:16:45]
 [2018-05-19 22:16:46] 准备发布 [Message.from.the.King.2016.BluRay.iPad.720p.AAC.x264-HDSPad]
-1180 == 15 step 4 1179 1254
+Item: [1179 1254]
 +++++++++++[post data]+++++++++++
 name=Message from the King 2016 BluRay iPad 720p AAC x264-HDSPad 
- small_descr=国王口信 / 金恩的訊息(台) 
- url=tt1712192 
- type=430 
- standard_sel=3 
- uplver=yes
+small_descr=国王口信 / 金恩的訊息(台) 
+url=tt1712192 
+type=430 
+standard_sel=3 
+uplver=yes
+https://hudbt.hust.edu.cn
 t_id: [138696]
 ++++++++++++++[add]++++++++++++++
 +++++++++++++[clean]+++++++++++++
 +++++++++++++++++++++++++++++++++
 [2018-05-19 22:17:02] 发布了：[Message.from.the.King.2016.BluRay.iPad.720p.AAC.x264-HDSPad]
-=================================
-+++++++++++[delet tmp]+++++++++++
+++++++++++++++[end]++++++++++++++
 
 ```
 
 ## 更新日志
+
+- 2018-05-24
+  - 修复简介获取失败，添加通过 detail 页面获取简介以及二次编辑代码(基于LOG)。
+  - 修复一些　bugs。
 
 - 2018-05-21
   - 进一步模块化，添加对 WHUPT 的支持。
