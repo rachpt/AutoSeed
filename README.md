@@ -8,7 +8,7 @@ Pt auto seed.
 
 可以自动清理种子，不会爆仓。
 
-[![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
+[![release](https://img.shields.io/badge/Version-1.6-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v1.6)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
 |  源站点（from）   |        转至（to）         | 时间（time） |
 | :---------------: | :-----------------------: | :----------: |
@@ -32,7 +32,7 @@ Pt auto seed.
 1. clone 本 repo 至本地；
 2. 修改设置文件`setting.sh`(包括cookie、passkey，路径等)；
 3. 添加 `auto_main.sh` 脚本路径至 transmission 的 `script-torrent-done-filename`。具体可以参见 [这里](https://rachpt.github.io/2018/03/25/transmission-settings/) ；
-4. 如果 `transmission` 运行脚本诡异，可以将 `auto_main.sh` 添加到  `crontab` 之类的程序周期运行。
+4. 如果 `transmission` 运行脚本诡异，可以将 `auto_main.sh` 添加到  `crontab` 之类的程序周期运行（运行锁会解决和3的冲突问题）。
 
 
 *其他：*
@@ -68,9 +68,15 @@ t_id: [138696]
 
 ## 更新日志
 
+- 2018-06-10
+  - 添加代码防止重复运行扰乱生成 LOG。
+  - 添加基于网络的 [html2bbcode](https://www.garyshood.com/htmltobb/) 代码。
+  - 使用绝对路径。
+  - 已知 bug：后在自动运行程序在 html2bbcode 处 bug，终端手动运行程序无此问题。
+
 - 2018-05-24
   - 修复简介获取失败，添加通过 detail 页面获取简介以及二次编辑代码(基于LOG)。
-  - 修复一些　bugs。
+  - 修复一些　bug。
 
 - 2018-05-21
   - 进一步模块化，添加对 WHUPT 的支持。
