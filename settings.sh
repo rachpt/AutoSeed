@@ -2,8 +2,8 @@
 # FileName: settings.sh
 #
 # Author: rachpt@126.com
-# Version: 1.5v
-# Date: 2018-05-24
+# Version: 1.6v
+# Date: 2018-06-04
 #
 # Environmental requirements:
 # - transmission-[show,remote,daemon or gtk]
@@ -11,6 +11,10 @@
 # - cut, cat, mktemp, html2bbcode 
 #
 #----------------[main]----------------#
+# Set it also in auto_man.sh and edit.sh
+AUTO_ROOT_PATH='/home/rachpt/shell/auto'
+#---Use yes to disable all---#
+disable_AutoSeed='no'
 #---path of transmission-show---#
 trans_show="transmission-show"
 
@@ -18,14 +22,14 @@ trans_show="transmission-show"
 trans_remote='transmission-remote'
 
 #---path of html2bbcode---#
-h2b='html2bbcode'
-#---include "/" end---#
-AUTO_ROOT_PATH='/home/rachpt/shell/auto/'
-flexget_path="/home/rachpt/Downloads/tmp/"
+h2b='/usr/local/bin/html2bbcode'
 
-#moveTotPath="/home/rc/Downloads/finish/"
-log_Path="/home/rachpt/shell/auto/log"
+flexget_path="/home/rachpt/tmp"
 
+# log path
+log_Path="$AUTO_ROOT_PATH/log"
+# lock path
+lock_file="$AUTO_ROOT_PATH/lock"
 #----------------[post]----------------#
 
 #---[hudbt]---#
