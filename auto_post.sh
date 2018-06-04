@@ -2,12 +2,12 @@
 # FileName: auto_post.sh
 #
 # Author: rachpt@126.com
-# Version: 1.5v
-# Date: 2018-05-21
+# Version: 1.6v
+# Date: 2018-06-04
 #
 #-------------settings---------------#
 
-torrentPath="${flexget_path}${new_torrent_name}.torrent"
+torrentPath="${flexget_path}/${new_torrent_name}.torrent"
 
 #-------------------------------------#
 #---paramter up_status code---#
@@ -36,7 +36,7 @@ function upload_torrent()
             echo t_id: [$t_id] >> $log_Path
             #---add torrent---#
             download_url="${site_download_url}${t_id}"
-            . ./auto_add.sh
+            source "$AUTO_ROOT_PATH/auto_add.sh"
         fi
     fi
 }
@@ -53,12 +53,12 @@ function finish()
 #----------call function-----------#
 
 if [ "$enable_hds2hudbt" = 'yes' ]; then
-    . ./hds2hudbt.sh
+    source "$AUTO_ROOT_PATH/hds2hudbt.sh"
     upload_torrent
 fi
 
 if [ "$enable_hds2whu" = 'yes' ]; then
-    . ./hds2whu.sh
+    source "$AUTO_ROOT_PATH/hds2whu.sh"
     upload_torrent
 fi
 
