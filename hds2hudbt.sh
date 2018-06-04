@@ -21,7 +21,7 @@ postUrl='https://hudbt.hust.edu.cn/takeupload.php'
 edit_postUrl='https://hudbt.hust.edu.cn/takeedit.php'
 site_download_url='https://hudbt.hust.edu.cn/download.php?id='
 #-------------------------------------#
-. ./hds_desc.sh
+source "$AUTO_ROOT_PATH/hds_desc.sh"
 
 #-------------------------------------#
 function get_info_hudbt()
@@ -62,17 +62,16 @@ function get_info_hudbt()
 
     #---subtitle---#
     if [ "`grep '　中国大陆' $descr_page`" ]; then
-        smallDescr="$name_2 $chs_include"
+        smallDescr="`echo $name_2` $chs_include"
     else
         if [ "$name_1" ]; then
-            smallDescr="$name_1 $chs_include"
+            smallDescr="`echo $name_1` $chs_include"
         elif [ "$name_2" ]; then
-            smallDescr="$name_2 $chs_include"
+            smallDescr="`echo $name_2` $chs_include"
         else
             smallDescr="$default_subname"
         fi
     fi
-
 }
-
+#-------------------------------------#
 get_info_hudbt

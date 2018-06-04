@@ -21,7 +21,7 @@ postUrl='https://pt.whu.edu.cn/takeupload.php'
 edit_postUrl='https://pt.whu.edu.cn/takeedit.php'
 site_download_url='https://pt.whu.edu.cn/download.php?id='
 #-------------------------------------#
-. ./hds_desc.sh
+source "$AUTO_ROOT_PATH/hds_desc.sh"
 
 #-------------------------------------#
 function get_info_whu()
@@ -74,17 +74,16 @@ function get_info_whu()
 
     #---subtitle---#
     if [ "`grep '　中国大陆' $descr_page`" ]; then
-        smallDescr="$name_2 $chs_include"
+        smallDescr="`echo $name_2` $chs_include"
     else
         if [ "$name_1" ]; then
-             smallDescr="$name_1 $chs_include"
+             smallDescr="`echo $name_1` $chs_include"
         elif [ "$name_2" ]; then
-             smallDescr="$name_2 $chs_include"
+             smallDescr="`echo $name_2` $chs_include"
         else
             smallDescr="$default_subname"
         fi
-    fi
-       
+    fi   
 }
-#------#
+#-------------------------------#
 get_info_whu
