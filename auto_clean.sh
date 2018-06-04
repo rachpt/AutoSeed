@@ -2,8 +2,8 @@
 # FileName: auto_clean.sh
 #
 # Author: rachpt@126.com
-# Version: 1.2v
-# Date: 2018-05-19
+# Version: 1.6v
+# Date: 2018-06-04
 #-----------------------------#
 #
 # Auto clean old files/folders in 
