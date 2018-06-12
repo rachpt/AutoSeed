@@ -17,20 +17,21 @@ function judge_torrent()
     elif [ "`echo "$new_torrent_name"|grep -i '1080p'`" ]; then
         url="${postUrl%/*}/torrents.php?search=`echo "$new_torrent_name" |egrep -o '.*[12][098][0-9]{2}'`+1080p"
     fi
-    no_one_here="`http --ignore-stdin GET "$url" "$cookie"|egrep '没有种子。请用准确的关键字重试|没有种子|找到0条结果'`"
-    
-    if [ "$no_one_here" ]; then
-        up_status=1  # upload 
-    else
-        up_status=0  # give up upload
-        echo "Dupe!" >> "$log_Path"
+    search_html_page="$(http --ignore-stdin GET "$url" "$cookie")"
+    if [ "$(echo "$search_html_page"|grep '搜索结果')" ]; then
+        if [ "$(echo "$search_html_page"|egrep '没有种子。请用准确的关键字重试|没有种子|找到0条结果')" ]; then
+            up_status=1  # upload 
+        else
+            up_status=0  # give up upload
+            echo "Dupe! [${postUrl%/*}]" >> "$log_Path"
+        fi
     fi
 
     if [ "$(egrep '禁止转载|禁转' "$source_detail_desc")" ]; then
         up_status=0  # give up upload
         echo "禁转资源" >> "$log_Path"
     fi
-
+    search_html_page=''
 }
 
 #----------------------------------------#
