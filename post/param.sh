@@ -14,7 +14,23 @@ function from_desc_get_prarm()
     no_dot_name=`echo "$new_torrent_name"|sed 's/\./ /g'|sed 's/DD2 0/DD2.0/;s/H 26/H.26/;s/5 1/5.1/;s/7 1/7.1/'`
     dot_name=`echo "$new_torrent_name"|sed 's/[ ]\+/./g'`
     #---get torrent's type---#
+    
     #---hudbt & whu---#
+    if [ "`egrep '[国地][　 ]+[家区][　 ]+中国大陆|[国地][　 ]+[家区][　 ]+中国' "$source_detail_desc"`" ]; then
+        whu_selectType='401'
+        hudbt_selectType='401'
+    elif [ "`egrep '[国地][　 ]+[家区][　 ]+马来西亚|产[　 ]+地[　 ]+日本|[国地][　 ]+[家区][　 ]+日本|[国地][　 ]+[家区][　 ]+韩国|产[　 ]+地[　 ]+韩国|[国地][　 ]+[家区][　 ]+印度|[国地][　 ]+[家区][　 ]+泰国|[国地][　 ]+[家区][　 ]+伊朗' "$source_detail_desc"`" ]; then
+        whu_selectType='414'
+        hudbt_selectType='414'
+    elif [ "`egrep '[国地][　 ]+[家区][　 ]+中国台湾|[国地][　 ]+[家区][　 ]+台湾|[国地][　 ]+[家区][　 ]+香港|[国地][　 ]+[家区][　 ]+中国香港|[国地][　 ]+[家区][　 ]+澳门' "$source_detail_desc"`" ]; then
+        whu_selectType='413'
+        hudbt_selectType='413'
+    fi
+    if [ -z "$whu_selectType" ]; then
+        whu_selectType="$default_select_type_whu"
+    fi
+    
+    #---hudbt & whu ipad---#
     case "$new_torrent_name" in
         *[Ii][Pp][Aa][Dd]*)
             hudbt_selectType='430' 
@@ -29,7 +45,9 @@ function from_desc_get_prarm()
             esac
             ;;
         *)
-            hudbt_selectType="$default_select_type_hudbt"
+            if [ -z "$hudbt_selectType" ]; then
+                hudbt_selectType="$default_select_type_hudbt"
+            fi
             case "$new_torrent_name" in
                 *720[Pp]*)
                     hudbt_standardSel='3'
@@ -56,18 +74,6 @@ function from_desc_get_prarm()
     else
         nanyangpt_selectType="$default_select_type_nanyangpt"
         npupt_selectType="$default_select_type_npupt"
-    fi
-    
-    #---type whu---#
-    if [ "`egrep '[国地][　 ]+[家区][　 ]+中国大陆|[国地][　 ]+[家区][　 ]+中国' "$source_detail_desc"`" ]; then
-        whu_selectType='401'
-    elif [ "`egrep '[国地][　 ]+[家区][　 ]+马来西亚|产[　 ]+地[　 ]+日本|[国地][　 ]+[家区][　 ]+日本|[国地][　 ]+[家区][　 ]+韩国|产[　 ]+地[　 ]+韩国|[国地][　 ]+[家区][　 ]+印度' "$source_detail_desc"`" ]; then
-        whu_selectType='414'
-    elif [ "`egrep '[国地][　 ]+[家区][　 ]+中国台湾|[国地][　 ]+[家区][　 ]+台湾|[国地][　 ]+[家区][　 ]+香港|[国地][　 ]+[家区][　 ]+中国香港|[国地][　 ]+[家区][　 ]+澳门' "$source_detail_desc"`" ]; then
-        whu_selectType='413'
-    fi
-    if [ -z "$whu_selectType" ]; then
-        whu_selectType="$default_select_type_whu"
     fi
     
     #---npupt source---#
