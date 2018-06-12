@@ -13,8 +13,8 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 | https://hdchina.org | https://npupt.com | 2019-06-07 |
 |                   | https://nanyangpt.com | 2018-06-07 |
 
+## 特点
 
-##特点
  - 自动生成并提交简介，依赖原种简介。
  - 自动设置做种时间，分享率。自动清理种子，硬盘不会爆仓。
  - 支持自动 Dupe 以及禁转判断。
@@ -26,8 +26,8 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 - GNU/Linux （在ubuntu 18.04 lts 测试通过）。
 - 软件：
-  - transmission-daemon，transmission-remote，transmission-show，安装`sudo pip3 install transmission-cli`；
-  - ~~html2bbcode，安装命令：`sudo pip3 install html2bbcode~~`(已经使用本地正则表达式实现，转换耗时小于0.6s)；
+  - transmission-daemon，transmission-remote，transmission-show，安装`sudo apt-get install transmission-cli`；
+  - ~~html2bbcode，安装命令：`sudo pip3 install html2bbcode`~~(已经使用本地正则表达式实现，转换耗时小于0.6s)；
   - httpie，安装命令`sudo apt-get install httpie`；
   - 其他常用软件工具，curl，grep等(一般系统自带)。
 
@@ -35,7 +35,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 1. clone 本 repo 至本地；
 2. 修改设置文件`setting.sh`(包括cookie、passkey，监控 torrent 文件路径等)；
-3. 添加 `auto_main.sh` 脚本路径至 transmission 的 `script-torrent-done-filename`。具体可以参见 [这里](https://rachpt.github.io/2018/03/25/transmission-settings/) ；
+3. 添加 `main.sh` 脚本路径至 transmission 的 `script-torrent-done-filename`。具体可以参见 [这里](https://rachpt.github.io/2018/03/25/transmission-settings/) ；
 4. 如果 `transmission` 运行脚本诡异，可以将 `main.sh` 添加到  `crontab` 之类的程序周期运行（运行锁会解决和3的冲突问题）。
 
 
