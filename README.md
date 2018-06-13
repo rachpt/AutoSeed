@@ -10,7 +10,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 | :---------------: | :-----------------------: | :----------: |
 | https://hdsky.me/ | https://hudbt.hust.edu.cn |  2018-05-19  |
 | https://totheglory.im/ | https://pt.whu.edu.cn |  2018-05-21  |
-| https://hdchina.org | https://npupt.com | 2019-06-07 |
+| https://hdchina.org | https://npupt.com | 2018-06-07 |
 |                   | https://nanyangpt.com | 2018-06-07 |
 
 ## 特点
