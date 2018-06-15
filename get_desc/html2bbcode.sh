@@ -2,10 +2,12 @@
 # FileName: get_desc/html2bbcode.sh
 #
 # Author: rachpt@126.com
-# Version: 2.0v
-# Date: 2018-06-10
+# Version: 2.1v
+# Date: 2018-06-15
 #
 #-------------------------------------#
+sed -i "s/id=\"[^\"]\"//g; s/alt=\"[^\"]\"//g" "$source_detail_desc"
+
 sed -i "s#<strong>#[b]#g;s#</strong>#[/b]#g" "$source_detail_desc"
 sed -i "s#<span[^>]*>##g;s#</span>##g;s#<p[^>]*>##g;s#</p>##g;s#<tr[^>]*>##g;s#</tr>##g;s#<td[^>]*>##g;s#</td>##g" "$source_detail_desc"
 sed -i "s#<div[^>]*>##g;s#</div>##g" "$source_detail_desc"
@@ -20,7 +22,7 @@ sed -i "s#<font size=\"\([^\"]\+\)\"[^>]*>#[size=\1]#g" "$source_detail_desc"
 #sed -i "s#<font color=\"\([^\"]\+\)\"[^>]*>#[color=\1]#g" "$source_detail_desc"
 
 #---br---#
-sed -i "s/<br \/>//g;s/<br\/>//g;s/<br>//g;s/&nbsp;/ /g" "$source_detail_desc"
+sed -i "s/<br \/>//g;s/<br\/>//g;s/<br>//g;s/&nbsp;//g" "$source_detail_desc"
 
 #---font face---#
 sed -i "s/<font face=\"[cC]ourier [nN]ew\">/[font=monospace]/g;s/<font face=\"monospace\">/[font=monospace]/g;s/<\/font>/[\/font]/g" "$source_detail_desc"
@@ -29,11 +31,12 @@ sed -i "s/<font face=\"[cC]ourier [nN]ew\">/[font=monospace]/g;s/<font face=\"mo
 sed -i "s#<table[^>]\+>#[quote]#g;s#</table>#[/quote]\n#g;" "$source_detail_desc"
 
 #---img---#
+sed -i "s#\"[^\"]\+attachments\([^\"]\+\)#\"${source_site_URL}/attachments\1#g" "$source_detail_desc"
 sed -i "s#<img[^>]\+src=\"\(.[^\"]\+\)\"[^>]*>#[img]\1[/img]#g" "$source_detail_desc"
-sed -i "s#\(.*\)attachments\(.*\)#\1${source_site_URL}/attachments\2#g" "$source_detail_desc"
+sed -i "s#\]attachments#\]${source_site_URL}/attachments#g" "$source_detail_desc"
 
 #---a---#
-sed -i "s#</a>#[/url]#g;s#<a[^>]\+href=\"\(.[^\"]\+\)\"[^>]*>#[url=\1]#g" "$source_detail_desc"
+sed -i "s#</a>#[/url]#g;s#<a[^>]\+href=\"\(.[^\"]\+\)\"[^<]*>#[url=\1]#g" "$source_detail_desc"
 
 #---hdsky & hdchina---#
 sed -i "s#<legend>[^>]\+引用[^>]\+</legend>##g;s#fieldset#quote#g" "$source_detail_desc"
@@ -44,8 +47,32 @@ sed -i "s#<#[#g;s#>#]#g" "$source_detail_desc"
 #---double url---#
 sed -i "s#\[url=[^\]]\+/\]\[url=\(.*\)\[/url\]\[/url\]#[url=\1[/url]#g" "$source_detail_desc"
 
+#---deal with hdc poster---#
+if [ "$source_site_URL" = "https://hdchina.org" ]; then
+    hdc_poster_counter=0
+    while true; do
+        hdc_poster_url="$(egrep -o "${source_site_URL}/attachments[^\[]+" "$source_detail_desc"|head -n 1)"
+        if [ ! "$hdc_poster_url" ]; then
+            break # jump out
+        elif [ $hdc_poster_counter -gt 8 ]; then
+            break # jump out
+        fi
+        tmp_poster_file="$AUTO_ROOT_PATH/tmp/${hdc_poster_url##*/}"
+        http --ignore-stdin -dco "$tmp_poster_file" "$hdc_poster_url" "$cookie_source_site"
+        new_poster_url="$(http --ignore-stdin -f POST 'https://sm.ms/api/upload' smfile@"$tmp_poster_file"|egrep -o "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')"
+        sed -i "s#$hdc_poster_url#$new_poster_url#g" "$source_detail_desc"
+        rm -f "$tmp_poster_file"
+        hdc_poster_url=''
+        tmp_poster_file=''
+        hdc_poster_counter=`expr $hdc_poster_counter + 1`
+    done
+fi
+
+#---ttg imdb url---#
+sed -i "s#\[url=http://www.imdb.com/title/tt[0-9]\{7\}/\]\[url=http://www.imdb.com/title/tt[0-9]\{7\}/\]\(http://www.imdb.com/title/tt[0-9]\{7\}/\)\[/url\]\[/url\]#\1#g" "$source_detail_desc"
+
 #---get subname---#
-if [ -n "`grep "CH[ST]" "$source_detail_desc"`" ]; then
+if [ -n "`grep -i "CH[ST]" "$source_detail_desc"`" ]; then
     subname_chs_include='中文字幕'
 else
     subname_chs_include=''
