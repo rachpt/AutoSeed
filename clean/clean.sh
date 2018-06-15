@@ -2,8 +2,8 @@
 # FileName: clean/clean.sh
 #
 # Author: rachpt@126.com
-# Version: 2.0v
-# Date: 2018-06-09
+# Version: 2.1v
+# Date: 2018-06-15
 #-----------------------------#
 #
 # Auto clean old files/folders in 
@@ -23,7 +23,8 @@ DELTE_OLD_ERROE_TORRENT()
         fi
         #---old torrent---#
         seed_time=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i|grep 'Seeding Time'|grep 'days'|cut -d : -f 2|awk '{print $1}'`
-        if [ $seed_time -ge $MAX_SEED_TIME ]; then
+        
+        [ "$seed_time" ] && if [ $seed_time -ge $MAX_SEED_TIME ]; then
             "$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -r
         elif [ "`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i|grep 'State:'|grep 'Finished'`" ]; then
             "$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -r
