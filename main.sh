@@ -37,7 +37,7 @@ function printLogo {
 get_torrent_func()
 {
 if [ -z "$TR_TORRENT_NAME" ]; then
-    for oneTorrentID in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep '100%'|awk '{print $1}'`
+    for oneTorrentID in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep '100%'|awk '{print $1}'|sed 's/\*//g'`
     do
 	oneTorrent=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'Name'|head -n 1|sed 's/  Name: //g'`
         if [ "$new_torrent_name" = "$oneTorrent" ]; then
