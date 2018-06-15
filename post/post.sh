@@ -46,7 +46,7 @@ function upload_torrent()
         #---momel moduel post, hudbt & whu---#
         else
             t_id=`http --ignore-stdin -f --print=h POST "$postUrl" 'name'="$no_dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'descr'="$com_des" 'type'="$selectType" 'standard_sel'="$standardSel" 'uplver'="$anonymous" file@"${torrentPath}" "$cookie" | grep "id=" |grep 'detail'|head -n 1|cut -d '=' -f 2|cut -d '&' -f 1` 
-        
+
             if [ -z "$t_id" ]; then
     	        t_id=`http --ignore-stdin -f POST "$postUrl" name="$no_dot_name" small_descr="$smallDescr" url="$imdbUrl" descr="$com_des" type="$selectType" uplver="$anonymous" file@"$torrentPath" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
             fi
