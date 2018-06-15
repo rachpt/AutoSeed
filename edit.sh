@@ -2,14 +2,13 @@
 # FileName: edit.sh
 #
 # Author: rachpt@126.com
-# Version: 2.0v
-# Date: 2018-06-08
+# Version: 2.1v
+# Date: 2018-06-15
 #
 #------------------------------------#
 if [ -z "$log_Path"]; then
     AUTO_ROOT_PATH="$(dirname "$(readlink -f "$0")")"
     source "$AUTO_ROOT_PATH/settings.sh"
-    echo $AUTO_ROOT_PATH
 fi
 #----------------post----------------#
 function edit_post_normal()
@@ -18,11 +17,11 @@ function edit_post_normal()
 }
 function edit_post_npupt()
 {
-    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id"  'name'="$dot_name" 'small_descr'="$smallDescr" 'nfoaction'='keep' 'descr'="$npupt_des" 'type'="$selectType" 'source_sel'="$npupt_select_source" 'visible'="1" "$cookie"
+    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id"  'name'="$dot_name" 'small_descr'="$smallDescr" 'nfoaction'='keep' 'descr'="$npupt_des" 'type'="$npupt_selectType" 'source_sel'="$npupt_select_source" 'visible'="1" "$cookie"
 }
 function edit_post_nanyangpt()
 {
-    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id"  'name'="$dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'nfoaction'='keep' 'descr'="$nanyangpt_des" 'type'="$selectType" 'visible'="1" "$cookie"
+    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id"  'name'="$dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'nfoaction'='keep' 'descr'="$nanyangpt_des" 'type'="$nanyangpt_selectType" 'visible'="1" "$cookie"
 }
 
 #------------------------------------#
