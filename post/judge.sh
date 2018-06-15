@@ -2,8 +2,8 @@
 # FileName: post/judge.sh
 #
 # Author: rachpt@126.com
-# Version: 2.0v
-# Date: 2018-06-09
+# Version: 2.1v
+# Date: 2018-06-15
 #
 #----------------------------------------#
 function judge_torrent()
@@ -20,10 +20,39 @@ function judge_torrent()
     search_html_page="$(http --ignore-stdin GET "$url" "$cookie")"
     if [ "$(echo "$search_html_page"|grep '搜索结果')" ]; then
         if [ "$(echo "$search_html_page"|egrep '没有种子。请用准确的关键字重试|没有种子|找到0条结果')" ]; then
-            up_status=1  # upload 
+            up_status=1  # upload
         else
-            up_status=0  # give up upload
-            echo "Dupe! [${postUrl%/*}]" >> "$log_Path"
+            count_item_720p=$(echo "$search_html_page"|grep -i '720p'|grep -i 'x264'|grep 'torrentname'|wc -l)
+            count_item_1080p=$(echo "$search_html_page"|grep -i '1080p'|grep -i 'x264'|grep 'torrentname'|wc -l)
+            count_ipad_720p=$(echo "$search_html_page"|grep -i 'ipad'|grep -i '720p'|grep 'torrentname'|wc -l)
+            count_ipad_1080p=$(echo "$search_html_page"|grep -i 'ipad'|grep -i '1080p'|grep 'torrentname'|wc -l)
+            #---deal with none---#
+            [ ! "$count_ipad_720p" ] && count_ipad_720p=0
+            [ ! "$count_ipad_1080p" ] && count_ipad_1080p=0
+            [ ! "$count_item_1080p" ] && count_item_1080p=0
+            [ ! "$count_item_720p" ] && count_item_720p=0
+            #---nanyangpt dupe judge---#
+            if [ "$postUrl" = "https://nanyangpt.com/takeupload.php" ]; then
+                if [ $(expr $count_item_720p - $count_ipad_720p) -eq 1 ]; then
+                    up_status=1  # upload
+                elif [ $(expr $count_item_1080p - $count_ipad_1080p) -eq 1 ]; then
+                    up_status=1  # upload
+                else
+                    up_status=0  # give up upload
+                    echo "Dupe! [${postUrl%/*}]" >> "$log_Path"
+                fi
+            #---npupt dupe judge---#
+            elif [ "$postUrl" = "https://npupt.com/takeupload.php" ]; then
+                up_status=1  # upload
+            #---normal dupe judge---#
+            else
+                if [ ! "$(echo "$search_html_page"|grep 'torrent-title'|grep -i `echo "$new_torrent_name" |egrep -o '.*[12][098][0-9]{2}.*0p'`)" ]; then
+                    up_status=1  # upload
+                else
+                    up_status=0  # give up upload
+                    echo "Dupe! [${postUrl%/*}]" >> "$log_Path"
+                fi
+            fi
         fi
     fi
 
