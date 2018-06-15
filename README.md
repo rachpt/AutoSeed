@@ -4,7 +4,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 目前适用于 从 HDSky / TTG / HDChina 自动转载 电影 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT 站。
 
-[![release](https://img.shields.io/badge/Version-2.0-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v2.0)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
+[![release](https://img.shields.io/badge/Version-2.1-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v2.1)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
 |  源站点（from）   |      支持站点（to）      | 时间（time） |
 | :---------------: | :-----------------------: | :----------: |
@@ -44,6 +44,8 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 请使用 flexget 订阅下载，使用 [transmissionrpc](https://flexget.com/Plugins/transmission) 将源种传入 transmission。
 如果 `crontab` 无法运行，参考命令 `*/5 * * * * /home/rachpt/shell/AutoSeed/main.sh >/dev/null 2>&1`。
 
+如果种子名中使用了部分中文符号，比如已知的 `’` （中文单引号）会导致 httpie 文件传输失败，2.1版修复了中文单引号 bug。
+
 
 
 一个运行 log：
@@ -61,7 +63,7 @@ https://hudbt.hust.edu.cn
 https://hdsky.me
 t_id: [138967]
 +++++++++++++[added]+++++++++++++
-Dupe!
+Dupe! [https://pt.whu.edu.cn]
 +++++++++++[post data]+++++++++++
 name=Pacific.Rim.Uprising.2018.BluRay.iPad.720p.AAC.x264-HDSPad
 small_descr=Pacific Rim: Uprising 
@@ -89,6 +91,13 @@ t_id: [55997]
 ```
 
 ## 更新日志
+
+- 2018-06-15 --> 2.1
+  - 修复 edit 中的错误参数。
+  - 加强 Dupe 判断逻辑。
+  - 修复 ttg 简介中 imdb 链接问题。
+  - 修复 hdc 海报外链问题，海报转至图床 https://sm.ms/。
+  - 修复几个分类判断问题。
 
 - 2018-06-10 --> 2.0
   - 更新至2.0版。
@@ -121,7 +130,7 @@ t_id: [55997]
 - 2018-05-17 --> v1.0
   - 首次提交，错误较多。
 
-## 实现流程
+## 实现流程（v1.6）
 
 ```flow
 st=>start: 导入settings
