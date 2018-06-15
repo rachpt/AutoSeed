@@ -2,8 +2,8 @@
 # FileName: get_desc/detail_page.sh
 #
 # Author: rachpt@126.com
-# Version: 2.0v
-# Date: 2018-06-10
+# Version: 2.1v
+# Date: 2018-06-15
 #
 #-------------------------------------#
 get_source_site()
@@ -50,14 +50,14 @@ form_source_site_get_tID()
 form_source_site_get_Desc()
 {
     form_source_site_get_tID
-    
+
     if [ -n "${source_t_id}" ]; then
         source_detail_html=`mktemp "${AUTO_ROOT_PATH}/tmp/detail_html.XXXXXXXX"`
         source_detail_desc=`mktemp "${AUTO_ROOT_PATH}/tmp/detail_desc.XXXXXXXX"`
-        
-        http --ignore-stdin GET "${source_site_URL}/details.php?id=${source_t_id}" "$cookie_source_site" > "$source_detail_html"   
+
+        http --ignore-stdin GET "${source_site_URL}/details.php?id=${source_t_id}" "$cookie_source_site" > "$source_detail_html"
     fi
-    
+
     if [ -s "$source_detail_html" ]; then
        source_start_line_html=`egrep -n '简介|简述' "$source_detail_html" |head -n 1|awk -F ':' '{print $1}'`
         if [ "$source_site_URL" = "https://totheglory.im" ]; then
@@ -65,7 +65,7 @@ form_source_site_get_Desc()
         else
             source_end_line_html=`grep -n '</div></td></tr>' "$source_detail_html" |head -n 2|tail -n 1|awk -F ':' '{print $1}'`
         fi
-    
+
         sed -n "${source_start_line_html},${source_end_line_html}p" "$source_detail_html" > "$source_detail_desc"
         #---hdsky---#
         sed -i 's#.*lt="ad" /></a></div>##' "$source_detail_desc"
@@ -73,16 +73,19 @@ form_source_site_get_Desc()
         #---ttg---#
         sed -i "/\/pic\/ico/d" "$source_detail_desc"
         sed -i "s/.*align=left><div id='kt_d'>//g" "$source_detail_desc"
-        
+        #---hdc---#
+        sed -i "s/.*kdescr'>//g;" "$source_detail_desc"
+
         #---hdc poster---#
         if [ "$source_site_URL" = "https://hdchina.org" ]; then
-            source_hdc_poster_img=`grep 'poster_box' "$source_detail_html"|sed "s/.*img src=\"\(http.*\)\"\/.*/\1/"`
+            source_hdc_poster_img=`grep 'poster_box' "$source_detail_html"|sed "s/.*img[^>]\+src=\"\([^\"]\+\)\".*/\1/g"`
             if [ ! "`grep "$source_hdc_poster_img" "$source_detail_desc"`" ]; then
-                sed -i "1i <img src=\'$source_hdc_poster_img\' />" "$source_detail_desc"
+                sed -i "1i <img src=\"$source_hdc_poster_img\" />" "$source_detail_desc"
             fi
+            sed -i "s/.*id='kdescr'>//g;s/onclick=\"Previewurl(.*)\"//g;s/onmouseover=\".*;\"//g" "$source_detail_desc"
         fi
-        sed -i "s/[　]*<br \/>/<br \/>/;s/\(..*\).br.*/\1/; s/&nbsp;/　/g" "$source_detail_desc"
-        
+        sed -i "s/[　]\+<br \/>//g;s/\(..*\).br.*/\1/g; s/&nbsp;//g" "$source_detail_desc"
+
         imdbUrl="$(grep -o 'tt[0-9]\{7\}' "$source_detail_html"|head -n 1)"
         echo 1:"$imdbUrl" >> "$log_Path"
         #---html2bbcode---#
