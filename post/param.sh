@@ -2,14 +2,23 @@
 # FileName: post/param.sh
 #
 # Author: rachpt@126.com
-# Version: 2.0v
-# Date: 2018-06-09
+# Version: 2.1v
+# Date: 2018-06-15
 #
 #-------------settings---------------#
 
 #-------------------------------------#
 function from_desc_get_prarm()
 {
+    #---test name,avoid special characters in name---#
+    plain_name_tmp="$(echo "$TR_TORRENT_NAME"|sed "s/‘/\'/g;s/“/\"/g;s/。/./g;s/，/,/g;s/：/:/g;s/；/;/g;s/！/!/g")"
+    if [ "$plain_name_tmp" != "$TR_TORRENT_NAME" ]; then
+        mv "${flexget_path}/${new_torrent_name}.torrent" "${flexget_path}/${plain_name_tmp}.torrent"
+        torrentPath="${flexget_path}/${plain_name_tmp}.torrent"
+        new_torrent_name="$plain_name_tmp"
+        TR_TORRENT_NAME="$plain_name_tmp"
+        plain_name_tmp=''
+    fi
     #---name---#
     no_dot_name=`echo "$new_torrent_name"|sed 's/\./ /g'|sed 's/DD2 0/DD2.0/;s/H 26/H.26/;s/5 1/5.1/;s/7 1/7.1/'`
     dot_name=`echo "$new_torrent_name"|sed 's/[ ]\+/./g'`
@@ -77,12 +86,15 @@ function from_desc_get_prarm()
     fi
     
     #---npupt source---#
+    npupt_select_source=''
     if [ "`egrep '[国地][　 ]+[家区][　 ]+大陆|[国地][　 ]+[家区][　 ]+中国|[国地][　 ]+[家区][　 ]+台湾|[国地][　 ]+[家区][　 ]+香港' "$source_detail_desc"`" ]; then
         npupt_select_source='6'
     elif [ "`egrep '产[　 ]+地[　 ]+日本|[国地][　 ]+[家区][　 ]+日本|[国地][　 ]+[家区][　 ]+韩国|产[　 ]+地[　 ]+韩国' "$source_detail_desc"`" ]; then
         npupt_select_source='4'
+    elif [ "`egrep '产[　 ]+地[　 ]+美国|[国地][　 ]+[家区][　 ]+美国|[国地][　 ]+[家区][　 ]+英国|[国地][　 ]+[家区][　 ]+加拿大' "$source_detail_desc"`" ]; then
+        npupt_select_source='5'
     fi
-    if [ -z "$select_source" ]; then
+    if [ -z "$npupt_select_source" ]; then
         npupt_select_source="$default_standard_npupt" #7
     fi
 
