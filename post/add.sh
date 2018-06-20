@@ -2,8 +2,8 @@
 # FileName: post/add.sh
 #
 # Author: rachpt@126.com
-# Version: 2.0v
-# Date: 2018-06-09
+# Version: 2.2v
+# Date: 2018-06-17
 #
 #-------------settings----------------#
 
@@ -20,6 +20,7 @@ function set_ratio()
 	    set_commit_whu=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'whupt'`
 	    set_commit_npupt=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'npupt.com'`
 	    set_commit_nanyangpt=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'tracker.nanyangpt.com'`
+	    set_commit_byrbt=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'tracker.byr.cn'`
 	    #---add new site's seed ratio here---#
 	    #set_commit_new=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'tracker.new.com'
 	    	    
@@ -36,6 +37,9 @@ function set_ratio()
                 break
             elif [ -n "$set_commit_nanyangpt" ]; then
 	    	    "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_nanyangpt
+	    	    break
+	    	elif [ -n "$set_commit_byrbt" ]; then
+	    	    "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_byrbt
 	    	    break
 	    	#---add new site's seed ratio here---#
 	    	#elif [ -n "$set_commit_new" ]; then
