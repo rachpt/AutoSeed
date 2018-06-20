@@ -2,8 +2,8 @@
 # FileName: post/post.sh
 #
 # Author: rachpt@126.com
-# Version: 2.0v
-# Date: 2018-06-09
+# Version: 2.2v
+# Date: 2018-06-18
 #
 #-------------settings---------------#
 torrentPath="${flexget_path}/${new_torrent_name}.torrent"
@@ -15,7 +15,8 @@ function upload_torrent()
 {
     up_status=1    # judge code
     #---judge to get away from dupe---#
-    source "$AUTO_ROOT_PATH/post/judge.sh"
+    [ "$postUrl" = "https://pt.whu.edu.cn/takeupload.php" ] && source "$AUTO_ROOT_PATH/post/judge.sh"
+    [ "$postUrl" = "https://nanyangpt.com/takeupload.php" ] && source "$AUTO_ROOT_PATH/post/judge.sh"
     t_id=''        # set t_id to none
     #---post---#
     if [ "$up_status" = "1" ]; then
@@ -29,23 +30,31 @@ function upload_torrent()
             name_enc="`echo "$dot_name"|base64`"
             sub_title_enc="`echo "$smallDescr"|base64`"
             #---post data---#
-            t_id=`http --ignore-stdin -f --print=h POST "$postUrl" 'name'="$name_enc" 'small_descr'="$sub_title_enc" 'descr'="$des_enc" 'type'="$npupt_selectType" 'source_sel'="$npupt_select_source" 'uplver'="$anonymous" file@"${torrentPath}" "$cookie" | grep "id=" |grep 'detail'|head -n 1|cut -d '=' -f 2|cut -d '&' -f 1` 
-        
+            t_id=`http --ignore-stdin -f --print=h POST "$postUrl" 'name'="$name_enc" 'small_descr'="$sub_title_enc" 'descr'="$des_enc" 'type'="$npupt_selectType" 'source_sel'="$npupt_select_source" 'uplver'="$anonymous" file@"${torrentPath}" "$cookie" | grep "id=" |grep 'detail'|head -n 1|cut -d '=' -f 2|cut -d '&' -f 1`
+
             if [ -z "$t_id" ]; then
     	        t_id=`http --ignore-stdin -f POST "$postUrl" name="$name_enc" small_descr="$sub_title_enc" descr="$des_enc" type="$npupt_selectType" source_sel="$npupt_select_source" uplver="$anonymous" file@"$torrentPath" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
             fi
 
         #---nanyangpt post---#
         elif [ "$postUrl" = "https://nanyangpt.com/takeupload.php" ]; then
-            t_id=`http --ignore-stdin -f --print=h POST "$postUrl" 'name'="$dot_name" 'movie_enname'="$dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'descr'="$nanyangpt_des" 'type'="$nanyangpt_selectType" 'uplver'="$anonymous" file@"${torrentPath}" "$cookie" | grep "id="|grep 'detail'|head -n 1|cut -d '=' -f 2|cut -d '&' -f 1` 
-            
+            t_id=`http --ignore-stdin -f --print=h POST "$postUrl" 'name'="$dot_name" 'movie_enname'="$dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'descr'="$nanyangpt_des" 'type'="$nanyangpt_selectType" 'uplver'="$anonymous" file@"${torrentPath}" "$cookie" | grep "id="|grep 'detail'|head -n 1|cut -d '=' -f 2|cut -d '&' -f 1`
+
             if [ -z "$t_id" ]; then
     	        t_id=`http --ignore-stdin -f POST "$postUrl" name="$dot_name" movie_enname="$dot_name" small_descr="$smallDescr" url="$imdbUrl" descr="$nanyangpt_des" type="$nanyangpt_selectType" uplver="$anonymous" file@"$torrentPath" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
             fi
 
+        #---byrbt post---#
+        elif [ "$postUrl" = "https://bt.byr.cn/takeupload.php" ]; then
+            t_id=`http --ignore-stdin -f --print=h POST "$postUrl" 'movie_cname'="$smallDescr_byrbt" 'ename0day'="$dot_name"  'type'="$byrbt_selectType" 'small_descr'="$subname_chs_include" 'url'="$imdbUrl" 'descr'="$byrbt_des" 'type'="$byrbt_selectType" 'second_type'="$second_type_byrbt" 'movie_type'="$movie_type_byrbt" 'movie_country'="$movie_country_byrbt" 'uplver'="$anonymous" file@"${torrentPath}" "$cookie" | grep "id="|grep 'detail'|head -n 1|cut -d '=' -f 2|cut -d '&' -f 1`
+
+            if [ -z "$t_id" ]; then
+    	        t_id=`http --ignore-stdin -f POST "$postUrl" movie_cname="$smallDescr_byrbt" ename0day="$dot_name" small_descr="$subname_chs_include" url="$imdbUrl" type="$byrbt_selectType" descr="$byrbt_des" type="$byrbt_selectType" second_type="$second_type_byrbt" movie_type="$movie_type_byrbt" movie_country="$movie_country_byrbt" uplver="$anonymous" file@"$torrentPath" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
+            fi
+
         #---momel moduel post, hudbt & whu---#
         else
-            t_id=`http --ignore-stdin -f --print=h POST "$postUrl" 'name'="$no_dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'descr'="$com_des" 'type'="$selectType" 'standard_sel'="$standardSel" 'uplver'="$anonymous" file@"${torrentPath}" "$cookie" | grep "id=" |grep 'detail'|head -n 1|cut -d '=' -f 2|cut -d '&' -f 1` 
+            t_id=`http --ignore-stdin -f --print=h POST "$postUrl" 'name'="$no_dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'descr'="$com_des" 'type'="$selectType" 'standard_sel'="$standardSel" 'uplver'="$anonymous" file@"${torrentPath}" "$cookie" | grep "id=" |grep 'detail'|head -n 1|cut -d '=' -f 2|cut -d '&' -f 1`
 
             if [ -z "$t_id" ]; then
     	        t_id=`http --ignore-stdin -f POST "$postUrl" name="$no_dot_name" small_descr="$smallDescr" url="$imdbUrl" descr="$com_des" type="$selectType" uplver="$anonymous" file@"$torrentPath" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
@@ -67,11 +76,12 @@ function upload_torrent()
 #---------------------------------#
 function unset_tempfiles()
 {
-    rm -f "$hds_rss_desc" "$hds_rss_html" "$source_detail_page" "$source_detail_desc"
+    rm -f "$hds_rss_desc" "$hds_rss_html" "$source_detail_page" "$source_detail_desc" "$source_detail_html"
     hds_rss_html=''
     hds_rss_desc=''
     source_detail_desc=''
     source_detail_page=''
+    source_detail_html=''
     source_site_URL=''
     echo "++++++++++[deleted tmp]++++++++++" >> "$log_Path"
 }
@@ -94,6 +104,11 @@ fi
 
 if [ "$enable_nanyangpt" = 'yes' ]; then
     source "$AUTO_ROOT_PATH/post/nanyangpt.sh"
+    upload_torrent
+fi
+
+if [ "$enable_byrbt" = 'yes' ]; then
+    source "$AUTO_ROOT_PATH/post/byrbt.sh"
     upload_torrent
 fi
 
