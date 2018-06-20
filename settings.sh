@@ -2,8 +2,8 @@
 # FileName: settings.sh
 #
 # Author: rachpt@126.com
-# Version: 2.0v
-# Date: 2018-06-10
+# Version: 2.2v
+# Date: 2018-06-17
 #
 # Environmental requirements:
 # - transmission-[show,remote,daemon or gtk]
@@ -20,7 +20,7 @@ trans_show="transmission-show"
 trans_remote='transmission-remote'
 #
 #---torrent file path---#
-flexget_path="/home/rc/Downloads/tmp"
+flexget_path="/home/rachpt/Downloads/tmp"
 #
 # log path
 log_Path="$AUTO_ROOT_PATH/tmp/log"
@@ -91,6 +91,18 @@ cookie_nanyangpt='Cookie:c_secure_uid=XXXXXX; c_secure_pass=xxxxxxxxxxxxxxxxxxxx
 #---you passkey---#
 passkey_nanyangpt='12345678909876543212345654'
 ########################################
+#---[byrbt]---#
+enable_byrbt='yes'
+#
+default_select_type_byrbt='408'
+default_second_type_byrbt='1'
+anonymous_byrbt='yes'
+#---ratio of uploaded torrent---#
+ratio_byrbt='8'
+cookie_byrbt='Cookie:c_secure_uid=XXXXXX; c_secure_pass=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx; c_secure_login=bm9wZQ=='
+#---you passkey---#
+passkey_byrbt='12345678909876543212345654'
+########################################
 #--------------------------------------#
 default_subname='Default Subtitle'
 default_imdb_url='tt1234567'
@@ -116,6 +128,19 @@ descrCom_complex="[quote]
 
 [span style='inline-block:block;background-color:steelblue;padding:10px;border:dashed silver 1px;border-radius:3px;box-shadow: 2px 2px 5px gray;width:110px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2em auto;'][b]使用 Shell 脚本实现，具体见：[url=https://github.com/rachpt/AutoSeed]rachpt/AutoSeed[/url][em108]，Python 版请关注 [url=https://github.com/Rhilip/Pt-Autoseed]Rhilip/Pt-Autoseed[/url]，JS版 [url=https://git.coding.net/Kannnnng/AutoSeed.git]Kannnnng/AutoSeed[/url]。[/b] [/span]
 [/quote]"
+#
+descrCom_complex_html="<br />
+<div style=\"text-align:center\">
+    <marquee behavior=\"alternate\" direction=\"down\" height=\"90\" style=\"border:none\" width=\"960\"><marquee behavior=\"alternate\"><span style=\"font-size:26px;\">
+	<span style=\"inline-block:block;background-color:slateblue;padding:30px;border:dashed silver 1px;border-radius:px;box-shadow: 2px 2px 5px gray;width:100px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:6em auto;\"><strong>这是一个自动发布的种子</strong> <em> (又是一个 AUTO)</em> <img alt=\"[em57]\" src=\"https://bt.byr.cn/pic/smilies/57.gif\" /></span></span></marquee></marquee></div>
+<br /><br /><br />
+<span style=\"nline-block:block;background-color:pink;padding:10px;border:dashed silver 1px;border-radius:3px;box-shadow: 2px 2px 5px gray;width:110px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2em auto;\"><strong>所有信息以种子文件名为准，标题、简介信息仅供参考，若发现有误请以［举报］或［留言］的形式通知工作人员审查编辑。</strong> </span><br />
+<br />
+<span style=\"nline-block:block;background-color:greenyellow;padding:10px;border:dashed silver 1px;border-radius:3px;box-shadow: 2px 2px 5px gray;width:100px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2em auto;\"><strong>最长保种［${MAX_SEED_TIME}］天，保种分享率［${ratio_byrbt}］，断种恕不补种。</strong> </span><br />
+<br />
+<span style=\"inline-block:block;background-color:steelblue;padding:10px;border:dashed silver 1px;border-radius:3px;box-shadow: 2px 2px 5px gray;width:110px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2em auto;\"><strong>使用 Shell 脚本实现，具体见：<a href=\"https://github.com/rachpt/AutoSeed\">rachpt/AutoSeed</a><img alt=\"[em108]\" src=\"https://bt.byr.cn/pic/smilies/108.gif\" />，Python 版请关注 <a href=\"https://github.com/Rhilip/Pt-Autoseed\">Rhilip/Pt-Autoseed</a>，JS版 <a href=\"https://git.coding.net/Kannnnng/AutoSeed.git\">Kannnnng/AutoSeed</a>。</strong> </span><br />
+<br />
+<br />"
 #
 #------------[transmission]------------#
 #---authoriz for transmission---#
