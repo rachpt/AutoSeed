@@ -13,22 +13,25 @@ fi
 #----------------post----------------#
 function edit_post_normal()
 {
-    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id"  'name'="$no_dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'nfoaction'='keep' 'descr'="$complex_des" 'type'="$selectType" 'standard_sel'="$standardSel" 'visible'="1" "$cookie"
+    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id" 'name'="$no_dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'nfoaction'='keep' 'descr'="$complex_des" 'type'="$selectType" 'standard_sel'="$standardSel" 'anonymous'="`([ "$anonymous" = 'yes' ] && echo 1) || echo 0`" 'visible'="1" "$cookie"
 }
 function edit_post_npupt()
 {
-    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id"  'name'="$dot_name" 'small_descr'="$smallDescr" 'nfoaction'='keep' 'descr'="$npupt_des" 'type'="$npupt_selectType" 'source_sel'="$npupt_select_source" 'visible'="1" "$cookie"
+    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id" 'name'="$dot_name" 'small_descr'="$smallDescr" 'nfoaction'='keep' 'descr'="$npupt_des" 'type'="$npupt_selectType" 'source_sel'="$npupt_select_source" 'anonymous'="`([ "$anonymous" = 'yes' ] && echo 1) || echo 0`" 'visible'="1" "$cookie"
 }
 function edit_post_nanyangpt()
 {
-    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id"  'name'="$dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'nfoaction'='keep' 'descr'="$nanyangpt_des" 'type'="$nanyangpt_selectType" 'visible'="1" "$cookie"
+    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id" 'name'="$dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'nfoaction'='keep' 'descr'="$nanyangpt_des" 'type'="$nanyangpt_selectType" 'anonymous'="`([ "$anonymous" = 'yes' ] && echo 1) || echo 0`" 'visible'="1" 'allow_transfer'='yes' "$cookie"
 }
-
+function edit_post_byrbt()
+{
+    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id" 'name'="[$smallDescr_byrbt][$dot_name][$movie_type_byrbt][$movie_country_byrbt]" 'small_descr'="$subname_chs_include" 'url'="$imdbUrl" 'dburl'='' 'nfoaction'='keep' 'descr'="$byrbt_des" 'type'="$byrbt_selectType" 'secocat'="$second_type_byrbt" 'anonymous'="`([ "$anonymous" = 'yes' ] && echo 1) || echo 0`" 'visible'="1" "$cookie"
+}
 #------------------------------------#
 for edit_loop in `egrep -n "small_descr=$default_subname" "$log_Path" |awk -F ':' '{print $1}'`
 do
     posted_name="`sed -n "$(expr $edit_loop - 1) p" "$log_Path"|awk -F '=' '{print $2}'`"
-    new_torrent_name="`echo "$posted_name"|sed 's/ /./g'`"
+    new_torrent_name="`echo "$posted_name"|sed "s/ /./g;s/\(.*\)\.mp4/\1/g;s/\(.*\)\.mkv/\1/g"`"
     check_site="`sed -n "$(expr $edit_loop + 3) p" "$log_Path"`"        # post site
     source_site_URL="`sed -n "$(expr $edit_loop + 4) p" "$log_Path"`"   # source site
     t_id=`sed -n "$(expr $edit_loop + 5) p" "$log_Path"|awk -F '[' '{print $2}'|awk -F ']' '{print $1}'`
@@ -40,7 +43,6 @@ do
         echo $imdbUrl
         if [ "$check_site" = "https://hudbt.hust.edu.cn" ]; then
             source "$AUTO_ROOT_PATH/post/hudbt.sh"
-            echo "$edit_postUrl" 'id'="$t_id"  'name'="$no_dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'nfoaction'='keep' 'descr'="$complex_des" 'type'="$selectType" 'standard_sel'="$standardSel" 'visible'="1" "$cookie"
             edit_post_normal
             echo "$default_subname" "$smallDescr"
             sed -i "${edit_loop}s#$default_subname#$smallDescr#" "$log_Path"
@@ -59,15 +61,22 @@ do
             edit_post_nanyangpt
             echo "$default_subname" "$smallDescr"
             sed -i "${edit_loop}s#$default_subname#$smallDescr#" "$log_Path"
-        fi 
+        elif [ "$check_site" = "https://bt.byr.cn" ]; then
+            source "$AUTO_ROOT_PATH/post/byrbt.sh"
+            edit_post_byrbt
+            echo "$default_subname" "$smallDescr"
+            sed -i "${edit_loop}s#$default_subname#$smallDescr#" "$log_Path"
+        fi
     fi
-    
-    #---clean---#    
-    rm -f "$hds_rss_desc" "$hds_rss_html" "$source_detail_page" "$source_detail_desc"
+
+    #---clean---#
+    rm -f "$hds_rss_desc" "$hds_rss_html" "$source_detail_desc" "$source_detail_html"
     new_torrent_name=''
     source_site_URL=''
+    hds_rss_desc=''
+    hds_rss_html=''
     source_detail_desc=''
-    source_detail_page=''
+    source_detail_html=''
 done
 
 #------------------------------------#
