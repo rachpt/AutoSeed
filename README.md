@@ -2,9 +2,9 @@
 
 An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a python version [HERE](https://github.com/Rhilip/Pt-Autoseed).
 
-目前适用于 从 HDSky / TTG / HDChina 自动转载 电影 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT 站。
+目前适用于 从 HDSky / TTG / HDChina 自动转载 电影 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT / BYRBT 站。
 
-[![release](https://img.shields.io/badge/Version-2.1-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v2.1)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
+[![release](https://img.shields.io/badge/Version-2.2-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v2.2)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
 |  源站点（from）   |      支持站点（to）      | 时间（time） |
 | :---------------: | :-----------------------: | :----------: |
@@ -12,6 +12,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 | https://totheglory.im/ | https://pt.whu.edu.cn |  2018-05-21  |
 | https://hdchina.org | https://npupt.com | 2018-06-07 |
 |                   | https://nanyangpt.com | 2018-06-07 |
+|                   | https://bt.byr.cn | 2018-06-17 |
 
 ## 特点
 
@@ -19,7 +20,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
  - 自动设置做种时间，分享率。自动清理种子，硬盘不会爆仓。
  - 支持自动 Dupe 以及禁转判断。
  - 开箱即用，不需要使用数据库等复杂操作。
- - 速度快，10秒内4站齐发，开启 Dupe 检查小于20秒。
+ - 速度快，10秒内4站齐发，开启 Dupe 检查小于20秒，BYRBT 由于需要处理图片，典型耗时约 40 秒。
 
 
 ## 环境要求
@@ -92,11 +93,17 @@ t_id: [55997]
 
 ## 更新日志
 
+- 2018-06-17 --> 2.2
+  - 添加对 BYRBT 的支持，图片自动转至其服务器。
+  - 添加处理脚本超时代码，默认 300 秒。
+  - 修复可能导致 bug 的代码。
+  - 这可能是最后一个 release 版本。
+
 - 2018-06-15 --> 2.1
   - 修复 edit 中的错误参数。
   - 加强 Dupe 判断逻辑。
   - 修复 ttg 简介中 imdb 链接问题。
-  - 修复 hdc 海报外链问题，海报转至图床 https://sm.ms/。
+  - 修复 hdc 海报外链问题，海报转至图床 https://sm.ms/ 。
   - 修复几个分类判断问题。
 
 - 2018-06-10 --> 2.0
