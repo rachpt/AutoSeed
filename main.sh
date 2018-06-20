@@ -2,8 +2,8 @@
 # FileName: main.sh
 #
 # Author: rachpt@126.com
-# Version: 2.0v
-# Date: 2018-06-09
+# Version: 2.2v
+# Date: 2018-06-18
 #
 #-----------import settings-------------#
 AUTO_ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -54,15 +54,15 @@ function main_loop()
 {
     create_lock  # lock file
     IFS_OLD=$IFS
-    IFS=$'\n'    
+    IFS=$'\n'
     #---loop for torrent in flexget path ---#
     for i in $(find "$flexget_path" -iname "*.torrent*" |awk -F "/" '{print $NF}')
-    do  
+    do
     	new_torrent_name=`$trans_show "${flexget_path}/$i"|grep 'Name'|head -n 1|sed 's/Name: //'`
         if [ "$i" != "${new_torrent_name}.torrent" ]; then
             mv "${flexget_path}/${i}" "${flexget_path}/${new_torrent_name}.torrent"
         fi
-        get_torrent_func         # get TR_NAME 
+        get_torrent_func         # get TR_NAME
     	if [ "$new_torrent_name" = "$TR_TORRENT_NAME" ]
         then
             IFS=$IFS_OLD
@@ -70,7 +70,7 @@ function main_loop()
             echo "[`date '+%Y-%m-%d %H:%M:%S'`] 准备发布 [$TR_TORRENT_NAME]" >> "$log_Path"
             source "$AUTO_ROOT_PATH/post/post.sh"
             rm -f "$torrentPath" # delete uploaded torrent
-                   
+
             printLogo            # print log
             TR_TORRENT_NAME=''   # next torrent
             clean_commit_main=1
@@ -83,13 +83,25 @@ function main_loop()
     fi
 }
 
+#--------------timeout func--------------#
+TimeOut()
+{
+    waitfor=300
+    command=$*
+    $command &
+    commandpid=$!
+
+    ( sleep $waitfor ; kill -9 $commandpid  > /dev/null 2>&1 && echo -e "脚本超时\n" >> "$log_Path" ) &
+
+    wait $commandpid > /dev/null 2>&1
+}
+
 #-------------start function------------#
-if [ "$disable_AutoSeed" = "yes" ]; then
-    exit
-fi
+[ "$disable_AutoSeed" = "yes" ] && exit
+
 #---start check---#
 if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
     is_locked
-    main_loop
-    remove_lock
+    TimeOut main_loop
+    trap remove_lock EXIT
 fi
