@@ -55,5 +55,4 @@ fi
 
 movie_type_byrbt="$(egrep "[类分][　 ]*[别类]" "$source_detail_desc"|sed "s/.*[类分][　 ]*[别类][ 　]*//g;s/[ ]*//g;s/[\n\r]*//g")"
 movie_country_byrbt="$(egrep "[国地产][　 ]*[家区地]" "$source_detail_desc"|sed "s/.*[国地产][　 ]*[家区地][ 　]*//g;s/,/\//g;;s/[ ]*//g;s/[\n\r]*//g")"
-# debug
-mv "$source_detail_html" "/home/rc/${source_detail_html##*/}"
+
