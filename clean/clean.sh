@@ -2,8 +2,8 @@
 # FileName: clean/clean.sh
 #
 # Author: rachpt@126.com
-# Version: 2.1v
-# Date: 2018-06-15
+# Version: 2.2v
+# Date: 2018-06-23
 #-----------------------------#
 #
 # Auto clean old files/folders in 
@@ -13,9 +13,9 @@
 #---------Settings------------#
 
 #-----------------------------#
-DELTE_OLD_ERROE_TORRENT()
+DELTE_OLD_and_ERROE_TORRENT()
 {
-    for eachTorrentID in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep '[0-9]\*'|awk '{print $1}'|awk -F '*' '{print $1}'`
+    for eachTorrentID in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep '[1]\?[0-9]\{1,2\}%'|awk '{print $1}'|sed "s/\*//g"`
     do
         #---error torrent---#
         if [ "`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i|grep 'torrent not registered with this tracker'`" ]; then
@@ -26,7 +26,9 @@ DELTE_OLD_ERROE_TORRENT()
         
         [ "$seed_time" ] && if [ $seed_time -ge $MAX_SEED_TIME ]; then
             "$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -r
-        elif [ "`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i|grep 'State:'|grep 'Finished'`" ]; then
+        fi
+        #---finished torrent---#
+        if [ "`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i|grep 'State:'|grep 'Finished'`" ]; then
             "$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -r
         fi
     done
@@ -65,14 +67,14 @@ IS_FILE_OLD()
     fi
 }
 #-----------------------------#
-COMPARER_FILE()
+COMPARER_FILE_and_DELETE()
 {
     IFS_OLD=$IFS
     IFS=$'\n'
     for i in `ls -1 $FILE_PATH`
     do
-       status=`IS_FILE_OLD "$i"` 
-       if [ $status -eq 1 ]; then
+       old_status=`IS_FILE_OLD "$i"` 
+       if [ $old_status -eq 1 ]; then
            IS_SEEDING "$i"
        fi
     done
@@ -85,7 +87,7 @@ DISK_CHECK()
     DISK_OVER=`awk 'BEGIN{print('$DISK_AVAIL'<'$DISK_AVAIL_MIN')}'`
 }
 #-----------------------------#
-IS_OVER_USE()
+DISK_IS_OVER_USE()
 {
     DISK_CHECK
     if [ "$DISK_OVER" = "1" ]; then
@@ -102,14 +104,14 @@ IS_OVER_USE()
 #---------call func-----------#
 echo "+++++++++++++[clean]+++++++++++++" >> "$log_Path"
 
-if [ -z "$default_FILE_PATH" ]; then
+if [ "$TR_TORRENT_DIR" ]; then
         FILE_PATH="$TR_TORRENT_DIR"
     else
         FILE_PATH="$default_FILE_PATH"
 fi
 
-COMPARER_FILE
-DELTE_OLD_ERROE_TORRENT
-IS_OVER_USE
+DELTE_OLD_and_ERROE_TORRENT
+COMPARER_FILE_and_DELETE
+DISK_IS_OVER_USE
 
 echo -e "++++++++++++++[end]++++++++++++++\n"   >> "$log_Path"

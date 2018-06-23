@@ -17,6 +17,11 @@ function upload_torrent()
     #---judge to get away from dupe---#
     [ "$postUrl" = "https://pt.whu.edu.cn/takeupload.php" ] && source "$AUTO_ROOT_PATH/post/judge.sh"
     [ "$postUrl" = "https://nanyangpt.com/takeupload.php" ] && source "$AUTO_ROOT_PATH/post/judge.sh"
+    #---necessary judge---# 
+    if [ "$(egrep '禁止转载|禁转|情色' "$source_detail_desc")" ]; then
+        up_status=0  # give up upload
+        echo "禁转禁发资源" >> "$log_Path"
+    fi
     t_id=''        # set t_id to none
     #---post---#
     if [ "$up_status" = "1" ]; then
@@ -76,11 +81,8 @@ function upload_torrent()
 #---------------------------------#
 function unset_tempfiles()
 {
-    rm -f "$hds_rss_desc" "$hds_rss_html" "$source_detail_page" "$source_detail_desc" "$source_detail_html"
-    hds_rss_html=''
-    hds_rss_desc=''
+    rm -f "$source_detail_desc" "$source_detail_html"
     source_detail_desc=''
-    source_detail_page=''
     source_detail_html=''
     source_site_URL=''
     echo "++++++++++[deleted tmp]++++++++++" >> "$log_Path"

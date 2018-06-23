@@ -96,7 +96,12 @@ form_source_site_get_Desc()
             fi
             sed -i "s/.*id='kdescr'>//g;s/onclick=\"Previewurl([^)]*)[;]*\"//g;s/onload=\"Scale([^)]*)[;]*\"//g;s/onmouseover=\"[^\"]*;\"//g" "$source_detail_desc"
         fi
+        #---filter html code---#
         sed -i "s#\"[^\"]*attachments\([^\"]\+\)#\"${source_site_URL}/attachments\1#g;s#src=\"attachments#src=\"${source_site_URL}/attachments#g" "$source_detail_desc"
+        sed -i "s#onmouseover=\"[^\"]*;\"##g" "$source_detail_desc"
+        sed -i "s#onload=\"[^\"]*;\"##g" "$source_detail_desc"
+        sed -i "s#onclick=\"[^\"]*;\"##g" "$source_detail_desc"
+        #---copy as a duplication---#
         cat "$source_detail_desc" > "$source_detail_html"
 
         imdbUrl="$(grep -o 'tt[0-9]\{7\}' "$source_detail_full"|head -n 1)"

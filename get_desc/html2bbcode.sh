@@ -81,8 +81,8 @@ else
     subname_chs_include=''
 fi
 
-subname_1=`grep "译[　 ]*名" "$source_detail_desc" |sed "s/.*译[　 ]*名[　 ]*//;s/<br \/>//g;s/\n//g;s/\r//g;s/[ ]*//g"`
-subname_2=`grep "片[　 ]*名" "$source_detail_desc" |sed "s/.*片[　 ]*名[　 ]*//;s/<br \/>//g;s/\n//g;s/\r//g;s/[ ]*//g"`
+subname_1=`grep "译[　 ]*名" "$source_detail_desc" |sed "s/.*译[　 ]*名[　 ]*//;s/<br \/>//g;s/\n//g;s/\r//g;s/[ ]*//g"|sed "s#[/]\?[a-zA-Z0-9:]\{3,\}[/]\?##g"`
+subname_2=`grep "片[　 ]*名" "$source_detail_desc" |sed "s/.*片[　 ]*名[　 ]*//;s/<br \/>//g;s/\n//g;s/\r//g;s/[ ]*//g"|sed "s#[/]\?[a-zA-Z0-9:]\{3,\}[/]\?##g"`
 
 if [ -z "$imdbUrl" ]; then
 	imdbUrl="$(grep -o 'tt[0-9]\{7\}' "$source_detail_desc"|head -n 1)"

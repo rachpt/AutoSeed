@@ -26,7 +26,7 @@ deal_with_byrbt_images()
         elif [ $img_counter_bytbt -gt 40 ]; then
             break # jump out
         fi
-        tmp_desc_img_file="$AUTO_ROOT_PATH/tmp/${img_in_desc_url##*/}"
+        tmp_desc_img_file="$AUTO_ROOT_PATH/tmp/`echo $RANDOM`-`echo $RANDOM`-${img_in_desc_url##*/}"
         http --ignore-stdin -dco "$tmp_desc_img_file" "$img_in_desc_url" >/dev/null 2>&1
 
         byr_upload_img_url="$(http -f POST "$upload_pic_URL" upload@"$tmp_desc_img_file" "$cookie_byrbt"|egrep -o "http[-a-zA-Z0-9./:()]+images[-a-zA-Z0-9./:(_ )]+[^''\"]*" |sed "s/http:/https:/g")"  # byrbt
@@ -45,12 +45,15 @@ deal_with_byrbt_images
 
 if [ -s "$source_detail_html" ]; then
     byrbt_des="$descrCom_complex_html
-    `cat "$source_detail_html"`"
+    `cat "$source_detail_html"` <br /><br /><br />
+    <span style=\"font-size:30px;color:red;\">简介中图片已经上传 byr 服务器，部分有超链接！ ipv4 限量用户别点击图片放大！</span><br /><br />
+    <span style=\"font-size:20px;\">本种简介来自： ${source_site_URL}/details.php?id=${source_t_id}</span>"
 else
     byrbt_des="$descrCom_complex_html
-    <br /><br /><br /><strong>获取简介失败, 稍后编辑。</strong><br /><br />"
+    <br /><br /><br /><strong><span style=\"font-size:30px;\">获取简介失败。无人职守！！！ 不喜勿下！ 如果帮助修改，在此非常感谢！</span></strong><br /><br />"
 fi
 
 movie_type_byrbt="$(egrep "[类分][　 ]*[别类]" "$source_detail_desc"|sed "s/.*[类分][　 ]*[别类][ 　]*//g;s/[ ]*//g;s/[\n\r]*//g")"
 movie_country_byrbt="$(egrep "[国地产][　 ]*[家区地]" "$source_detail_desc"|sed "s/.*[国地产][　 ]*[家区地][ 　]*//g;s/,/\//g;;s/[ ]*//g;s/[\n\r]*//g")"
-
+# debug
+mv "$source_detail_html" "/home/rc/${source_detail_html##*/}"

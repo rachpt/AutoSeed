@@ -56,9 +56,9 @@ function judge_torrent()
         fi
     fi
 
-    if [ "$(egrep '禁止转载|禁转' "$source_detail_desc")" ]; then
+    if [ "$(egrep '禁止转载|禁转|情色' "$source_detail_desc")" ]; then
         up_status=0  # give up upload
-        echo "禁转资源" >> "$log_Path"
+        #echo "禁转资源" >> "$log_Path"
     fi
     search_html_page=''
 }

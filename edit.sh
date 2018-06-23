@@ -2,10 +2,17 @@
 # FileName: edit.sh
 #
 # Author: rachpt@126.com
-# Version: 2.1v
-# Date: 2018-06-15
+# Version: 2.2v
+# Date: 2018-06-21
 #
 #------------------------------------#
+#---main.sh is running?---#
+pidof -x main.sh
+if [ $? -eq 0 ]; then
+    echo '主程序正在运行，稍后重试！'
+    exit
+fi
+#---import settings---#
 if [ -z "$log_Path"]; then
     AUTO_ROOT_PATH="$(dirname "$(readlink -f "$0")")"
     source "$AUTO_ROOT_PATH/settings.sh"
@@ -70,11 +77,9 @@ do
     fi
 
     #---clean---#
-    rm -f "$hds_rss_desc" "$hds_rss_html" "$source_detail_desc" "$source_detail_html"
+    rm -f "$source_detail_desc" "$source_detail_html"
     new_torrent_name=''
     source_site_URL=''
-    hds_rss_desc=''
-    hds_rss_html=''
     source_detail_desc=''
     source_detail_html=''
 done

@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.2v
-# Date: 2018-06-19
+# Date: 2018-06-23
 #
 #-------------settings---------------#
 
@@ -25,7 +25,7 @@ function from_desc_get_prarm()
     #---get torrent's type---#
 
     #---hudbt & whu---#
-    if [ "`egrep '[国地产][　 ]*[家区地][　 ]*中国大陆|[国地产][　 ]*[家区地][　 ]*中国' "$source_detail_desc"`" ]; then
+    if [ "`egrep '[国地产][　 ]*[家区地][　 ]*中国大陆|[国地产][　 ]*[家区地][　 ]*中国[　 ]*$' "$source_detail_desc"`" ]; then
         whu_selectType='401'
         hudbt_selectType='401'
     elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*马来西亚|[国地产][　 ]*[家区地][　 ]*日本|[国地产][　 ]*[家区地][　 ]*韩国|[国地产][　 ]*[家区地][　 ]*印度|[国地产][　 ]*[家区地][　 ]*泰国|[国地产][　 ]*[家区地][　 ]*伊朗' "$source_detail_desc"`" ]; then
@@ -138,10 +138,12 @@ function from_desc_get_prarm()
     #---join desc---#
     if [ -s "$source_detail_desc" ]; then
         simple_des="${descrCom_simple}
-        `cat "$source_detail_desc"`"
+        `cat "$source_detail_desc"`
+        [b]本种简介来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}"
 
         complex_des="${descrCom_complex}
-        `cat "$source_detail_desc"`"
+        `cat "$source_detail_desc"`
+        [b]本种简介来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}"
 
     else
         simple_des="${descrCom_simple}

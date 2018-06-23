@@ -59,7 +59,10 @@ function hds_rss_get_desc()
             #---extral item's descr---#
             sed -n "${min_item_line},${max_item_line}p" "$hds_rss_full" > "$hds_rss_desc"
             sed -i "s/<description><\!\[CDATA\[//g; s/\]\]><\/description>//g" "$hds_rss_desc"
-            
+            #---filter html code---#
+            sed -i "s#onclick=\"[^\"]*\"##g;s#onmouseover=\"[^\"]*\"##g;s#onload=\"[^\"]*;\"##g" "$hds_rss_desc"
+            sed -i "s#\"[^\"]*attachments\([^\"]\+\)#\"${source_site_URL}/attachments\1#g;s#src=\"attachments#src=\"${source_site_URL}/attachments#g" "$source_detail_desc"
+            #---copy as a duplication---#
             cat "$hds_rss_desc" > "$hds_rss_html"
             source_detail_desc="$hds_rss_desc"
             source_detail_html="$hds_rss_html"
@@ -70,9 +73,11 @@ function hds_rss_get_desc()
             #---use detail func if failed to get item---#
             form_source_site_get_Desc
         fi
-        
+        #---clean---#
         rm -f "$hds_rss_full"
 	    hds_rss_full=''
+	    hds_rss_desc=''
+	    hds_rss_html=''
     fi
 }
 
