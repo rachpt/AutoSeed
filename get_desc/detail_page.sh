@@ -54,6 +54,30 @@ form_source_site_get_tID()
 }
 
 #-------------------------------------#
+get_original_subname()
+{
+    if [ "$source_site_URL" = "https://hdsky.me" ]; then
+        original_subname_info="$(grep '副标题' "$source_detail_full"|sed "s#.*left\">##g;s#<.*>##g;s#[ ]\+##g")"
+        if [ "$original_subname_info" ]; then
+            original_subname="$(echo "$original_subname_info"|sed "s#\[.*\]##g;s#[ ]\+##g;s#【.*】##g")"
+            original_other_info="$(echo "$original_subname_info"|sed "s#.*\[\(.*\)\].*#\1#g;s#.*【\(.*\)】.*#\1#g"|sed "s%\][ ]*\[% %g")"
+        fi
+    elif [ "$source_site_URL" = "https://totheglory.im" ]; then
+        original_subname_info="$(grep 'h1.*\[.*\]' "$source_detail_full"|sed "s#.*\[\(.*\)</h1>#\1#g")"
+        if [ "$original_subname_info" ]; then
+            original_subname="$(echo "$original_subname_info"|sed "s#\[\(.*\)\]#\1#g;s#[ ]\+##g")"
+            original_other_info="$(echo "$original_subname_info"|sed "s#.*\]\(.*\)#\1#g;s#\*##g")"
+        fi
+    elif [ "$source_site_URL" = "https://hdchina.org" ]; then
+        original_subname_info="$(grep 'h3' "$source_detail_full"|head -n 1)"
+        if [ "$original_subname_info" ]; then
+            original_subname="$(echo "$original_subname_info"|sed "s#\([^\*]\+\)##g;s#\([^\[]\+\)\[#\1#g;s#[导主]演.*##g;s#|.*##g;s#[ ]\+##g")"
+            original_other_info="$(echo "$original_subname_info"|sed "s#[^\*]*\*##g;s#\[\([.*]\+\)#\1#g;s#[\[\]]##g;s#\*##g;s#.*|##g;s#.*\([导主]演.*\)#\1#g")"
+        fi
+    fi
+}
+
+#-------------------------------------#
 form_source_site_get_Desc()
 {
     form_source_site_get_tID
@@ -67,7 +91,8 @@ form_source_site_get_Desc()
     fi
 
     if [ -s "$source_detail_full" ]; then
-       source_start_line_html=`egrep -n '简介|简述' "$source_detail_full" |head -n 1|awk -F ':' '{print $1}'`
+        get_original_subname
+        source_start_line_html=`egrep -n '简介|简述' "$source_detail_full" |head -n 1|awk -F ':' '{print $1}'`
         if [ "$source_site_URL" = "https://totheglory.im" ]; then
             source_end_line_html=`grep -n '</div></td></tr>' "$source_detail_full" |head -n 1|awk -F ':' '{print $1}'`
         else
@@ -95,17 +120,19 @@ form_source_site_get_Desc()
                 sed -i "1i <img src=\"$source_hdc_poster_img\" />" "$source_detail_desc"
             fi
             sed -i "s/.*id='kdescr'>//g;s/onclick=\"Previewurl([^)]*)[;]*\"//g;s/onload=\"Scale([^)]*)[;]*\"//g;s/onmouseover=\"[^\"]*;\"//g" "$source_detail_desc"
+            sed -i "/本资源仅限会员测试带宽之用，严禁用于商业用途！/d; /对用于商业用途所产生的法律责任，由使用者自负！/d" "$source_detail_desc"
         fi
         #---filter html code---#
         sed -i "s#\"[^\"]*attachments\([^\"]\+\)#\"${source_site_URL}/attachments\1#g;s#src=\"attachments#src=\"${source_site_URL}/attachments#g" "$source_detail_desc"
-        sed -i "s#onmouseover=\"[^\"]*;\"##g" "$source_detail_desc"
-        sed -i "s#onload=\"[^\"]*;\"##g" "$source_detail_desc"
-        sed -i "s#onclick=\"[^\"]*;\"##g" "$source_detail_desc"
+        sed -i "s#onmouseover=\"[^\"]*[;]*\"##g" "$source_detail_desc"
+        sed -i "s#onload=\"[^\"]*[;]*\"##g" "$source_detail_desc"
+        sed -i "s#onclick=\"[^\"]*[;)]*\"##g" "$source_detail_desc"
+
         #---copy as a duplication---#
         cat "$source_detail_desc" > "$source_detail_html"
 
         imdbUrl="$(grep -o 'tt[0-9]\{7\}' "$source_detail_full"|head -n 1)"
-        echo 1:"$imdbUrl" >> "$log_Path"
+
         #---html2bbcode---#
 	    source "$AUTO_ROOT_PATH/get_desc/html2bbcode.sh"
     fi

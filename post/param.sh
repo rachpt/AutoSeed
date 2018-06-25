@@ -119,19 +119,24 @@ function from_desc_get_prarm()
     fi
 
     #---subtitle---#
-    if [ "`egrep '国[　 ]+家[　 ]+中国大陆[ ]*$|国[　 ]+家[　 ]+中[　 ]*国[ ]*$' $source_detail_desc`" ]; then
-        smallDescr="`echo "$subname_2"` $subname_chs_include"
+    if [ "`egrep '国[　 ]+家[　 ]+中国大陆[ ]*$|国[　 ]+家[　 ]+中[　 ]*国[ ]*$' $source_detail_desc`" ] && [ "$subname_2" != "`echo "$subname_2"|egrep -o "[,\':a-zA-Z ]+"`" ]; then
+        smallDescr="$subname_2 $subname_chs_include"
         smallDescr_byrbt="$subname_2"
     else
-        if [ "$subname_1" != "`echo "$subname_1"|egrep -o '[a-zA-Z ]+'`" ]; then
-             smallDescr="`echo "$subname_1"` $subname_chs_include"
-             smallDescr_byrbt="$subname_1"
-        elif [ "$subname_2" ]; then
-             smallDescr="`echo "$subname_2"` $subname_chs_include"
-             smallDescr_byrbt="$subname_2"
+        if [ "$subname_1" ] && [ "$subname_1" != "`echo "$subname_1"|egrep -o "[,\':a-zA-Z ]+"`" ]; then
+            smallDescr="$subname_1 $subname_chs_include"
+            smallDescr_byrbt="$subname_1"
+        elif [ "$subname_2" ] && [ "$subname_2" != "`echo "$subname_2"|egrep -o "[,\':a-zA-Z ]+"`" ]; then
+            smallDescr="$subname_2 $subname_chs_include"
+            smallDescr_byrbt="$subname_2"
         else
-            smallDescr="$default_subname"
-            smallDescr_byrbt="$default_subname"
+            if [ -s "$source_detail_desc" ] && [ "$original_subname" ]; then
+                smallDescr="$original_subname $subname_chs_include"
+                smallDescr_byrbt="$original_subname"
+            else
+                smallDescr="$default_subname"
+                smallDescr_byrbt="$default_subname"
+            fi
         fi
     fi
 
@@ -139,11 +144,21 @@ function from_desc_get_prarm()
     if [ -s "$source_detail_desc" ]; then
         simple_des="${descrCom_simple}
         `cat "$source_detail_desc"`
-        [b]本种简介来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}"
+        `if [ $source_t_id ]; then
+            echo "[quote][b]本种简介来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}[/quote]"
+        else
+            echo "[quote][b]本种简介来自：[/b] ${source_site_URL}[/quote]"
+        fi
+        `"
 
         complex_des="${descrCom_complex}
         `cat "$source_detail_desc"`
-        [b]本种简介来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}"
+        `if [ $source_t_id ]; then
+            echo "[quote][b]本种简介来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}[/quote]"
+        else
+            echo "[quote][b]本种简介来自：[/b] ${source_site_URL}[/quote]"
+        fi
+        `"
 
     else
         simple_des="${descrCom_simple}

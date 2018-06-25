@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.2v
-# Date: 2018-06-21
+# Date: 2018-06-23
 #
 #------------------------------------#
 #---main.sh is running?---#
@@ -20,7 +20,7 @@ fi
 #----------------post----------------#
 function edit_post_normal()
 {
-    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id" 'name'="$no_dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'nfoaction'='keep' 'descr'="$complex_des" 'type'="$selectType" 'standard_sel'="$standardSel" 'anonymous'="`([ "$anonymous" = 'yes' ] && echo 1) || echo 0`" 'visible'="1" "$cookie"
+    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id" 'name'="$no_dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'nfoaction'='keep' 'descr'="$com_des" 'type'="$selectType" 'standard_sel'="$standardSel" 'anonymous'="`([ "$anonymous" = 'yes' ] && echo 1) || echo 0`" 'visible'="1" "$cookie"
 }
 function edit_post_npupt()
 {
@@ -35,6 +35,7 @@ function edit_post_byrbt()
     http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id" 'name'="[$smallDescr_byrbt][$dot_name][$movie_type_byrbt][$movie_country_byrbt]" 'small_descr'="$subname_chs_include" 'url'="$imdbUrl" 'dburl'='' 'nfoaction'='keep' 'descr'="$byrbt_des" 'type'="$byrbt_selectType" 'secocat'="$second_type_byrbt" 'anonymous'="`([ "$anonymous" = 'yes' ] && echo 1) || echo 0`" 'visible'="1" "$cookie"
 }
 #------------------------------------#
+old_new_torrent_name=''
 for edit_loop in `egrep -n "small_descr=$default_subname" "$log_Path" |awk -F ':' '{print $1}'`
 do
     posted_name="`sed -n "$(expr $edit_loop - 1) p" "$log_Path"|awk -F '=' '{print $2}'`"
@@ -44,8 +45,14 @@ do
     t_id=`sed -n "$(expr $edit_loop + 5) p" "$log_Path"|awk -F '[' '{print $2}'|awk -F ']' '{print $1}'`
 
     if [ "$t_id" ]; then
-    	source "$AUTO_ROOT_PATH/get_desc/detail_page.sh"
-	    source "$AUTO_ROOT_PATH/post/param.sh"
+        if [ "$new_torrent_name" != "$old_new_torrent_name" ]; then
+            #---clean---#
+            rm -f "$source_detail_desc" "$source_detail_html"
+            source_detail_desc=''
+            source_detail_html=''
+    	    source "$AUTO_ROOT_PATH/get_desc/detail_page.sh"
+	        source "$AUTO_ROOT_PATH/post/param.sh"
+        fi
 
         echo $imdbUrl
         if [ "$check_site" = "https://hudbt.hust.edu.cn" ]; then
@@ -76,12 +83,8 @@ do
         fi
     fi
 
-    #---clean---#
-    rm -f "$source_detail_desc" "$source_detail_html"
-    new_torrent_name=''
-    source_site_URL=''
-    source_detail_desc=''
-    source_detail_html=''
+    old_new_torrent_name="$new_torrent_name"
+
 done
 
 #------------------------------------#

@@ -77,6 +77,8 @@ sed -i "s#\[url=http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\]\[url=http[s
 #---get subname---#
 if [ -n "`grep -i "CH[ST]" "$source_detail_desc"`" ]; then
     subname_chs_include='中文字幕'
+elif [ "$original_other_info" ]; then
+    subname_chs_include="$original_other_info"
 else
     subname_chs_include=''
 fi
@@ -86,6 +88,5 @@ subname_2=`grep "片[　 ]*名" "$source_detail_desc" |sed "s/.*片[　 ]*名[�
 
 if [ -z "$imdbUrl" ]; then
 	imdbUrl="$(grep -o 'tt[0-9]\{7\}' "$source_detail_desc"|head -n 1)"
-	echo 2:"$imdbUrl" >> "$log_Path"
 fi
 

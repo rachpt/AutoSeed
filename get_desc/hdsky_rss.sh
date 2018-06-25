@@ -20,7 +20,7 @@ function hds_rss_get_desc()
         hds_rss_full=`mktemp "${AUTO_ROOT_PATH}/tmp/hds_rss_full.XXXXXXXX"`
         hds_rss_desc=`mktemp "${AUTO_ROOT_PATH}/tmp/hds_rss_desc.XXXXXXXX"`
         hds_rss_html=`mktemp "${AUTO_ROOT_PATH}/tmp/hds_rss_html.XXXXXXXX"`
-    
+
         #---get item arrar---#
         curl -s --connect-timeout 100 -m 300 "https://hdsky.me/torrentrss.php?rows=50" > "$hds_rss_full"
         j=0
@@ -35,16 +35,16 @@ function hds_rss_get_desc()
             all_item_lists_B[$j]=$i
             j=`expr $j + 1`
         done
-        
+
         #---get current item---#
         torrent_location_line=`grep -n "$name" "$hds_rss_full"|cut -d: -f1|head -n 1`
-        
+
         if [ -z "$torrent_location_line" ]; then
             name=`echo "$name"|sed "s/DD2 0/DD2.0/g;s/H 26/H.26/g;s/5 1/5.1/g;s/7 1/7.1/g;s/\(.*\)[\. ]mp4/\1/g;s/\(.*\)[\. ]mkv/\1/g"`
             torrent_location_line=`grep -n "$name" "$hds_rss_full"|cut -d: -f1|head -n 1`
         fi
         #---get decsribe---#
-        if [ -n "$torrent_location_line" ]; then 
+        if [ -n "$torrent_location_line" ]; then
             j=0
             while [ $j -lt 50 ]
             do
@@ -60,8 +60,11 @@ function hds_rss_get_desc()
             sed -n "${min_item_line},${max_item_line}p" "$hds_rss_full" > "$hds_rss_desc"
             sed -i "s/<description><\!\[CDATA\[//g; s/\]\]><\/description>//g" "$hds_rss_desc"
             #---filter html code---#
-            sed -i "s#onclick=\"[^\"]*\"##g;s#onmouseover=\"[^\"]*\"##g;s#onload=\"[^\"]*;\"##g" "$hds_rss_desc"
-            sed -i "s#\"[^\"]*attachments\([^\"]\+\)#\"${source_site_URL}/attachments\1#g;s#src=\"attachments#src=\"${source_site_URL}/attachments#g" "$source_detail_desc"
+            sed -i "s#onclick=\"[^\"]*\"##g;s#onmouseover=\"[^\"]*\"##g;s#onload=\"[^\"]*;\"##g;s#onclick=\"[^\"]*[)]*\"##g" "$hds_rss_desc"
+            sed -i "s#\"[^\"]*attachments\([^\"]\+\)#\"${source_site_URL}/attachments\1#g;s#src=\"attachments#src=\"${source_site_URL}/attachments#g" "$hds_rss_desc"
+
+            #---imdb url---#
+            imdbUrl="$(grep -o 'tt[0-9]\{7\}' "$hds_rss_desc"|head -n 1)"
             #---copy as a duplication---#
             cat "$hds_rss_desc" > "$hds_rss_html"
             source_detail_desc="$hds_rss_desc"

@@ -93,7 +93,8 @@ passkey_nanyangpt='12345678909876543212345654'
 ########################################
 #---[byrbt]---#
 enable_byrbt='yes'
-#
+#---delete screens img---#
+just_poster_byrbt='yes'
 default_select_type_byrbt='408'
 default_second_type_byrbt='1'
 anonymous_byrbt='yes'
