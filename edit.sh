@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.2v
-# Date: 2018-06-23
+# Date: 2018-06-28
 #
 #------------------------------------#
 #---main.sh is running?---#
@@ -48,8 +48,6 @@ do
         if [ "$new_torrent_name" != "$old_new_torrent_name" ]; then
             #---clean---#
             rm -f "$source_detail_desc" "$source_detail_html"
-            source_detail_desc=''
-            source_detail_html=''
     	    source "$AUTO_ROOT_PATH/get_desc/detail_page.sh"
 	        source "$AUTO_ROOT_PATH/post/param.sh"
         fi
@@ -88,4 +86,6 @@ do
 done
 
 #------------------------------------#
+#---clean---#
+rm -f $AUTO_ROOT_PATH/tmp/*_desc.txt $AUTO_ROOT_PATH/tmp/*_html.txt
 
