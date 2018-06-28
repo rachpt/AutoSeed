@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.2v
-# Date: 2018-06-18
+# Date: 2018-06-28
 #
 #-------------------------------------#
 get_source_site()
@@ -69,10 +69,10 @@ get_original_subname()
             original_other_info="$(echo "$original_subname_info"|sed "s#.*\]\(.*\)#\1#g;s#\*##g")"
         fi
     elif [ "$source_site_URL" = "https://hdchina.org" ]; then
-        original_subname_info="$(grep 'h3' "$source_detail_full"|head -n 1)"
+        original_subname_info="$(grep 'h3' "$source_detail_full"|head -n 1|sed "s#<[/]*h3>##g")"
         if [ "$original_subname_info" ]; then
-            original_subname="$(echo "$original_subname_info"|sed "s#\([^\*]\+\)##g;s#\([^\[]\+\)\[#\1#g;s#[导主]演.*##g;s#|.*##g;s#[ ]\+##g")"
-            original_other_info="$(echo "$original_subname_info"|sed "s#[^\*]*\*##g;s#\[\([.*]\+\)#\1#g;s#[\[\]]##g;s#\*##g;s#.*|##g;s#.*\([导主]演.*\)#\1#g")"
+            original_subname="$(echo "$original_subname_info"|sed "s#\*.*##g;s#\[.*##g;s#[导主]演.*##g;s#[ ]\+##g;s#|.*##g")"
+            original_other_info="$(echo "$original_subname_info"|sed "s#[^ ]\+##;s#[^*[|]\+[\*\[|]##;s#[*[|]##g;s#\]##g;s#.*\([导主]演.*\)#\1#g")"
         fi
     fi
 }
@@ -83,10 +83,6 @@ form_source_site_get_Desc()
     form_source_site_get_tID
 
     if [ -n "${source_t_id}" ]; then
-        source_detail_full=`mktemp "${AUTO_ROOT_PATH}/tmp/detail_full.XXXXXXXX"`
-        source_detail_desc=`mktemp "${AUTO_ROOT_PATH}/tmp/detail_desc.XXXXXXXX"`
-        source_detail_html=`mktemp "${AUTO_ROOT_PATH}/tmp/detail_html.XXXXXXXX"`
-
         http --ignore-stdin GET "${source_site_URL}/details.php?id=${source_t_id}" "$cookie_source_site" > "$source_detail_full"
     fi
 
@@ -137,19 +133,36 @@ form_source_site_get_Desc()
 	    source "$AUTO_ROOT_PATH/get_desc/html2bbcode.sh"
     fi
     rm -f "$source_detail_full"
-    source_detail_full=''
 }
-#-------------------------------------#
-if [ -z "$source_site_URL" ]; then
-	get_source_site
-else
-    set_source_site_cookie
-fi
 
-if [ "$source_site_URL" = "https://hdsky.me" ]; then
-    #---use rss page first---#
-    source "$AUTO_ROOT_PATH/get_desc/hdsky_rss.sh"
-else
-    form_source_site_get_Desc
-fi
+#-------------------------------------#
+detail_main_func()
+{
+    #---use dot name save desc---#
+    dot_name=`echo "$new_torrent_name"|sed "s/[ ]\+/./g;s/\(.*\)\.mp4/\1/g;s/\(.*\)\.mkv/\1/g"`
+    #---define temp file name---#
+    source_detail_full="${AUTO_ROOT_PATH}/tmp/${dot_name}_full.txt"
+    source_detail_desc="${AUTO_ROOT_PATH}/tmp/${dot_name}_desc.txt"
+    source_detail_html="${AUTO_ROOT_PATH}/tmp/${dot_name}_html.txt"
+
+    if [ ! -s "$source_detail_desc" ]; then
+        #---deal with called from edit.sh---#
+        if [ -z "$source_site_URL" ]; then
+	        get_source_site
+        else
+           set_source_site_cookie
+        fi
+        #---get description---#
+        if [ "$source_site_URL" = "https://hdsky.me" ]; then
+            #---use rss page first---#
+            source "$AUTO_ROOT_PATH/get_desc/hdsky_rss.sh"
+        else
+            #---mormal method---#
+            form_source_site_get_Desc
+        fi
+    fi
+}
+
+#-------------------------------------#
+detail_main_func
 
