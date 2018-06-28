@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.2v
-# Date: 2018-06-23
+# Date: 2018-06-28
 #
 #-------------settings---------------#
 
@@ -112,8 +112,23 @@ function from_desc_get_prarm()
     if [ -z "$second_type_byrbt" ]; then
         second_type_byrbt="$default_second_type_byrbt" #1
     fi
+           
+    #---get 2 subname---#
+    if [ -n "`grep -i "CH[ST]" "$source_detail_desc"`" ]; then
+        subname_chs_include='中文字幕'
+    elif [ "$original_other_info" ]; then
+        subname_chs_include="$original_other_info"
+    else
+        subname_chs_include=''
+    fi
+    subname_1=`grep "译[　 ]*名" "$source_detail_desc" |sed "s/.*译[　 ]*名[　 ]*//;s/\n//g;s/\r//g;s/[ ]*//g"|sed "s#[/]\?[a-zA-Z0-9:]\{3,\}[/]\?##g"`
+    subname_2=`grep "片[　 ]*名" "$source_detail_desc" |sed "s/.*片[　 ]*名[　 ]*//;s/\n//g;s/\r//g;s/[ ]*//g"|sed "s#[/]\?[a-zA-Z0-9:]\{3,\}[/]\?##g"`
 
-    #---imdb---#
+    if [ -z "$imdbUrl" ]; then
+	    imdbUrl="$(grep -o 'tt[0-9]\{7\}' "$source_detail_desc"|head -n 1)"
+    fi
+
+    #---default imdb---#
     if [ -z "$imdbUrl" ]; then
         imdbUrl="$default_imdb_url"
     fi
