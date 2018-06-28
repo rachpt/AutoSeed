@@ -2,8 +2,8 @@
 # FileName: get_desc/html2bbcode.sh
 #
 # Author: rachpt@126.com
-# Version: 2.0v
-# Date: 2018-06-10
+# Version: 2.2v
+# Date: 2018-06-28
 #
 #-------------------------------------#
 sed -i "s/id=\"[^\"]\"//g; s/alt=\"[^\"]\"//g" "$source_detail_desc"
@@ -73,20 +73,4 @@ fi
 #---ttg imdb url---#
 sed -i "s#\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\]\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\]\(http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\)\[/url\]\[/url\]#\1#g" "$source_detail_desc"
 sed -i "s#\[url=http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\]\[url=http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\]\(http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\)\[/url\]\[/url\]#\1#g" "$source_detail_desc"
-
-#---get subname---#
-if [ -n "`grep -i "CH[ST]" "$source_detail_desc"`" ]; then
-    subname_chs_include='中文字幕'
-elif [ "$original_other_info" ]; then
-    subname_chs_include="$original_other_info"
-else
-    subname_chs_include=''
-fi
-
-subname_1=`grep "译[　 ]*名" "$source_detail_desc" |sed "s/.*译[　 ]*名[　 ]*//;s/<br \/>//g;s/\n//g;s/\r//g;s/[ ]*//g"|sed "s#[/]\?[a-zA-Z0-9:]\{3,\}[/]\?##g"`
-subname_2=`grep "片[　 ]*名" "$source_detail_desc" |sed "s/.*片[　 ]*名[　 ]*//;s/<br \/>//g;s/\n//g;s/\r//g;s/[ ]*//g"|sed "s#[/]\?[a-zA-Z0-9:]\{3,\}[/]\?##g"`
-
-if [ -z "$imdbUrl" ]; then
-	imdbUrl="$(grep -o 'tt[0-9]\{7\}' "$source_detail_desc"|head -n 1)"
-fi
 
