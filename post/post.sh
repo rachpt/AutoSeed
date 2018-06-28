@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.2v
-# Date: 2018-06-18
+# Date: 2018-06-28
 #
 #-------------settings---------------#
 torrentPath="${flexget_path}/${new_torrent_name}.torrent"
@@ -82,9 +82,6 @@ function upload_torrent()
 function unset_tempfiles()
 {
     rm -f "$source_detail_desc" "$source_detail_html"
-    source_detail_desc=''
-    source_detail_html=''
-    source_site_URL=''
     echo "++++++++++[deleted tmp]++++++++++" >> "$log_Path"
 }
 
