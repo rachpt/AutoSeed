@@ -38,13 +38,13 @@ function set_ratio()
             elif [ -n "$set_commit_nanyangpt" ]; then
 	    	    "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_nanyangpt
 	    	    break
-	    	elif [ -n "$set_commit_byrbt" ]; then
-	    	    "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_byrbt
-	    	    break
-	    	#---add new site's seed ratio here---#
-	    	#elif [ -n "$set_commit_new" ]; then
-	    	#   "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_new
-	    	#   break
+	        elif [ -n "$set_commit_byrbt" ]; then
+	            "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_byrbt
+	            break
+	        #---add new site's seed ratio here---#
+	        #elif [ -n "$set_commit_new" ]; then
+	        #   "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_new
+	        #   break
             fi
         fi
     done
