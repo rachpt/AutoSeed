@@ -16,7 +16,7 @@ site_download_url='https://bt.byr.cn/download.php?id='
 upload_pic_URL='https://bt.byr.cn/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images'
 #-------------------------------------#
 
-delete_screensshorts_img()
+delete_screenshots_img()
 {
     sed -i "/<a.*><img.*>.*<\/a>/d" "$source_detail_html" # small img
     sed -i "/截图赏析/d; /alt=\"screens.jpg\"/d; /www.stonestudio2015.com\/stonestudio\/created.png/d; /hds_logo.png/d" "$source_detail_html" # hds
@@ -32,7 +32,7 @@ delete_screensshorts_img()
 
 deal_with_byrbt_images()
 {
-    [ "$just_poster_byrbt" = "yes" ] && delete_screensshorts_img # delete small images
+    [ "$just_poster_byrbt" = "yes" ] && delete_screenshots_img # delete small images
     
     img_counter_bytbt=0
     while true; do
