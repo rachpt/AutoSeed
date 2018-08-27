@@ -2,8 +2,8 @@
 # FileName: get_desc/detail_page.sh
 #
 # Author: rachpt@126.com
-# Version: 2.2v
-# Date: 2018-06-28
+# Version: 2.3v
+# Date: 2018-08-22
 #
 #-------------------------------------#
 get_source_site()
@@ -13,16 +13,18 @@ get_source_site()
     if [ "`echo $tracker_source_infos|grep -i 'hdsky'`" ]; then
         source_site_URL='https://hdsky.me'
         cookie_source_site="$cookie_hds"
+        echo "got source_site" >> "$log_Path"
     elif [ "`echo $tracker_source_infos|grep -i 'totheglory'`" ]; then
         source_site_URL='https://totheglory.im'
         cookie_source_site="$cookie_ttg"
+        echo "got source_site" >> "$log_Path"
     elif [ "`echo $tracker_source_infos|grep -i 'hdchina'`" ]; then
         source_site_URL='https://hdchina.org'
         cookie_source_site="$cookie_hdc"
+        echo "got source_site" >> "$log_Path"
     #elif [ "`echo $tracker_source_infos|grep -i 'new'`" ]; then
     #    source_site_URL='https://new.tracker.com'
     fi
-    echo "got source_site" >> "$log_Path"
 }
 set_source_site_cookie()
 {
@@ -128,9 +130,11 @@ form_source_site_get_Desc()
         cat "$source_detail_desc" > "$source_detail_html"
 
         imdbUrl="$(grep -o 'tt[0-9]\{7\}' "$source_detail_full"|head -n 1)"
+        doubanUrl="$(grep -o 'http[s]*://movie\.douban\.com/subject/[0-9]\{8\}[/]*' "$source_detail_full"|head -n 1)"
 
         #---html2bbcode---#
-	    source "$AUTO_ROOT_PATH/get_desc/html2bbcode.sh"
+	      source "$AUTO_ROOT_PATH/get_desc/html2bbcode.sh"
+
     fi
     rm -f "$source_detail_full"
 }
@@ -138,31 +142,18 @@ form_source_site_get_Desc()
 #-------------------------------------#
 detail_main_func()
 {
-    #---use dot name save desc---#
-    dot_name=`echo "$new_torrent_name"|sed "s/[ ]\+/./g;s/\(.*\)\.mp4/\1/g;s/\(.*\)\.mkv/\1/g"`
     #---define temp file name---#
     source_detail_full="${AUTO_ROOT_PATH}/tmp/${dot_name}_full.txt"
-    source_detail_desc="${AUTO_ROOT_PATH}/tmp/${dot_name}_desc.txt"
-    source_detail_html="${AUTO_ROOT_PATH}/tmp/${dot_name}_html.txt"
 
-    if [ ! -s "$source_detail_desc" ]; then
-        #---deal with called from edit.sh---#
-        if [ -z "$source_site_URL" ]; then
-	        get_source_site
-        else
-           set_source_site_cookie
-        fi
-        #---get description---#
-        if [ "$source_site_URL" = "https://hdsky.me" ]; then
-            #---use rss page first---#
-            source "$AUTO_ROOT_PATH/get_desc/hdsky_rss.sh"
-        else
-            #---mormal method---#
-            form_source_site_get_Desc
-        fi
+    #---get description---#
+    if [ "$source_site_URL" = "https://hdsky.me" ]; then
+        #---use rss page first---#
+        source "$AUTO_ROOT_PATH/get_desc/hdsky_rss.sh"
+    else
+        #---mormal method---#
+        form_source_site_get_Desc
     fi
 }
 
 #-------------------------------------#
-detail_main_func
 
