@@ -10,9 +10,9 @@ cookie="$cookie_whu"
 passkey="$passkey_whu"
 anonymous="$anonymous_whu"
 #---static---#
-postUrl='https://pt.whu.edu.cn/takeupload.php'
-edit_postUrl='https://pt.whu.edu.cn/takeedit.php'
-site_download_url='https://pt.whu.edu.cn/download.php?id='
+postUrl='https://whu.pt/takeupload.php'
+edit_postUrl='https://whu.pt/takeedit.php'
+site_download_url='https://whu.pt/download.php?id='
 #-------------------------------------#
 selectType="$whu_selectType"
 standardSel="$whu_standardSel"

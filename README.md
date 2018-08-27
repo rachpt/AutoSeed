@@ -4,23 +4,25 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 目前适用于 从 HDSky / TTG / HDChina 自动转载 电影 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT / BYRBT 站。
 
-[![release](https://img.shields.io/badge/Version-2.2-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v2.2)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
+[![release](https://img.shields.io/badge/Version-2.3-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v2.3)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
 |  源站点（from）   |      支持站点（to）      | 时间（time） |
 | :---------------: | :-----------------------: | :----------: |
 | https://hdsky.me/ | https://hudbt.hust.edu.cn |  2018-05-19  |
-| https://totheglory.im/ | https://pt.whu.edu.cn |  2018-05-21  |
-| https://hdchina.org | https://npupt.com | 2018-06-07 |
+| https://totheglory.im/ | https://whu.pt |  2018-05-21  |
+| https://hdchina.org | https://npupt.com |  2018-06-07 |
 |                   | https://nanyangpt.com | 2018-06-07 |
 |                   | https://bt.byr.cn | 2018-06-17 |
+|                   | https://hdcmct.org  | 2018-07-28 |
 
 ## 特点
 
- - 自动生成并提交简介，依赖原种简介。
+ - 自动生成并提交简介，尽量与原种简介一致。
  - 自动设置做种时间，分享率。自动清理种子，硬盘不会爆仓。
  - 支持自动 Dupe 以及禁转判断。
  - 开箱即用，不需要使用数据库等复杂操作。
- - 速度快，10秒内4站齐发，开启 Dupe 检查小于20秒，BYRBT 由于需要处理图片，典型耗时约 40 秒。
+ - 速度快，使用临时文件提前生成简介。
+ - 自动判断并处理简介缺失海报情况。 
 
 
 ## 环境要求
@@ -31,13 +33,14 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
   - ~~html2bbcode，安装命令：`sudo pip3 install html2bbcode`~~(已经使用本地正则表达式实现，转换耗时小于0.6s)；
   - httpie，安装命令`sudo apt-get install httpie`；
   - 其他常用软件工具，curl，grep等(一般系统自带)。
+  - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python依赖自行查看。
 
 ## 使用方法
 
 1. clone 本 repo 至本地；
 2. 修改设置文件`setting.sh`(包括cookie、passkey，监控 torrent 文件路径等)；
 3. 添加 `main.sh` 脚本路径至 transmission 的 `script-torrent-done-filename`。具体可以参见 [这里](https://rachpt.github.io/2018/03/25/transmission-settings/) ；
-4. 如果 `transmission` 运行脚本诡异，可以将 `main.sh` 添加到  `crontab` 之类的程序周期运行（运行锁会解决和3的冲突问题）。
+4. 如果 `transmission` 运行脚本诡异，可以将 `main.sh` 添加到  `crontab` 之类的程序周期运行（运行锁会解决和3的冲突问题），提前生成简介依赖该项。
 
 
 *其他：*
@@ -47,6 +50,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 如果种子名中使用了部分中文符号，比如已知的 `’` （中文单引号）会导致 httpie 文件传输失败，2.1版修复了中文单引号 bug。
 
+python 并非必须，只需将 `setting.sh` 中的`USE_Local_Gen='yes'`改为其他值，即可使用基于 [web](https://rhilip.github.io/PT-help/ptgen) 的生成方法，只有原种简介不符合要求时才会主动生成。
 
 
 一个运行 log：
@@ -93,6 +97,13 @@ t_id: [55997]
 
 ## 更新日志
 
+- 2018-08-23 --> 2.3
+  - 添加对 CMCT 的支持，以后不再维护该项。
+  - 提前生成简介(大约完成 70% 后开始，由 crontab 等驱动)。
+  - 优化结构，添加处理非法简介代码。
+  - 感谢 Rhilip 大佬的 python 模块。
+  - whu.pt 暂时需要使用 `transmission-edit` 修改 tracker 添加 `s`。
+
 - 2018-06-17 --> 2.2
   - 添加对 BYRBT 的支持，图片自动转至其服务器。
   - 添加处理脚本超时代码，默认 300 秒。
@@ -117,7 +128,7 @@ t_id: [55997]
 - 2018-06-07 --> v1.7 （未发布）
   - 添加对 NPUBITS 的支持。
   - 修复上版 v1.6 引入的 bug。
-  
+
 - 2018-06-04 --> v1.6
   - 添加代码防止重复运行扰乱生成 LOG。
   - 添加基于网络的 [html2bbcode](https://www.garyshood.com/htmltobb/) 代码。

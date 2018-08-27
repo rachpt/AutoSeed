@@ -2,20 +2,18 @@
 # FileName: post/post.sh
 #
 # Author: rachpt@126.com
-# Version: 2.2v
-# Date: 2018-06-28
+# Version: 2.3v
+# Date: 2018-08-22
 #
-#-------------settings---------------#
-torrentPath="${flexget_path}/${new_torrent_name}.torrent"
 #---get desc---#
-source "$AUTO_ROOT_PATH/get_desc/detail_page.sh"
+source "$AUTO_ROOT_PATH/get_desc/desc.sh"
 source "$AUTO_ROOT_PATH/post/param.sh"
 #-------------------------------------#
-function upload_torrent()
+upload_torrent()
 {
     up_status=1    # judge code
     #---judge to get away from dupe---#
-    [ "$postUrl" = "https://pt.whu.edu.cn/takeupload.php" ] && source "$AUTO_ROOT_PATH/post/judge.sh"
+    [ "$postUrl" = "https://whu.pt/takeupload.php" ] && source "$AUTO_ROOT_PATH/post/judge.sh"
     [ "$postUrl" = "https://nanyangpt.com/takeupload.php" ] && source "$AUTO_ROOT_PATH/post/judge.sh"
     #---necessary judge---# 
     if [ "$(egrep '禁止转载|禁转|情色' "$source_detail_desc")" ]; then
@@ -56,7 +54,16 @@ function upload_torrent()
             if [ -z "$t_id" ]; then
     	        t_id=`http --ignore-stdin -f POST "$postUrl" movie_cname="$smallDescr_byrbt" ename0day="$dot_name" small_descr="$subname_chs_include" url="$imdbUrl" type="$byrbt_selectType" descr="$byrbt_des" type="$byrbt_selectType" second_type="$second_type_byrbt" movie_type="$movie_type_byrbt" movie_country="$movie_country_byrbt" uplver="$anonymous" file@"$torrentPath" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
             fi
+            
+        #---cmct post---#
+        elif [ "$postUrl" = "https://hdcmct.org/takeupload.php" ]; then
+            t_id=`http --ignore-stdin -f --print=h POST "$postUrl" 'name'="$dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'descr'="$cmct_des" 'type'="$selectType" 'medium_sel'="$medium_sel_cmct" 'codec_sel'="$codec_sel_cmct" 'standard_sel'="$standardSel" 'source_sel'="$source_sel_cmct" 'uplver'="$anonymous" file@"${torrentPath}" "$cookie" | grep "id=" |grep 'detail'|head -n 1|cut -d '=' -f 2|cut -d '&' -f 1`
 
+            if [ -z "$t_id" ]; then
+    	        t_id=`http --ignore-stdin -f POST "$postUrl" name="$dot_name" small_descr="$smallDescr" url="$imdbUrl" descr="$cmct_des" type="$selectType" medium_sel="$medium_sel_cmct" codec_sel="$codec_sel_cmct" standard_sel="$standardSel" source_sel="$source_sel_cmct" uplver="$anonymous" file@"$torrentPath" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
+            fi
+
+        
         #---momel moduel post, hudbt & whu---#
         else
             t_id=`http --ignore-stdin -f --print=h POST "$postUrl" 'name'="$no_dot_name" 'small_descr'="$smallDescr" 'url'="$imdbUrl" 'descr'="$com_des" 'type'="$selectType" 'standard_sel'="$standardSel" 'uplver'="$anonymous" file@"${torrentPath}" "$cookie" | grep "id=" |grep 'detail'|head -n 1|cut -d '=' -f 2|cut -d '&' -f 1`
@@ -76,12 +83,13 @@ function upload_torrent()
             source "$AUTO_ROOT_PATH/post/add.sh"
         fi
     fi
-    t_id=''
+    unset t_id
 }
 #---------------------------------#
-function unset_tempfiles()
+unset_tempfiles()
 {
     rm -f "$source_detail_desc" "$source_detail_html"
+    unset source_detail_desc source_detail_html
     echo "++++++++++[deleted tmp]++++++++++" >> "$log_Path"
 }
 
@@ -111,6 +119,10 @@ if [ "$enable_byrbt" = 'yes' ]; then
     upload_torrent
 fi
 
+if [ "$enable_cmct" = 'yes' ]; then
+    source "$AUTO_ROOT_PATH/post/cmct.sh"
+    upload_torrent
+fi
 #-------------unset---------------#
 unset_tempfiles
 

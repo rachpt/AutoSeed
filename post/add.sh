@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.2v
-# Date: 2018-06-17
+# Date: 2018-07-28
 #
 #-------------settings----------------#
 
@@ -21,6 +21,7 @@ function set_ratio()
 	    set_commit_npupt=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'npupt.com'`
 	    set_commit_nanyangpt=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'tracker.nanyangpt.com'`
 	    set_commit_byrbt=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'tracker.byr.cn'`
+	    set_commit_cmct=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'tracker.hdcmct.org'`
 	    #---add new site's seed ratio here---#
 	    #set_commit_new=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'tracker.new.com'
 	    	    
@@ -36,11 +37,17 @@ function set_ratio()
 		        "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_npupt
                 break
             elif [ -n "$set_commit_nanyangpt" ]; then
+                sleep 1
+	    	    "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_nanyangpt
+	    	    sleep 4
 	    	    "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_nanyangpt
 	    	    break
 	        elif [ -n "$set_commit_byrbt" ]; then
 	            "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_byrbt
 	            break
+	        elif [ -n "$set_commit_cmct" ]; then
+	            "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_cmct
+	            break	            
 	        #---add new site's seed ratio here---#
 	        #elif [ -n "$set_commit_new" ]; then
 	        #   "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_new
@@ -48,6 +55,19 @@ function set_ratio()
             fi
         fi
     done
+}
+
+#------------add torrent--------------#
+function add_torrent_special_for_whupt()
+{
+    http -d "$torrent2add" -o "${AUTO_ROOT_PATH}/tmp/${t_id}.torrent"
+    transmission-edit -r 'http://' 'https://' "${AUTO_ROOT_PATH}/tmp/${t_id}.torrent"
+
+    "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} --add "${AUTO_ROOT_PATH}/tmp/${t_id}.torrent" -w "$TR_TORRENT_DIR"
+    #---set seed ratio---#
+    set_ratio
+    echo "+++++++++++++[added]+++++++++++++" >> "$log_Path"
+    rm -f "${AUTO_ROOT_PATH}/tmp/${t_id}.torrent"
 }
 
 #------------add torrent--------------#
@@ -60,5 +80,9 @@ function add_torrent_to_TR()
 }
 #-----------call function-------------#
 if [ "$torrent2add" ]; then
-    add_torrent_to_TR
+    if [ "$postUrl" = 'https://whu.pt/takeupload.php' ]; then
+        add_torrent_special_for_whupt
+    else
+        add_torrent_to_TR
+    fi
 fi

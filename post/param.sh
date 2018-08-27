@@ -2,13 +2,11 @@
 # FileName: post/param.sh
 #
 # Author: rachpt@126.com
-# Version: 2.2v
-# Date: 2018-06-28
+# Version: 2.3v
+# Date: 2018-08-21
 #
-#-------------settings---------------#
-
 #-------------------------------------#
-function from_desc_get_prarm()
+from_desc_get_prarm()
 {
     #---test name,avoid special characters in name---#
     plain_name_tmp="$(echo "$TR_TORRENT_NAME"|sed "s/‘/\'/g;s/“/\"/g;s/。/./g;s/，/,/g;s/：/:/g;s/；/;/g;s/！/!/g")"
@@ -20,20 +18,23 @@ function from_desc_get_prarm()
         plain_name_tmp=''
     fi
     #---name---#
-    no_dot_name=`echo "$new_torrent_name"|sed 's/\./ /g'|sed "s/DD2 0/DD2.0/g;s/H 26/H.26/g;s/5 1/5.1/g;s/7 1/7.1/g;s/\(.*\) mp4/\1/g;s/\(.*\) mkv/\1/g"`
-    dot_name=`echo "$new_torrent_name"|sed "s/[ ]\+/./g;s/\(.*\)\.mp4/\1/g;s/\(.*\)\.mkv/\1/g"`
+    no_dot_name="$(echo "$new_torrent_name"|sed 's/\./ /g'|sed "s/DD2 0/DD2.0/g;s/H 26/H.26/g;s/5 1/5.1/g;s/7 1/7.1/g;s/\(.*\) mp4/\1/g;s/\(.*\) mkv/\1/g")"
+    # dot_name defined in main.sh
+
     #---get torrent's type---#
 
     #---hudbt & whu---#
     if [ "`egrep '[国地产][　 ]*[家区地][　 ]*中国大陆|[国地产][　 ]*[家区地][　 ]*中国[　 ]*$' "$source_detail_desc"`" ]; then
         whu_selectType='401'
         hudbt_selectType='401'
+        source_sel_cmct='1'
     elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*马来西亚|[国地产][　 ]*[家区地][　 ]*日本|[国地产][　 ]*[家区地][　 ]*韩国|[国地产][　 ]*[家区地][　 ]*印度|[国地产][　 ]*[家区地][　 ]*泰国|[国地产][　 ]*[家区地][　 ]*伊朗' "$source_detail_desc"`" ]; then
         whu_selectType='414'
         hudbt_selectType='414'
     elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*中国台湾|[国地产][　 ]*[家区地][　 ]*台湾|[国地产][　 ]*[家区地][　 ]*香港|[国地产][　 ]*[家区地][　 ]*中国香港|[国地产][　 ]*[家区地][　 ]*澳门' "$source_detail_desc"`" ]; then
         whu_selectType='413'
         hudbt_selectType='413'
+        source_sel_cmct='2'
     fi
     if [ -z "$whu_selectType" ]; then
         whu_selectType="$default_select_type_whu"
@@ -80,22 +81,26 @@ function from_desc_get_prarm()
         hudbt_selectType='404'
         whu_selectType='404'
         byrbt_selectType='410'
+        cmct_selectType='503'
         # other site
     else
         nanyangpt_selectType="$default_select_type_nanyangpt"
         npupt_selectType="$default_select_type_npupt"
         byrbt_selectType="$default_select_type_byrbt"
+        cmct_selectType="$default_select_type_cmct"
     fi
 
     #---npupt source---#
     npupt_select_source=''
     second_type_byrbt=''
+    source_sel_cmct=''
     if [ "`egrep '[国地产][　 ]*[家区地][　 ]*大陆|[国地产][　 ]*[家区地][　 ]*中国|[国地产][　 ]*[家区地][　 ]*台湾|[国地产][　 ]*[家区地][　 ]*香港' "$source_detail_desc"`" ]; then
         npupt_select_source='6'
         second_type_byrbt='11'
     elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*日本|[国地产][　 ]*[家区地][　 ]*韩国' "$source_detail_desc"`" ]; then
         npupt_select_source='4'
         second_type_byrbt='14'
+        source_sel_cmct='10'
     elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*美国|[国地产][　 ]*[家区地][　 ]*英国|[国地产][　 ]*[家区地][　 ]*加拿大' "$source_detail_desc"`" ]; then
         npupt_select_source='5'
     fi
@@ -133,6 +138,29 @@ function from_desc_get_prarm()
         imdbUrl="$default_imdb_url"
     fi
 
+
+    #---join desc---#
+    if [ -s "$source_detail_desc" ]; then
+        simple_des="${descrCom_simple}
+        $(cat "$source_detail_desc")"
+
+        complex_des="${descrCom_complex}
+        $(cat "$source_detail_desc")"
+
+    else
+        simple_des="${descrCom_simple}
+        $failed_to_get_des"
+
+        complex_des="${descrCom_complex}
+        $failed_to_get_des"
+    fi
+
+        nanyangpt_des="$simple_des"
+        npupt_des="$simple_des"
+        cmct_des="$simple_des"
+#        hudbt_des="$complex_des"
+#        whu_des="$complex_des"
+
     #---subtitle---#
     if [ "`egrep '国[　 ]+家[　 ]+中国大陆[ ]*$|国[　 ]+家[　 ]+中[　 ]*国[ ]*$' $source_detail_desc`" ] && [ "$subname_2" != "`echo "$subname_2"|egrep -o "[,\':a-zA-Z ]+"`" ]; then
         smallDescr="$subname_2 $subname_chs_include"
@@ -148,44 +176,17 @@ function from_desc_get_prarm()
             if [ -s "$source_detail_desc" ] && [ "$original_subname" ]; then
                 smallDescr="$original_subname $subname_chs_include"
                 smallDescr_byrbt="$original_subname"
+            elif [ "$chs_name_douban" ]; then
+                smallDescr="$chs_name_douban $subname_chs_include"
+                smallDescr_byrbt="$chs_name_douban"
             else
                 smallDescr="$default_subname"
                 smallDescr_byrbt="$default_subname"
             fi
         fi
     fi
-
-    #---join desc---#
-    if [ -s "$source_detail_desc" ]; then
-        simple_des="${descrCom_simple}
-        `cat "$source_detail_desc"`
-        `if [ $source_t_id ]; then
-            echo "[quote][b]本种简介来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}[/quote]"
-        else
-            echo "[quote][b]本种简介来自：[/b] ${source_site_URL}[/quote]"
-        fi
-        `"
-
-        complex_des="${descrCom_complex}
-        `cat "$source_detail_desc"`
-        `if [ $source_t_id ]; then
-            echo "[quote][b]本种简介来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}[/quote]"
-        else
-            echo "[quote][b]本种简介来自：[/b] ${source_site_URL}[/quote]"
-        fi
-        `"
-
-    else
-        simple_des="${descrCom_simple}
-        $failed_to_get_des"
-
-        complex_des="${descrCom_complex}
-        $failed_to_get_des"
-    fi
-        nanyangpt_des="$simple_des"
-        npupt_des="$simple_des"
-#        hudbt_des="$complex_des"
-#        whu_des="$complex_des"
 }
+
 #-------------------------------#
 from_desc_get_prarm
+
