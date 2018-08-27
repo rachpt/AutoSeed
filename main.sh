@@ -2,8 +2,8 @@
 # FileName: main.sh
 #
 # Author: rachpt@126.com
-# Version: 2.2v
-# Date: 2018-06-23
+# Version: 2.3v
+# Date: 2018-08-23
 #
 #-----------import settings-------------#
 AUTO_ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -28,9 +28,10 @@ function remove_lock()
 }
 
 #----------------log func---------------#
-function printLogo {
+write_log_main()
+{
     echo "+++++++++++++++++++++++++++++++++"   >> "$log_Path"
-    echo -e "[`date '+%Y-%m-%d %H:%M:%S'`] \c" >> "$log_Path"
+    echo -e "[`date '+%Y-%m-%d %H:%M:%S'`]\c"  >> "$log_Path"
     echo "发布了：[$TR_TORRENT_NAME]"          >> "$log_Path"
 }
 
@@ -59,21 +60,36 @@ function main_loop()
     #---loop for torrent in flexget path ---#
     for i in $(find "$flexget_path" -iname "*.torrent*" |awk -F "/" '{print $NF}')
     do
-    	new_torrent_name=`$trans_show "${flexget_path}/$i"|grep 'Name'|head -n 1|sed 's/Name: //'`
+   	    new_torrent_name=`$trans_show "${flexget_path}/$i"|grep 'Name'|head -n 1|sed 's/Name: //'`
         if [ "$i" != "${new_torrent_name}.torrent" ]; then
             mv "${flexget_path}/${i}" "${flexget_path}/${new_torrent_name}.torrent"
         fi
-        get_torrent_func         # get TR_NAME
-    	if [ "$new_torrent_name" = "$TR_TORRENT_NAME" ]
-        then
+        #---.tr file path---#
+        torrentPath="${flexget_path}/${new_torrent_name}.torrent"
+        #---use dot name save desc---#
+        dot_name="$(echo "$new_torrent_name"|sed "s/[ ]\+/./g;s/\(.*\)\.mp4/\1/g;s/\(.*\)\.mkv/\1/g")"
+
+        #---generate desc before done---#
+        if [ ! -s "${AUTO_ROOT_PATH}/tmp/${dot_name}_desc.txt" ]; then
+            completion="$("$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep "$new_torrent_name"|head -n 1|awk '{print $2}'|sed 's/%//')"
+            [ "$completion" ] && if [ $completion -ge 70 ]; then
+                unset completion
+                source "$AUTO_ROOT_PATH/get_desc/desc.sh"
+                break           # must have not completed
+            fi
+        fi
+
+        #---if completed---#
+        get_torrent_func            # get TR_NAME
+        if [ "$new_torrent_name" = "$TR_TORRENT_NAME" ]; then
             IFS=$IFS_OLD
             echo "+++++++++++++[start]+++++++++++++" >> "$log_Path"
             echo "[`date '+%Y-%m-%d %H:%M:%S'`] 准备发布 [$TR_TORRENT_NAME]" >> "$log_Path"
             source "$AUTO_ROOT_PATH/post/post.sh"
-            rm -f "$torrentPath" # delete uploaded torrent
+            rm -f "$torrentPath"    # delete uploaded torrent
 
-            printLogo            # print log
-            TR_TORRENT_NAME=''   # next torrent
+            write_log_main          # write log
+            unset TR_TORRENT_NAME   # next torrent
             clean_commit_main=1
         fi
     done
@@ -87,7 +103,7 @@ function main_loop()
 #--------------timeout func--------------#
 TimeOut()
 {
-    waitfor=420
+    waitfor=380
     main_loop_command=$*
     $main_loop_command &
     main_loop_pid=$!
@@ -108,3 +124,4 @@ if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
     TimeOut main_loop
     trap remove_lock EXIT
 fi
+
