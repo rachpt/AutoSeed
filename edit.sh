@@ -2,8 +2,8 @@
 # FileName: edit.sh
 #
 # Author: rachpt@126.com
-# Version: 2.2v
-# Date: 2018-06-28
+# Version: 2.3v
+# Date: 2018-08-27
 #
 #------------------------------------#
 #---main.sh is running?---#
@@ -48,8 +48,9 @@ do
         if [ "$new_torrent_name" != "$old_new_torrent_name" ]; then
             #---clean---#
             rm -f "$source_detail_desc" "$source_detail_html"
-    	    source "$AUTO_ROOT_PATH/get_desc/detail_page.sh"
-	        source "$AUTO_ROOT_PATH/post/param.sh"
+            dot_name="$(echo "$new_torrent_name"|sed "s/[ ]\+/./g;s/\(.*\)\.mp4/\1/g;s/\(.*\)\.mkv/\1/g")"
+    	      source "$AUTO_ROOT_PATH/get_desc/desc.sh"
+            source "$AUTO_ROOT_PATH/post/param.sh"
         fi
 
         echo $imdbUrl
@@ -58,7 +59,7 @@ do
             edit_post_normal
             echo "$default_subname" "$smallDescr"
             sed -i "${edit_loop}s#$default_subname#$smallDescr#" "$log_Path"
-        elif [ "$check_site" = "https://pt.whu.edu.cn" ]; then
+        elif [ "$check_site" = "https://whu.pt" ]; then
             source "$AUTO_ROOT_PATH/post/whu.sh"
             edit_post_normal
             echo "$default_subname" "$smallDescr"
@@ -81,11 +82,13 @@ do
         fi
     fi
 
+    [ "$old_new_torrent_name" ] && if [ "$old_new_torrent_name" != "$new_torrent_name" ]; then
+        rm -f "$source_detail_desc" "$source_detail_html"
+    fi
     old_new_torrent_name="$new_torrent_name"
-
 done
 
 #------------------------------------#
 #---clean---#
-rm -f $AUTO_ROOT_PATH/tmp/*_desc.txt $AUTO_ROOT_PATH/tmp/*_html.txt
+rm -f "$source_detail_desc" "$source_detail_html"
 
