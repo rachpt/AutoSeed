@@ -2,8 +2,8 @@
 # FileName: post/add.sh
 #
 # Author: rachpt@126.com
-# Version: 2.2v
-# Date: 2018-07-28
+# Version: 2.4v
+# Date: 2018-08-28
 #
 #-------------settings----------------#
 
@@ -22,36 +22,40 @@ function set_ratio()
 	    set_commit_nanyangpt=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'tracker.nanyangpt.com'`
 	    set_commit_byrbt=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'tracker.byr.cn'`
 	    set_commit_cmct=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'tracker.hdcmct.org'`
+	    set_commit_tjupt=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'tjupt.org'`
 	    #---add new site's seed ratio here---#
 	    #set_commit_new=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'tracker.new.com'
 	    	    
         if [ "$TR_TORRENT_NAME" = "$oneTorrent" ]; then
         
             if [ -n "$set_commit_hust" ]; then
-		        "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_hudbt
+                "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_hudbt
                 break
             elif [ -n "$set_commit_whu" ]; then
-		        "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_whu
+                "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_whu
                 break
             elif [ -n "$set_commit_npupt" ]; then
-		        "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_npupt
+                "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_npupt
                 break
             elif [ -n "$set_commit_nanyangpt" ]; then
                 sleep 1
-	    	    "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_nanyangpt
-	    	    sleep 4
-	    	    "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_nanyangpt
-	    	    break
-	        elif [ -n "$set_commit_byrbt" ]; then
-	            "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_byrbt
-	            break
-	        elif [ -n "$set_commit_cmct" ]; then
-	            "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_cmct
-	            break	            
-	        #---add new site's seed ratio here---#
-	        #elif [ -n "$set_commit_new" ]; then
-	        #   "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_new
-	        #   break
+                "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_nanyangpt
+                sleep 4
+                "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_nanyangpt
+                break
+            elif [ -n "$set_commit_byrbt" ]; then
+                "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_byrbt
+                break
+            elif [ -n "$set_commit_cmct" ]; then
+                "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_cmct
+                break	            
+            elif [ -n "$set_commit_tjupt" ]; then
+                "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_tjupt
+                break	            
+            #---add new site's seed ratio here---#
+            #elif [ -n "$set_commit_new" ]; then
+            #   "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_new
+            #   break
             fi
         fi
     done

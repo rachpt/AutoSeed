@@ -25,5 +25,4 @@ else
 fi
 
 movie_type_byrbt="$(egrep "[类分][　 ]*[别类型]" "$source_detail_desc"|head -n 1|sed "s/.*[类分][　 ]*[别类型][ 　]*//g;s/[ ]*//g;s/[\n\r]*//g")"
-movie_country_byrbt="$(egrep "[国地产][　 ]*[家区地]" "$source_detail_desc"|head -n 1|sed "s/.*[国地产][　 ]*[家区地][ 　]*//g;s/,/\//g;;s/[ ]*//g;s/[\n\r]*//g")"
 

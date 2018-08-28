@@ -2,8 +2,8 @@
 # FileName: post/post.sh
 #
 # Author: rachpt@126.com
-# Version: 2.3v
-# Date: 2018-08-22
+# Version: 2.4v
+# Date: 2018-08-28
 #
 #---get desc---#
 source "$AUTO_ROOT_PATH/get_desc/desc.sh"
@@ -63,6 +63,13 @@ upload_torrent()
     	        t_id=`http --ignore-stdin -f POST "$postUrl" name="$dot_name" small_descr="$smallDescr" url="$imdbUrl" descr="$cmct_des" type="$selectType" medium_sel="$medium_sel_cmct" codec_sel="$codec_sel_cmct" standard_sel="$standardSel" source_sel="$source_sel_cmct" uplver="$anonymous" file@"$torrentPath" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
             fi
 
+        #---tjupt post---#
+        elif [ "$postUrl" = "https://tjupt.org/takeupload.php" ]; then
+            t_id=`http --ignore-stdin -f --print=h POST "$postUrl" file@"${torrentPath}" 'small_descr'="$subname_chs_include" 'url'="$imdbUrl" 'descr'="$tjupt_des" 'type'="$selectType" 'cname'="$smallDescr_tjupt" 'ename'="$dot_name" 'issuedate'="$issuedate_tjupt" 'language'="$language_tjupt" 'format'="$formatratio_tjupt" 'formatratio'="$formatratio_tjupt" 'subsinfo'="$subsinfo_tjupt" 'district'="$country_tjupt" 'source_sel'="$source_sel_tjupt" 'team_sel'="$team_sel_tjupt" 'uplver'="$anonymous" "$cookie"| grep "id=" |grep 'detail'|head -n 1|cut -d '=' -f 2|cut -d '&' -f 1`
+
+            if [ -z "$t_id" ]; then
+    	        t_id=`http --ignore-stdin -f POST "$postUrl" small_descr="$subname_chs_include" url="$imdbUrl" descr="$tjupt_des" type="$selectType" cname="$smallDescr_tjupt" ename="$dot_name" issuedate="$issuedate_tjupt" language="$language_tjupt" format="$formatratio_tjupt" formatradio="$formatradio_tjupt" subsinfo="$subsinfo_tjupt" district="$district_tjupt" "$country_tjupt"="$country_tjupt" source_sel="$source_sel_tjupt" team_sel="$team_sel_tjupt" uplver="$anonymous" file@"$torrentPath" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d & -f 1`
+            fi
         
         #---momel moduel post, hudbt & whu---#
         else
@@ -121,6 +128,11 @@ fi
 
 if [ "$enable_cmct" = 'yes' ]; then
     source "$AUTO_ROOT_PATH/post/cmct.sh"
+    upload_torrent
+fi
+
+if [ "$enable_tjupt" = 'yes' ]; then
+    source "$AUTO_ROOT_PATH/post/tjupt.sh"
     upload_torrent
 fi
 #-------------unset---------------#

@@ -112,7 +112,6 @@ passkey_byrbt='12345678909876543212345654'
 #---[cmct]---#
 enable_cmct='yes'
 #---delete screens img---#
-just_poster_cmct='yes'
 default_select_type_cmct='501'
 default_medium_sel_cmct='6'  # mkv 6, mp4 7.
 default_codec_sel_cmct='2' # h264
@@ -124,6 +123,20 @@ ratio_cmct='16'
 cookie_cmct='Cookie:c_secure_uid=XXXXXX; c_secure_pass=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx; c_secure_login=bm9wZQ=='
 #---your passkey---#
 passkey_cmct='12345678909876543212345654'
+########################################
+#---[tjupt]---#
+enable_tjupt='yes'
+#
+default_select_type_tjupt='401' # 401 电影, 411 纪录片
+default_subsinfo_tjupt='6' # 其他 ## 字幕
+default_source_sel_tjupt='8' # 1 BD, 8 other.
+default_team_sel_tjupt='7' # 1 欧美, 7 其他, 2 大陆, 3 日韩, 5 港台.
+anonymous_tjupt='yes'
+#---ratio of uploaded torrent---#
+ratio_tjupt='8'
+cookie_tjupt='Cookie:c_secure_uid=XXXXXX; c_secure_pass=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx; c_secure_login=bm9wZQ=='
+#---your passkey---#
+passkey_tjupt='12345678909876543212345654'
 ########################################
 #--------------------------------------#
 default_subname='此种需要人工编辑'

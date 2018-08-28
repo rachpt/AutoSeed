@@ -63,4 +63,4 @@ fi
 #---poster---#
 sed -i "1 {s/^[ \t]*//g}" "$source_detail_desc"
 source "$AUTO_ROOT_PATH/get_desc/poster.sh"
-cat "$source_detail_html"
+

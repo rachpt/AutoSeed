@@ -2,12 +2,13 @@
 # FileName: main.sh
 #
 # Author: rachpt@126.com
-# Version: 2.3v
-# Date: 2018-08-23
+# Version: 2.2v
+# Date: 2018-06-23
 #
 #-----------import settings-------------#
 AUTO_ROOT_PATH="$(dirname "$(readlink -f "$0")")"
 source "$AUTO_ROOT_PATH/settings.sh"
+source "$AUTO_ROOT_PATH/test.sh"
 #----------------lock func--------------#
 function is_locked()
 {
@@ -86,10 +87,10 @@ function main_loop()
             echo "+++++++++++++[start]+++++++++++++" >> "$log_Path"
             echo "[`date '+%Y-%m-%d %H:%M:%S'`] 准备发布 [$TR_TORRENT_NAME]" >> "$log_Path"
             source "$AUTO_ROOT_PATH/post/post.sh"
-            rm -f "$torrentPath"    # delete uploaded torrent
 
             write_log_main          # write log
             unset TR_TORRENT_NAME   # next torrent
+            rm -f "$torrentPath"    # delete uploaded torrent
             clean_commit_main=1
         fi
     done
@@ -103,7 +104,7 @@ function main_loop()
 #--------------timeout func--------------#
 TimeOut()
 {
-    waitfor=380
+    waitfor=480
     main_loop_command=$*
     $main_loop_command &
     main_loop_pid=$!
@@ -112,6 +113,7 @@ TimeOut()
     main_loop_sleep_pid=$!
 
     wait $main_loop_pid > /dev/null 2>&1
+    sleep 2
     kill -9 $main_loop_sleep_pid > /dev/null 2>&1
 }
 
@@ -122,6 +124,6 @@ TimeOut()
 if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
     is_locked
     TimeOut main_loop
+    #main_loop
     trap remove_lock EXIT
 fi
-

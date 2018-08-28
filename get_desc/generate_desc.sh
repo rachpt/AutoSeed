@@ -2,8 +2,8 @@
 # FileName: get_desc/generate_desc.sh
 #
 # Author: rachpt@126.com
-# Version: 2.3v
-# Date: 2018-08-27
+# Version: 2.4v
+# Date: 2018-08-28
 #
 #-------------------------------------#
 #
@@ -13,7 +13,10 @@ search_keyword_get_douban_url()
     search_get_douban_url="$(http --pretty=format --ignore-stdin GET "https://api.douban.com/v2/movie/search?q=${base_movie_name_search}"|grep 'movie.douban.com/subject'|head -n 1|awk -F '"' '{print $4}')"
 
     if [ "$search_get_douban_url" ]; then
-        search_desc_url="$doubabUrl"
+        search_desc_url="$search_get_douban_url"
+        echo "搜索得到豆瓣链接：$search_get_douban_url" >> "$log_Path"
+    else
+        echo '未搜索到豆瓣链接！' >> "$log_Path"
     fi
 }
 

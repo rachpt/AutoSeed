@@ -2,9 +2,9 @@
 
 An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a python version [HERE](https://github.com/Rhilip/Pt-Autoseed).
 
-目前适用于 从 HDSky / TTG / HDChina 自动转载 电影 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT / BYRBT 站。
+目前适用于 从 HDSky / TTG / HDChina 自动转载 电影 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT / BYRBT / 北洋园 PT 站。
 
-[![release](https://img.shields.io/badge/Version-2.3-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v2.3)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
+[![release](https://img.shields.io/badge/Version-2.4-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v2.4)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
 |  源站点（from）   |      支持站点（to）      | 时间（time） |
 | :---------------: | :-----------------------: | :----------: |
@@ -14,6 +14,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 |                   | https://nanyangpt.com | 2018-06-07 |
 |                   | https://bt.byr.cn | 2018-06-17 |
 |                   | https://hdcmct.org  | 2018-07-28 |
+|                   | https://tjupt.org  | 2018-08-28 |
 
 ## 特点
 
@@ -96,6 +97,9 @@ t_id: [55997]
 ```
 
 ## 更新日志
+- 2018-08-28 --> 2.4
+  - 添加对 北洋园pt 的支持。
+  - 修复部分错误。
 
 - 2018-08-23 --> 2.3
   - 添加对 CMCT 的支持，以后不再维护该项。

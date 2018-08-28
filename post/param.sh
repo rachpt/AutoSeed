@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.3v
-# Date: 2018-08-21
+# Date: 2018-08-27
 #
 #-------------------------------------#
 from_desc_get_prarm()
@@ -28,6 +28,7 @@ from_desc_get_prarm()
         whu_selectType='401'
         hudbt_selectType='401'
         source_sel_cmct='1'
+        team_sel_tjupt='2'
     elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*马来西亚|[国地产][　 ]*[家区地][　 ]*日本|[国地产][　 ]*[家区地][　 ]*韩国|[国地产][　 ]*[家区地][　 ]*印度|[国地产][　 ]*[家区地][　 ]*泰国|[国地产][　 ]*[家区地][　 ]*伊朗' "$source_detail_desc"`" ]; then
         whu_selectType='414'
         hudbt_selectType='414'
@@ -35,6 +36,7 @@ from_desc_get_prarm()
         whu_selectType='413'
         hudbt_selectType='413'
         source_sel_cmct='2'
+        team_sel_tjupt='5'
     fi
     if [ -z "$whu_selectType" ]; then
         whu_selectType="$default_select_type_whu"
@@ -82,12 +84,14 @@ from_desc_get_prarm()
         whu_selectType='404'
         byrbt_selectType='410'
         cmct_selectType='503'
+        tjupt_selectType='411'
         # other site
     else
         nanyangpt_selectType="$default_select_type_nanyangpt"
         npupt_selectType="$default_select_type_npupt"
         byrbt_selectType="$default_select_type_byrbt"
         cmct_selectType="$default_select_type_cmct"
+        tjupt_selectType="$default_select_type_tjupt"
     fi
 
     #---npupt source---#
@@ -101,8 +105,10 @@ from_desc_get_prarm()
         npupt_select_source='4'
         second_type_byrbt='14'
         source_sel_cmct='10'
+        team_sel_tjupt='3'
     elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*美国|[国地产][　 ]*[家区地][　 ]*英国|[国地产][　 ]*[家区地][　 ]*加拿大' "$source_detail_desc"`" ]; then
         npupt_select_source='5'
+        team_sel_tjupt='1'
     fi
     if [ -z "$npupt_select_source" ]; then
         npupt_select_source="$default_standard_npupt" #7
@@ -121,13 +127,14 @@ from_desc_get_prarm()
     #---get 2 subname---#
     if [ -n "`grep -i "CH[ST]" "$source_detail_desc"`" ]; then
         subname_chs_include='中文字幕'
+        subsinfo_tjupt='2'
     elif [ "$original_other_info" ]; then
         subname_chs_include="$original_other_info"
     else
         subname_chs_include=''
     fi
-    subname_1=`grep "译[　 ]*名" "$source_detail_desc" |sed "s/.*译[　 ]*名[　 ]*//;s/\n//g;s/\r//g;s/[ ]*//g"|sed "s#[/]\?[a-zA-Z0-9:]\{3,\}[/]\?##g"`
-    subname_2=`grep "片[　 ]*名" "$source_detail_desc" |sed "s/.*片[　 ]*名[　 ]*//;s/\n//g;s/\r//g;s/[ ]*//g"|sed "s#[/]\?[a-zA-Z0-9:]\{3,\}[/]\?##g"`
+    subname_1=`grep "译[　 ]*名" "$source_detail_desc" |sed "s/.*译[　 ]*名[　 ]*//;s/\n//g;s/\r//g;s/[ ]*//g"|sed "s#[/]\?[a-zA-Z0-9:‘' ]\{3,\}[/]\?##g"`
+    subname_2=`grep "片[　 ]*名" "$source_detail_desc" |sed "s/.*片[　 ]*名[　 ]*//;s/\n//g;s/\r//g;s/[ ]*//g"|sed "s#[/]\?[a-zA-Z0-9:‘' ]\{3,\}[/]\?##g"`
 
     if [ -z "$imdbUrl" ]; then
 	    imdbUrl="$(grep -o 'tt[0-9]\{7\}' "$source_detail_desc"|head -n 1)"
@@ -185,6 +192,9 @@ from_desc_get_prarm()
             fi
         fi
     fi
+    #---com info---#
+    movie_country_byrbt="$(egrep "[国地产][　 ]*[家区地]" "$source_detail_desc"|head -n 1|sed "s/.*[国地产][　 ]*[家区地][ 　]*//g;s/,/\//g;;s/[ ]*//g;s/[\n\r]*//g")"
+
 }
 
 #-------------------------------#

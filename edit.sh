@@ -2,8 +2,8 @@
 # FileName: edit.sh
 #
 # Author: rachpt@126.com
-# Version: 2.3v
-# Date: 2018-08-27
+# Version: 2.4v
+# Date: 2018-08-28
 #
 #------------------------------------#
 #---main.sh is running?---#
@@ -33,6 +33,10 @@ function edit_post_nanyangpt()
 function edit_post_byrbt()
 {
     http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id" 'name'="[$smallDescr_byrbt][$dot_name][$movie_type_byrbt][$movie_country_byrbt]" 'small_descr'="$subname_chs_include" 'url'="$imdbUrl" 'dburl'='' 'nfoaction'='keep' 'descr'="$byrbt_des" 'type'="$byrbt_selectType" 'secocat'="$second_type_byrbt" 'anonymous'="`([ "$anonymous" = 'yes' ] && echo 1) || echo 0`" 'visible'="1" "$cookie"
+}
+function edit_post_tjupt()
+{
+    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id" 'small_descr'="$subname_chs_include" 'url'="$imdbUrl" 'descr'="$tjupt_des" 'type'="$selectType" 'cname'="$smallDescr_tjupt" 'ename'="$dot_name" 'issuedate'="$issuedate_tjupt" 'language'="$language_tjupt" 'format'="$formatratio_tjupt" 'formatradio'="$formatradio_tjupt" 'subsinfo'="$subsinfo_tjupt" 'district'="$district_tjupt" "$country_tjupt"="$country_tjupt" 'source_sel'="$source_sel_tjupt" 'team_sel'="$team_sel_tjupt" 'anonymous'="`([ "$anonymous" = 'yes' ] && echo 1) || echo 0`" 'visible'="1" "$cookie"
 }
 #------------------------------------#
 old_new_torrent_name=''
@@ -79,16 +83,17 @@ do
             edit_post_byrbt
             echo "$default_subname" "$smallDescr"
             sed -i "${edit_loop}s#$default_subname#$smallDescr#" "$log_Path"
+        elif [ "$check_site" = "https://tjupt.org" ]; then
+            source "$AUTO_ROOT_PATH/post/tjupt.sh"
+            edit_post_tjupt
+            echo "$default_subname" "$smallDescr"
+            sed -i "${edit_loop}s#$default_subname#$smallDescr#" "$log_Path"
         fi
     fi
 
-    [ "$old_new_torrent_name" ] && if [ "$old_new_torrent_name" != "$new_torrent_name" ]; then
-        rm -f "$source_detail_desc" "$source_detail_html"
-    fi
     old_new_torrent_name="$new_torrent_name"
 done
 
 #------------------------------------#
 #---clean---#
 rm -f "$source_detail_desc" "$source_detail_html"
-

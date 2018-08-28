@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.3v
-# Date: 2018-08-25
+# Date: 2018-08-27
 #
 #-------------------------------------#
 #
@@ -35,7 +35,7 @@ deal_with_byrbt_images()
         elif [ $img_counter_bytbt -gt 24 ]; then
             break # jump out
         fi
-        tmp_desc_img_file="$AUTO_ROOT_PATH/tmp/$(echo $RANDOM)-$(echo $RANDOM)-$(echo "${img_in_desc_url##*/}"|sed "s#[^-a-zA-Z0-9.]##g")"
+        tmp_desc_img_file="$AUTO_ROOT_PATH/tmp/$(echo $RANDOM)-$(echo $RANDOM)-$(echo "${img_in_desc_url##*/}"|sed "s/[uU]nt/no-name/g;s#[^-a-zA-Z0-9.]##g")"
         http --ignore-stdin -dco "$tmp_desc_img_file" "$img_in_desc_url" >/dev/null 2>&1
 
         byr_upload_img_url="$(http -f POST "$byrbt_upload_pic_URL" upload@"$tmp_desc_img_file" "$cookie_byrbt"|egrep -o "http[-a-zA-Z0-9./:()]+images[-a-zA-Z0-9./:(_ )]+[^''\"]*" |sed "s/http:/https:/g")"  # byrbt
