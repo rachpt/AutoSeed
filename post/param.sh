@@ -2,8 +2,8 @@
 # FileName: post/param.sh
 #
 # Author: rachpt@126.com
-# Version: 2.3v
-# Date: 2018-08-27
+# Version: 2.4v
+# Date: 2018-08-29
 #
 #-------------------------------------#
 from_desc_get_prarm()
@@ -43,10 +43,12 @@ from_desc_get_prarm()
     fi
 
     #---hudbt & whu ipad---#
+    tjupt_selectType=''
     case "$new_torrent_name" in
         *[Ii][Pp][Aa][Dd]*|*iHD*)
             hudbt_selectType='430'
             whu_standardSel='9'
+            tjupt_selectType='412'
             case "$new_torrent_name" in
                 *720[Pp]*)
                     hudbt_standardSel='3' ;;
@@ -91,7 +93,7 @@ from_desc_get_prarm()
         npupt_selectType="$default_select_type_npupt"
         byrbt_selectType="$default_select_type_byrbt"
         cmct_selectType="$default_select_type_cmct"
-        tjupt_selectType="$default_select_type_tjupt"
+        [ ! "$tjupt_selectType" ] && tjupt_selectType="$default_select_type_tjupt"
     fi
 
     #---npupt source---#
