@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.4v
-# Date: 2018-08-28
+# Date: 2018-08-29
 #
 #------------------------------------#
 #---main.sh is running?---#
@@ -36,7 +36,7 @@ function edit_post_byrbt()
 }
 function edit_post_tjupt()
 {
-    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id" 'small_descr'="$subname_chs_include" 'url'="$imdbUrl" 'descr'="$tjupt_des" 'type'="$selectType" 'cname'="$smallDescr_tjupt" 'ename'="$dot_name" 'issuedate'="$issuedate_tjupt" 'language'="$language_tjupt" 'format'="$formatratio_tjupt" 'formatradio'="$formatradio_tjupt" 'subsinfo'="$subsinfo_tjupt" 'district'="$district_tjupt" "$country_tjupt"="$country_tjupt" 'source_sel'="$source_sel_tjupt" 'team_sel'="$team_sel_tjupt" 'anonymous'="`([ "$anonymous" = 'yes' ] && echo 1) || echo 0`" 'visible'="1" "$cookie"
+    http --ignore-stdin -f POST "$edit_postUrl" 'id'="$t_id" 'small_descr'="${smallDescr_tjupt#*/}[$subname_chs_include]" 'url'="$imdbUrl" 'descr'="$tjupt_des" 'type'="$selectType" 'cname'="${smallDescr_tjupt%%/*}" 'ename'="$dot_name" 'issuedate'="$issuedate_tjupt" 'language'="$language_tjupt" 'format'="$formatratio_tjupt" 'formatradio'="$formatradio_tjupt" 'subsinfo'="$subsinfo_tjupt" 'district'="$district_tjupt" "$country_tjupt"="$country_tjupt" 'source_sel'="$source_sel_tjupt" 'team_sel'="$team_sel_tjupt" 'anonymous'="`([ "$anonymous" = 'yes' ] && echo 1) || echo 0`" 'visible'="1" "$cookie"
 }
 #------------------------------------#
 old_new_torrent_name=''
