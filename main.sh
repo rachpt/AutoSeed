@@ -2,8 +2,8 @@
 # FileName: main.sh
 #
 # Author: rachpt@126.com
-# Version: 2.2v
-# Date: 2018-06-23
+# Version: 2.4v
+# Date: 2018-08-28
 #
 #-----------import settings-------------#
 AUTO_ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -124,6 +124,5 @@ TimeOut()
 if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
     is_locked
     TimeOut main_loop
-    #main_loop
     trap remove_lock EXIT
 fi
