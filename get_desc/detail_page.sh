@@ -115,7 +115,7 @@ form_source_site_get_Desc()
         if [ "$source_site_URL" = "https://hdchina.org" ]; then
             source_hdc_poster_img=`grep 'poster_box' "$source_detail_full"|sed "s/.*img[^>]\+src=\"\([^\"]\+\)\".*/\1/g"`
             if [ ! "`grep "$source_hdc_poster_img" "$source_detail_desc"`" ]; then
-                sed -i "1i <img src=\"$source_hdc_poster_img\" />" "$source_detail_desc"
+                sed -i "1i <img src=\"$source_hdc_poster_img\" /><br /><br />" "$source_detail_desc"
             fi
             sed -i "s/.*id='kdescr'>//g;s/onclick=\"Previewurl([^)]*)[;]*\"//g;s/onload=\"Scale([^)]*)[;]*\"//g;s/onmouseover=\"[^\"]*;\"//g" "$source_detail_desc"
             sed -i "/本资源仅限会员测试带宽之用，严禁用于商业用途！/d; /对用于商业用途所产生的法律责任，由使用者自负！/d" "$source_detail_desc"

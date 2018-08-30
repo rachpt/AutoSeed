@@ -2,8 +2,8 @@
 # FileName: get_desc/html2bbcode.sh
 #
 # Author: rachpt@126.com
-# Version: 2.2v
-# Date: 2018-06-28
+# Version: 2.4v
+# Date: 2018-08-30
 #
 #-------------------------------------#
 sed -i "s/id=\"[^\"]\"//g; s/alt=\"[^\"]\"//g" "$source_detail_desc"
@@ -57,10 +57,11 @@ if [ "$source_site_URL" = "https://hdchina.org" ]; then
         elif [ $hdc_poster_counter -gt 8 ]; then
             break # jump out
         fi
-        tmp_poster_file="$AUTO_ROOT_PATH/tmp/${hdc_poster_url##*/}"
+        tmp_poster_file="$AUTO_ROOT_PATH/tmp/$(echo $RANDOM)-$(echo $RANDOM)-$(echo "${hdc_poster_url##*/}"|sed "s/[uU]nt/no-name/g;s#[^-a-zA-Z0-9.]##g")"
+
         http --ignore-stdin -dco "$tmp_poster_file" "$hdc_poster_url" "$cookie_source_site"
         new_poster_url="$(http --ignore-stdin -f POST 'https://sm.ms/api/upload' smfile@"$tmp_poster_file"|egrep -o "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')"
-        new_poster_url_byrbt="$(http --ignore-stdin -f POST 'https://bt.byr.cn/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images' upload@"$tmp_poster_file" "$cookie_byrbt"|egrep -o 'http[a-zA-Z0-9./:()]+images[a-zA-Z0-9./:()]+'|sed 's/http:/https:/g')"  # byrbt
+        new_poster_url_byrbt="$(http --ignore-stdin -f POST 'https://bt.byr.cn/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images' upload@"$tmp_poster_file" "$cookie_byrbt"|egrep -o 'http[-a-zA-Z0-9./:()]+images[-a-zA-Z0-9./:(_ )]+[^''\"]*'|sed 's/http:/https:/g')"  # byrbt
         sed -i "s#$hdc_poster_url#$new_poster_url#g" "$source_detail_desc"
         sed -i "s#$hdc_poster_url#$new_poster_url_byrbt#g" "$source_detail_html" # byrbt
         rm -f "$tmp_poster_file"
