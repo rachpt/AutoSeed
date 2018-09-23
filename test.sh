@@ -3,11 +3,12 @@
 #
 # Author: rachpt@126.com
 # Version: 2.4v
-# Date: 2018-08-28
+# Date: 2018-09-23
 #
 #--------------------------------------#
 test_func()
 {
+    test_func_probe=1
     #---[hudbt]---#
     enable_hudbt='no'
     #---[whu]---#

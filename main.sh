@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.4v
-# Date: 2018-08-28
+# Date: 2018-09-23
 #
 #-----------import settings-------------#
 AUTO_ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -76,7 +76,7 @@ function main_loop()
             [ "$completion" ] && if [ $completion -ge 70 ]; then
                 unset completion
                 source "$AUTO_ROOT_PATH/get_desc/desc.sh"
-                break           # must have not completed
+                [ ! "$test_func_probe" ] && [ ! "$TR_TORRENT_NAME" ] && break   # must have not completed
             fi
         fi
 
@@ -104,7 +104,7 @@ function main_loop()
 #--------------timeout func--------------#
 TimeOut()
 {
-    waitfor=480
+    waitfor=460
     main_loop_command=$*
     $main_loop_command &
     main_loop_pid=$!
@@ -123,6 +123,19 @@ TimeOut()
 #---start check---#
 if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
     is_locked
-    TimeOut main_loop
+    get_cpu_current_usage() {
+        cpu_current_usage="$(echo $(uptime |awk -F 'average:' '{print $2}'|awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100|bc|awk -F '.' '{print $1}')"
+    }
+    cpu_threshold_90="$(echo $(grep 'model name' /proc/cpuinfo|wc -l)*100*0.9|bc|awk -F '.' '{print $1}')"
+    cpu_threshold_70="$(echo $(grep 'model name' /proc/cpuinfo|wc -l)*100*0.7|bc|awk -F '.' '{print $1}')"
+    cpu_threshold_50="$(echo $(grep 'model name' /proc/cpuinfo|wc -l)*100*0.5|bc|awk -F '.' '{print $1}')"
+    cpu_threshold_30="$(echo $(grep 'model name' /proc/cpuinfo|wc -l)*100*0.3|bc|awk -F '.' '{print $1}')"
+    get_cpu_current_usage && [ "$cpu_current_usage" -ge "$cpu_threshold_90" ] && sleep 20 
+    get_cpu_current_usage && [ "$cpu_current_usage" -ge "$cpu_threshold_70" ] && sleep 13 
+    get_cpu_current_usage && [ "$cpu_current_usage" -ge "$cpu_threshold_50" ] && sleep  9 
+    get_cpu_current_usage && [ "$cpu_current_usage" -ge "$cpu_threshold_30" ] && sleep  5 
+
+    #TimeOut main_loop
+    main_loop
     trap remove_lock EXIT
 fi
