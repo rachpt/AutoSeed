@@ -135,7 +135,10 @@ if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
     get_cpu_current_usage && [ "$cpu_current_usage" -ge "$cpu_threshold_50" ] && sleep  9 
     get_cpu_current_usage && [ "$cpu_current_usage" -ge "$cpu_threshold_30" ] && sleep  5 
 
-    #TimeOut main_loop
-    main_loop
+    if [ "$test_func_probe" ]; then
+        main_loop
+    else
+        TimeOut main_loop
+    fi
     trap remove_lock EXIT
 fi
