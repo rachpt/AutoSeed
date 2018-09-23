@@ -4,7 +4,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 目前适用于 从 HDSky / TTG / HDChina 自动转载 电影 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT / BYRBT / 北洋园 PT 站。
 
-[![release](https://img.shields.io/badge/Version-2.4-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v2.4)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
+[![release](https://img.shields.io/badge/Version-2.4.1-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v2.4.1)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
 |  源站点（from）   |      支持站点（to）      | 时间（time） |
 | :---------------: | :-----------------------: | :----------: |
@@ -34,7 +34,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
   - ~~html2bbcode，安装命令：`sudo pip3 install html2bbcode`~~(已经使用本地正则表达式实现，转换耗时小于0.6s)；
   - httpie，安装命令`sudo apt-get install httpie`；
   - 其他常用软件工具，curl，grep等(一般系统自带)。
-  - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python依赖自行查看。
+  - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖自行查看安装。
 
 ## 使用方法
 
@@ -97,6 +97,12 @@ t_id: [55997]
 ```
 
 ## 更新日志
+- 2018-09-23 --> 2.4.1
+  - tjupt 所有图片使用 sm 链接。
+  - 依据系统负载添加分阶延时已解决致命99.9%校验不通过。
+  - 添加 say thanks。_没什么卵用_
+  - rhilip 大佬的简介生成站坏了，暂时未修改基于 web 的方案。
+
 - 2018-08-28 --> 2.4
   - 添加对 北洋园pt 的支持。
   - 修复部分错误。
