@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.4v
-# Date: 2018-08-28
+# Date: 2018-09-14
 #
 #-------------settings----------------#
 
@@ -30,27 +30,35 @@ function set_ratio()
         
             if [ -n "$set_commit_hust" ]; then
                 "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_hudbt
+                http --ignore-stdin -f POST "https://hudbt.hust.edu.cn/thanks.php" id="$t_id" "$cookie"
                 break
             elif [ -n "$set_commit_whu" ]; then
                 "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_whu
+                http --ignore-stdin -f POST "https://whu.pt/thanks.php" id="$t_id" "$cookie"
                 break
             elif [ -n "$set_commit_npupt" ]; then
                 "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_npupt
+                #http --ignore-stdin -f POST "https://npupt.com/thanks.php" id="$t_id" "$cookie"
                 break
             elif [ -n "$set_commit_nanyangpt" ]; then
                 sleep 1
                 "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_nanyangpt
                 sleep 4
                 "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_nanyangpt
+                http --ignore-stdin -f POST "https://nanyangpt.com/thanks.php" id="$t_id" "$cookie"
                 break
             elif [ -n "$set_commit_byrbt" ]; then
                 "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_byrbt
+                http --ignore-stdin GET "https://bt.byr.cn/retriver.php?id=${t_id}&type=2&siteid=2" "$cookie"
+                http --ignore-stdin -f POST "https://bt.byr.cn/thanks.php" id="$t_id" "$cookie"
                 break
             elif [ -n "$set_commit_cmct" ]; then
                 "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_cmct
+                http --ignore-stdin -f POST "https://hdcmct.org/thanks.php" id="$t_id" "$cookie"
                 break	            
             elif [ -n "$set_commit_tjupt" ]; then
                 "$trans_remote" ${HOST}:${PORT} -n ${USER}:${PASSWORD} -t $oneTorrentID -sr $ratio_tjupt
+                http --ignore-stdin -f POST "https://tjupt.org/thanks.php" id="$t_id" "$cookie"
                 break	            
             #---add new site's seed ratio here---#
             #elif [ -n "$set_commit_new" ]; then

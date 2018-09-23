@@ -2,8 +2,8 @@
 # FileName: get_desc/hdsky_rss.sh
 #
 # Author: rachpt@126.com
-# Version: 2.2v
-# Date: 2018-06-28
+# Version: 2.4v
+# Date: 2018-09-23
 #
 #-------------------------------------#
 function hds_rss_get_desc()
@@ -51,7 +51,7 @@ function hds_rss_get_desc()
                 fi
                 j=`expr $j + 1`
             done
-            # echo "Item:[$torrent_location_line] [$min_item_line, $max_item_line]" >> "$log_Path"
+
             #---extral item's descr---#
             sed -n "${min_item_line},${max_item_line}p" "$source_detail_full" > "$source_detail_desc"
             sed -i "s/<description><\!\[CDATA\[//g; s/\]\]><\/description>//g" "$source_detail_desc"
@@ -59,13 +59,14 @@ function hds_rss_get_desc()
             sed -i "s#onclick=\"[^\"]*\"##g;s#onmouseover=\"[^\"]*\"##g;s#onload=\"[^\"]*;\"##g;s#onclick=\"[^\"]*[)]*\"##g" "$source_detail_desc"
             sed -i "s#\"[^\"]*attachments\([^\"]\+\)#\"${source_site_URL}/attachments\1#g;s#src=\"attachments#src=\"${source_site_URL}/attachments#g" "$source_detail_desc"
 
+            sed -i "/doubanio\.com/d" "$source_detail_desc"  # this img link cannot use
             #---imdb url---#
             imdbUrl="$(grep -o 'tt[0-9]\{7\}' "$source_detail_desc"|head -n 1)"
             #---copy as a duplication---#
             cat "$source_detail_desc" > "$source_detail_html"
 
             #---html2bbcode---#
-	        source "$AUTO_ROOT_PATH/get_desc/html2bbcode.sh"
+            source "$AUTO_ROOT_PATH/get_desc/html2bbcode.sh"
 	        
 	        #---clean---#
             rm -f "$source_detail_full"

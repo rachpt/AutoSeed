@@ -2,8 +2,8 @@
 # FileName: post/tjupt.sh
 #
 # Author: rachpt@126.com
-# Version: 2.3v
-# Date: 2018-08-28
+# Version: 2.4v
+# Date: 2018-09-23
 #
 #-------------settings---------------#
 cookie="$cookie_tjupt"
@@ -17,7 +17,7 @@ site_download_url='https://tjupt.org/download.php?id='
 selectType="$tjupt_selectType"
 [ ! "$team_sel_tjupt" ] && team_sel_tjupt="$default_team_sel_tjupt"
 [ ! "$subsinfo_tjupt" ] && subsinfo_tjupt="$default_subsinfo_tjupt"
-tjupt_des="$(echo "$simple_des"|sed "s/&ratio_in_desc&/$ratio_tjupt/g")"
+tjupt_des="$(echo "$tjupt_des"|sed "s/&ratio_in_desc&/$ratio_tjupt/g")"
 
 smallDescr_tjupt="$smallDescr_byrbt"
 

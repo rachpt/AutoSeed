@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.4v
-# Date: 2018-08-29
+# Date: 2018-09-23
 #
 #-------------------------------------#
 from_desc_get_prarm()
@@ -152,12 +152,18 @@ from_desc_get_prarm()
     if [ -s "$source_detail_desc" ]; then
         simple_des="${descrCom_simple}
         $(cat "$source_detail_desc")"
+        
+        tjupt_des="${descrCom_simple}
+        $(cat "$source_detail_desc2tjupt"|sed '/jpg\|png\|jpeg\|gif\|webp/{/i.loli.net/!d}')"
 
         complex_des="${descrCom_complex}
         $(cat "$source_detail_desc")"
 
     else
         simple_des="${descrCom_simple}
+        $failed_to_get_des"
+
+        tjupt_des="${descrCom_simple}
         $failed_to_get_des"
 
         complex_des="${descrCom_complex}
