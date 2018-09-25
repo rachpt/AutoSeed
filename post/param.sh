@@ -154,7 +154,7 @@ from_desc_get_prarm()
         $(cat "$source_detail_desc")"
         
         tjupt_des="${descrCom_simple}
-        $(cat "$source_detail_desc2tjupt"|sed '/jpg\|png\|jpeg\|gif\|webp/{/i.loli.net/!d}')"
+        $(cat "$source_detail_desc2tjupt"|sed '/jpg\|png\|jpeg\|gif\|webp/{/i\.loli\.net/!d}')"
 
         complex_des="${descrCom_complex}
         $(cat "$source_detail_desc")"
