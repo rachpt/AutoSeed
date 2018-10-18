@@ -62,7 +62,7 @@ function main_loop()
     for i in $(find "$flexget_path" -iname "*.torrent*" |awk -F "/" '{print $NF}')
     do
    	    new_torrent_name=`$trans_show "${flexget_path}/$i"|grep 'Name'|head -n 1|sed 's/Name: //'`
-        if [ ! "$(echo "$new_torrent_name"|grep -P '[-\.a-z0-9A-Z@_ ]+')" ]; then
+        if [ "$new_torrent_name" != "$(echo "$new_torrent_name"|grep -oP '[-\.a-z0-9A-Z@_ ]+')" ]; then
             #---special for non-standard 0day-name---#
             new_torrent_name="$($trans_show "${flexget_path}/$i"|grep -A 10 'FILES'|egrep -i '[\.0-9]+[ ]*(GB|MB)'|egrep -io '[-\.a-z0-9@ ]+'|tail -n 2|head -n 1|sed 's/^[\. ]\+//;s/\.[a-z4 ]\{3,5\}$//'|sed 's/\.[Ss]ample//')"
         fi
