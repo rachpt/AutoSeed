@@ -42,6 +42,10 @@ set_source_site_cookie()
         cookie_source_site="$cookie_ttg"
     elif [ "$source_site_URL" = "https://hdchina.org" ]; then
         cookie_source_site="$cookie_hdc"
+    elif [ "$source_site_URL" = "https://tp.m-team.cc" ]; then
+        cookie_source_site="$cookie_mt"
+    elif [ "$source_site_URL" = "https://hdcmct.org" ]; then
+        cookie_source_site="$cookie_cmct"
     fi
 }
 
@@ -49,9 +53,9 @@ set_source_site_cookie()
 form_source_site_get_tID()
 {
     if [ "$source_site_URL" = "https://totheglory.im" ]; then
-        source_site_search_URL="${source_site_URL}/browse.php?c=M&search_field=`echo "${new_torrent_name}"|sed "s/\(.*\)[\. ]mp4/\1/g;s/\(.*\)[\. ]mkv/\1/g"`"
+        source_site_search_URL="${source_site_URL}/browse.php?c=M&search_field=$(echo "${dot_name}"|sed -r "s/\.[a-z4]{2,4}$//i")"
     else
-        source_site_search_URL="${source_site_URL}/torrents.php?search=`echo "${new_torrent_name}"|sed "s/\(.*\)[\. ]mp4/\1/g;s/\(.*\)[\. ]mkv/\1/g"`"
+        source_site_search_URL="${source_site_URL}/torrents.php?search=$(echo "${dot_name}"|sed -r "s/\.[a-z4]{2,4}$//i")"
     fi
 
     source_t_id=`http "$source_site_search_URL" "$cookie_source_site"| grep 'hit=1'|grep 'id='|head -n 1|awk -F '?id=' '{print $2}'|awk -F '&' '{print $1}'`

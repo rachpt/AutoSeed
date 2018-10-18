@@ -44,7 +44,17 @@ deal_with_byrbt_images()
         http --ignore-stdin -dco "$tmp_desc_img_file" "$img_in_desc_url" >/dev/null 2>&1
 
         byr_upload_img_url="$(http -f POST "$byrbt_upload_pic_URL" upload@"$tmp_desc_img_file" "$cookie_byrbt"|egrep -o "http[-a-zA-Z0-9./:()]+images[-a-zA-Z0-9./:(_ )]+[^\',\"]*" |sed "s/http:/https:/g")"  # byrbt
-        [ "$enable_tjupt" = 'yes' ] && [ "$(echo "$img_in_desc_url"|sed "/i\.loli\.net/d")" ] && new_poster_url_sm="$(http --ignore-stdin -f POST 'https://sm.ms/api/upload' smfile@"$tmp_desc_img_file"|egrep -o "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" && sed -i "s#$img_in_desc_url#$new_poster_url_sm#g" "$source_detail_desc2tjupt" && unset new_poster_url_sm # tjupt
+
+        if [ "$enable_tjupt" = 'yes' ] && [ "$(echo "$img_in_desc_url"|sed "/i\.loli\.net/d")" ]; then
+            new_poster_url_sm="$(http --ignore-stdin -f POST 'https://sm.ms/api/upload' smfile@"$tmp_desc_img_file"|egrep -o "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" 
+            tmp_tjupt_desc="$(cat "$source_detail_desc2tjupt"|sed "s/${img_in_desc_url}/${new_poster_url_sm}/g")" 
+            echo "$img_in_desc_url $new_poster_url_sm" >> "$log_Path"  # debug
+            echo "$tmp_tjupt_desc" > "$source_detail_desc2tjupt"
+            sed -i "s#$img_in_desc_url#$new_poster_url_sm#g" "$source_detail_desc2tjupt" # tjupt
+            sed -i "s#$img_in_desc_url#$new_poster_url_sm#g" "$source_detail_desc2tjupt" # tjupt
+            echo "$tmp_tjupt_desc" | head -n 10 >> "$log_Path"         # debug
+            unset new_poster_url_sm tmp_tjupt_desc # tjupt
+        fi
 
         sed -i "s#$img_in_desc_url#$byr_upload_img_url#g" "$source_detail_html" # byrbt
         rm -f "$tmp_desc_img_file"

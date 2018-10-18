@@ -3,13 +3,13 @@
 #
 # Author: rachpt@126.com
 # Version: 2.4v
-# Date: 2018-08-28
+# Date: 2018-10-18
 #
 #-------------------------------------#
 #
 search_keyword_get_douban_url()
 {
-    base_movie_name_search="$(echo "$new_torrent_name" |egrep -o '.*[12][098][0-9]{2}')"
+    base_movie_name_search="$(echo "$dot_name" |egrep -o '.*[12][098][0-9]{2}')"
     search_get_douban_url="$(http --pretty=format --ignore-stdin GET "https://api.douban.com/v2/movie/search?q=${base_movie_name_search}"|grep 'movie.douban.com/subject'|head -n 1|awk -F '"' '{print $4}')"
 
     if [ "$search_get_douban_url" ]; then
