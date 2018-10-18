@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.4v
-# Date: 2018-09-23
+# Date: 2018-10-18
 #
 #-----------import settings-------------#
 AUTO_ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -62,6 +62,11 @@ function main_loop()
     for i in $(find "$flexget_path" -iname "*.torrent*" |awk -F "/" '{print $NF}')
     do
    	    new_torrent_name=`$trans_show "${flexget_path}/$i"|grep 'Name'|head -n 1|sed 's/Name: //'`
+        if [ ! "$(echo "$new_torrent_name"|grep -P '[-\.a-z0-9A-Z@_ ]+')" ]; then
+            #---special for non-standard 0day-name---#
+            new_torrent_name="$($trans_show "${flexget_path}/$i"|grep -A 10 'FILES'|egrep -i '[\.0-9]+[ ]*(GB|MB)'|egrep -io '[-\.a-z0-9@ ]+'|tail -n 2|head -n 1|sed 's/^[\. ]\+//;s/\.[a-z4 ]\{3,5\}$//'|sed 's/\.[Ss]ample//')"
+        fi
+
         if [ "$i" != "${new_torrent_name}.torrent" ]; then
             mv "${flexget_path}/${i}" "${flexget_path}/${new_torrent_name}.torrent"
         fi

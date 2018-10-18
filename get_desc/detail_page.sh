@@ -2,8 +2,8 @@
 # FileName: get_desc/detail_page.sh
 #
 # Author: rachpt@126.com
-# Version: 2.3v
-# Date: 2018-08-22
+# Version: 2.4v
+# Date: 2018-10-18
 #
 #-------------------------------------#
 get_source_site()
@@ -21,6 +21,14 @@ get_source_site()
     elif [ "`echo $tracker_source_infos|grep -i 'hdchina'`" ]; then
         source_site_URL='https://hdchina.org'
         cookie_source_site="$cookie_hdc"
+        echo "got source_site" >> "$log_Path"
+    elif [ "`echo $tracker_source_infos|grep -i 'tp.m-team.cc'`" ]; then
+        source_site_URL='https://tp.m-team.cc'
+        cookie_source_site="$cookie_mt"
+        echo "got source_site" >> "$log_Path"
+    elif [ "`echo $tracker_source_infos|grep -i 'hdcmct.org'`" ]; then
+        source_site_URL='https://hdcmct.org'
+        cookie_source_site="$cookie_cmct"
         echo "got source_site" >> "$log_Path"
     #elif [ "`echo $tracker_source_infos|grep -i 'new'`" ]; then
     #    source_site_URL='https://new.tracker.com'
@@ -76,6 +84,18 @@ get_original_subname()
             original_subname="$(echo "$original_subname_info"|sed "s#\*.*##g;s#\[.*##g;s#[导主]演.*##g;s#[ ]\+##g;s#|.*##g")"
             original_other_info="$(echo "$original_subname_info"|sed "s#[^ ]\+##;s#[^*[|]\+[\*\[|]##;s#[*[|]##g;s#\]##g;s#.*\([导主]演.*\)#\1#g")"
         fi
+    #elif [ "$source_site_URL" = "https://tp.m-team.cc" ]; then
+        #original_subname_info="$(grep 'h3' "$source_detail_full"|head -n 1|sed "s#<[/]*h3>##g")"
+        #if [ "$original_subname_info" ]; then
+            #original_subname="$(echo "$original_subname_info"|sed "s#\*.*##g;s#\[.*##g;s#[导主]演.*##g;s#[ ]\+##g;s#|.*##g")"
+            #original_other_info="$(echo "$original_subname_info"|sed "s#[^ ]\+##;s#[^*[|]\+[\*\[|]##;s#[*[|]##g;s#\]##g;s#.*\([导主]演.*\)#\1#g")"
+        #fi
+    #elif [ "$source_site_URL" = "https://hdcmct.org" ]; then
+        #original_subname_info="$(grep 'h3' "$source_detail_full"|head -n 1|sed "s#<[/]*h3>##g")"
+        #if [ "$original_subname_info" ]; then
+            #original_subname="$(echo "$original_subname_info"|sed "s#\*.*##g;s#\[.*##g;s#[导主]演.*##g;s#[ ]\+##g;s#|.*##g")"
+            #original_other_info="$(echo "$original_subname_info"|sed "s#[^ ]\+##;s#[^*[|]\+[\*\[|]##;s#[*[|]##g;s#\]##g;s#.*\([导主]演.*\)#\1#g")"
+        #fi
     fi
 }
 
@@ -118,6 +138,7 @@ form_source_site_get_Desc()
                 sed -i "1i <img src=\"$source_hdc_poster_img\" /><br /><br /><br />\n\n" "$source_detail_desc"
             fi
             sed -i "s/.*id='kdescr'>//g;s/onclick=\"Previewurl([^)]*)[;]*\"//g;s/onload=\"Scale([^)]*)[;]*\"//g;s/onmouseover=\"[^\"]*;\"//g" "$source_detail_desc"
+            sed -i "s#onclick=\"Previewurl.*/><br />#/><br />#g" "$source_detail_desc"
             sed -i "/本资源仅限会员测试带宽之用，严禁用于商业用途！/d; /对用于商业用途所产生的法律责任，由使用者自负！/d" "$source_detail_desc"
         fi
         #---filter html code---#
@@ -125,7 +146,8 @@ form_source_site_get_Desc()
         sed -i "s#onmouseover=\"[^\"]*[;]*\"##g" "$source_detail_desc"
         sed -i "s#onload=\"[^\"]*[;]*\"##g" "$source_detail_desc"
         sed -i "s#onclick=\"[^\"]*[;)]*\"##g" "$source_detail_desc"
-
+        
+        sed -i "/doubanio\.com/d" "$source_detail_desc"
         #---copy as a duplication---#
         cat "$source_detail_desc" > "$source_detail_html"
 
