@@ -57,7 +57,7 @@ if [ "$source_site_URL" = "https://hdchina.org" ]; then
         elif [ $hdc_poster_counter -gt 8 ]; then
             break # jump out
         fi
-        tmp_poster_file="$AUTO_ROOT_PATH/tmp/$(echo $RANDOM)-$(echo $RANDOM)-$(echo "${hdc_poster_url##*/}"|sed "s/[uU]nt/no-name/g;s#[^-a-zA-Z0-9.]##g")"
+        tmp_poster_file="$AUTO_ROOT_PATH/tmp/$(echo $RANDOM)-$(echo $RANDOM)-$(echo "${hdc_poster_url##*/}"|sed -r "s/title/no-n/ig;s/meta/no-n/ig;s/script/no-n/ig;s/span/no-n/ig;s#[^-a-zA-Z0-9.]##g")"
 
         http --ignore-stdin -dco "$tmp_poster_file" "$hdc_poster_url" "$cookie_source_site"
         new_poster_url="$(http --ignore-stdin -f POST 'https://sm.ms/api/upload' smfile@"$tmp_poster_file"|egrep -o "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')"
