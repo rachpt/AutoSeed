@@ -2,8 +2,8 @@
 # FileName: get_desc/desc.sh
 #
 # Author: rachpt@126.com
-# Version: 2.3v
-# Date: 2018-08-27
+# Version: 2.4v
+# Date: 2018-10-19
 #
 #-------------------------------------#
 #
@@ -61,6 +61,6 @@ if [ ! -s "$source_detail_desc" ]; then
 fi
 
 #---poster---#
-sed -i "1 {s/^[ \t]*//g}" "$source_detail_desc"
+sed -r -i "1 {s/^[ \t]+//}" "$source_detail_desc"
 source "$AUTO_ROOT_PATH/get_desc/poster.sh"
 
