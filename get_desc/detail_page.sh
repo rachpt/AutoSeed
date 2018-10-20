@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.4v
-# Date: 2018-10-18
+# Date: 2018-10-20
 #
 #-------------------------------------#
 get_source_site()
@@ -70,14 +70,8 @@ form_source_site_get_tID()
 #-------------------------------------#
 get_original_subname()
 {
-    if [ "$source_site_URL" = "https://hdsky.me" ]; then
-        original_subname_info="$(grep '副标题' "$source_detail_full"|sed "s#.*left\">##g;s#<.*>##g;s#[ ]\+##g")"
-        if [ "$original_subname_info" ]; then
-            original_subname="$(echo "$original_subname_info"|sed "s#\[.*\]##g;s#[ ]\+##g;s#【.*】##g")"
-            original_other_info="$(echo "$original_subname_info"|sed "s#.*\[\(.*\)\].*#\1#g;s#.*【\(.*\)】.*#\1#g"|sed "s%\][ ]*\[% %g")"
-        fi
-    elif [ "$source_site_URL" = "https://totheglory.im" ]; then
-        original_subname_info="$(grep 'h1.*\[.*\]' "$source_detail_full"|sed "s#.*\[\(.*\)</h1>#\1#g")"
+    if [ "$source_site_URL" = "https://totheglory.im" ]; then
+        original_subname_info="$(grep 'h1.*\[.*\]' "$source_detail_full"|head -n 1|sed "s#.*\[\(.*\)</h1>#\1#g")"
         if [ "$original_subname_info" ]; then
             original_subname="$(echo "$original_subname_info"|sed "s#\[\(.*\)\]#\1#g;s#[ ]\+##g")"
             original_other_info="$(echo "$original_subname_info"|sed "s#.*\]\(.*\)#\1#g;s#\*##g")"
@@ -88,18 +82,13 @@ get_original_subname()
             original_subname="$(echo "$original_subname_info"|sed "s#\*.*##g;s#\[.*##g;s#[导主]演.*##g;s#[ ]\+##g;s#|.*##g")"
             original_other_info="$(echo "$original_subname_info"|sed "s#[^ ]\+##;s#[^*[|]\+[\*\[|]##;s#[*[|]##g;s#\]##g;s#.*\([导主]演.*\)#\1#g")"
         fi
-    #elif [ "$source_site_URL" = "https://tp.m-team.cc" ]; then
-        #original_subname_info="$(grep 'h3' "$source_detail_full"|head -n 1|sed "s#<[/]*h3>##g")"
-        #if [ "$original_subname_info" ]; then
-            #original_subname="$(echo "$original_subname_info"|sed "s#\*.*##g;s#\[.*##g;s#[导主]演.*##g;s#[ ]\+##g;s#|.*##g")"
-            #original_other_info="$(echo "$original_subname_info"|sed "s#[^ ]\+##;s#[^*[|]\+[\*\[|]##;s#[*[|]##g;s#\]##g;s#.*\([导主]演.*\)#\1#g")"
-        #fi
-    #elif [ "$source_site_URL" = "https://hdcmct.org" ]; then
-        #original_subname_info="$(grep 'h3' "$source_detail_full"|head -n 1|sed "s#<[/]*h3>##g")"
-        #if [ "$original_subname_info" ]; then
-            #original_subname="$(echo "$original_subname_info"|sed "s#\*.*##g;s#\[.*##g;s#[导主]演.*##g;s#[ ]\+##g;s#|.*##g")"
-            #original_other_info="$(echo "$original_subname_info"|sed "s#[^ ]\+##;s#[^*[|]\+[\*\[|]##;s#[*[|]##g;s#\]##g;s#.*\([导主]演.*\)#\1#g")"
-        #fi
+
+    else
+        original_subname_info="$(egrep '副标题|Small Description|副標題' "$source_detail_full"|head -n 1|sed "s#.*left\">##g;s#<.*>##g;s#[ ]\+##g")"
+        if [ "$original_subname_info" ]; then
+            original_subname="$(echo "$original_subname_info"|sed "s#\[.*\]##g;s#[ ]\+##g;s#【.*】##g;s#[导主]演.*##g;s#[ ]\+##g;s#|.*##g")"
+            original_other_info="$(echo "$original_subname_info"|sed "s#.*\[\(.*\)\].*#\1#g;s#.*【\(.*\)】.*#\1#g;s#.*\([导主]演.*\)#\1#g"|sed "s%\][ ]*\[% %g")"
+        fi
     fi
 }
 
@@ -114,9 +103,13 @@ form_source_site_get_Desc()
 
     if [ -s "$source_detail_full" ]; then
         get_original_subname
-        source_start_line_html=`egrep -n '简介|简述' "$source_detail_full" |head -n 1|awk -F ':' '{print $1}'`
-        if [ "$source_site_URL" = "https://totheglory.im" ]; then
+        source_start_line_html=`egrep -n '>[ ]?简介<|>简述<|>[ ]?簡介<|>[ ]?Description<|>説明<|>설명<' "$source_detail_full" |head -n 1|awk -F ':' '{print $1}'`
+        if [ "$source_site_URL" = "https://totheglory.im" ] || [ "$source_site_URL" = "https://tp.m-team.cc" ]; then
             source_end_line_html=`grep -n '</div></td></tr>' "$source_detail_full" |head -n 1|awk -F ':' '{print $1}'`
+        elif [ "$source_site_URL" = "https://hdcmct.org" ]; then
+            source_start_line_html=`expr $source_start_line_html + 1` # delete notice
+            source_end_line_html=`grep -n '</div></td></tr>' "$source_detail_full" |head -n 2|tail -n 1|awk -F ':' '{print $1}'`
+            source_end_line_html=`expr $source_end_line_html - 1` # delete notice
         else
             source_end_line_html=`grep -n '</div></td></tr>' "$source_detail_full" |head -n 2|tail -n 1|awk -F ':' '{print $1}'`
         fi

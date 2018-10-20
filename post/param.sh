@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 2.4v
-# Date: 2018-09-23
+# Date: 2018-10-20
 #
 #-------------------------------------#
 from_desc_get_prarm()
@@ -17,8 +17,8 @@ from_desc_get_prarm()
         TR_TORRENT_NAME="$plain_name_tmp"
         plain_name_tmp=''
     fi
-    #---name---#
-    no_dot_name="$(echo "$new_torrent_name"|sed 's/\./ /g'|sed "s/DD2 0/DD2.0/g;s/H 26/H.26/g;s/5 1/5.1/g;s/7 1/7.1/g;s/\(.*\) mp4/\1/g;s/\(.*\) mkv/\1/g")"
+    #---name for post---#
+    no_dot_name="$(echo "$dot_name"|sed 's/\./ /g'|sed "s/DD2 0/DD2.0/ig;s/H 26/H.26/ig;s/5 1/5.1/g;s/7 1/7.1/g;s/\(.*\) mp4[ ]*$/\1/i;s/\(.*\) mkv[ ]*$/\1/i;s/\(.*\) ts[ ]*$/\1/i")"
     # dot_name defined in main.sh
 
     #---get torrent's type---#
@@ -154,7 +154,7 @@ from_desc_get_prarm()
         $(cat "$source_detail_desc")"
         
         tjupt_des="${descrCom_simple}
-        $(cat "$source_detail_desc2tjupt"|sed '/jpg\|png\|jpeg\|gif\|webp/{/i\.loli\.net/!d}')"
+        $(cat "$source_detail_desc2tjupt"|sed "/jpg\|png\|jpeg\|gif\|webp/{/i\.loli\.net/!d}")"
 
         complex_des="${descrCom_complex}
         $(cat "$source_detail_desc")"
