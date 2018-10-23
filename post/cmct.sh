@@ -2,8 +2,8 @@
 # FileName: post/cmct.sh
 #
 # Author: rachpt@126.com
-# Version: 2.3v
-# Date: 2018-07-28
+# Version: 3.0v
+# Date: 2018-10-23
 #
 #-------------settings---------------#
 cookie="$cookie_cmct"
@@ -36,3 +36,23 @@ elif [ "$dot_name" = ".*1080p*" ]; then
 else
     standardSel="$default_standard_sel_cmct"
 fi
+
+
+t_id=$(http --ignore-stdin -f --print=h POST "$postUrl"\
+    'name'="$dot_name"\
+    'small_descr'="$smallDescr"\
+    'url'="$imdbUrl"\
+    'descr'="$cmct_des"\
+    'type'="$selectType"\
+    'medium_sel'="$medium_sel_cmct"\
+    'codec_sel'="$codec_sel_cmct"\
+    'standard_sel'="$standardSel"\
+    'source_sel'="$source_sel_cmct"\
+    'uplver'="$anonymous"\
+    file@"${torrentPath}"\
+    "$cookie"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
+
+if [ -z "$t_id" ]; then
+    t_id=`http --ignore-stdin -f POST "$postUrl" name="$dot_name" small_descr="$smallDescr" url="$imdbUrl" descr="$cmct_des" type="$selectType" medium_sel="$medium_sel_cmct" codec_sel="$codec_sel_cmct" standard_sel="$standardSel" source_sel="$source_sel_cmct" uplver="$anonymous" file@"$torrentPath" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
+fi
+

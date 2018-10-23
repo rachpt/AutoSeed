@@ -2,8 +2,8 @@
 # FileName: main.sh
 #
 # Author: rachpt@126.com
-# Version: 2.4v
-# Date: 2018-10-20
+# Version: 3.0v
+# Date: 2018-10-23
 #
 #-----------import settings-------------#
 AUTO_ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -54,15 +54,18 @@ fi
 }
 
 #-------------main loop func-------------#
-function main_loop()
-{
+function main_loop() {
     create_lock  # lock file
     IFS_OLD=$IFS
     IFS=$'\n'
     #---loop for torrent in flexget path ---#
-    for i in $(find "$flexget_path" -iname "*.torrent*" |awk -F "/" '{print $NF}')
+    for i in $(find "$flexget_path" -iname "*.torrent*"|awk -F '/' '{print $NF}')
     do
-   	    new_torrent_name=`$trans_show "${flexget_path}/$i"|grep 'Name'|head -n 1|sed -r 's/Name:[ ]+//'`
+        # new_torrent_name 用于和 transmission 中的种子名进行比较，
+        # 以决定是否发布种子，作为方便，重命名 torrent 为该名，
+        # 最后发布前会再次重命名为简单的名字减少莫名其妙的bug。
+        # dot_name即点分隔名，用作 0day 名，以及构成保存简介文件名。
+        new_torrent_name="$("$trans_show" "${flexget_path}/$i"|grep 'Name'|head -1|sed -r 's/Name:[ ]+//')"
         #---use dot separated name for saving desc---#
         if [ "$new_torrent_name" != "$(echo "$new_torrent_name"|grep -oP "[-\.a-zA-Z0-9\!\'@_’:：（）()\[\] ]+")" ]; then
             #---special for non-standard 0day-name---#
@@ -79,7 +82,7 @@ function main_loop()
 
         #---generate desc before done---#
         if [ ! -s "${AUTO_ROOT_PATH}/tmp/${dot_name}_desc.txt" ]; then
-            completion="$("$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep "$new_torrent_name"|head -n 1|awk '{print $2}'|sed 's/%//')"
+            completion="$("$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep "$new_torrent_name"|head -1|awk '{print $2}'|sed 's/%//')"
             [ "$test_func_probe" ] && completion=100 && TR_TORRENT_NAME="$new_torrent_name" # convenient for test
             [ "$completion" ] && if [ $completion -ge 70 ]; then
                 unset completion

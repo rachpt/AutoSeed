@@ -2,8 +2,8 @@
 # FileName: settings.sh
 #
 # Author: rachpt@126.com
-# Version: 2.3v
-# Date: 2018-08-27
+# Version: 3.0v
+# Date: 2018-10-23
 #
 # Environmental requirements:
 # - transmission-[show,remote,daemon or gtk]

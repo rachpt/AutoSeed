@@ -2,7 +2,7 @@
 
 An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a python version [HERE](https://github.com/Rhilip/Pt-Autoseed).
 
-目前适用于 从 HDSky / TTG / HDChina 自动转载 电影 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT / BYRBT / 北洋园 PT 站。
+目前适用于 从 HDSky / TTG / HDChina / CMCT / M-Team 等站点自动转载 电影 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT / BYRBT / 北洋园 PT 站。
 
 [![release](https://img.shields.io/badge/Version-2.4.1-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v2.4.1)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
@@ -11,11 +11,11 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 | https://hdsky.me/ | https://hudbt.hust.edu.cn |  2018-05-19  |
 | https://totheglory.im/ | https://whu.pt |  2018-05-21  |
 | https://hdchina.org | https://npupt.com |  2018-06-07 |
-|                   | https://nanyangpt.com | 2018-06-07 |
-|                   | https://bt.byr.cn | 2018-06-17 |
+| https://hdcmct.org | https://nanyangpt.com | 2018-06-07 |
+| https://tp.m-team.cc | https://bt.byr.cn | 2018-06-17 |
 |                   | https://hdcmct.org  | 2018-07-28 |
 |                   | https://tjupt.org  | 2018-08-28 |
-
+|             |              | 2018-10-23 |
 ## 特点
 
  - 自动生成并提交简介，尽量与原种简介一致。
@@ -51,7 +51,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 如果种子名中使用了部分中文符号，比如已知的 `’` （中文单引号）会导致 httpie 文件传输失败，2.1版修复了中文单引号 bug。
 
-python 并非必须，只需将 `setting.sh` 中的`USE_Local_Gen='yes'`改为其他值，即可使用基于 [web](https://rhilip.github.io/PT-help/ptgen) 的生成方法，只有原种简介不符合要求时才会主动生成。
+python 并非必须，只需将 `setting.sh` 中的`Use_Local_Gen='yes'`改为其他值，即可使用基于 [web](https://rhilip.github.io/PT-help/ptgen) 的生成方法，只有原种简介不符合要求时才会主动生成。
 
 
 一个运行 log：
@@ -97,106 +97,8 @@ t_id: [55997]
 ```
 
 ## 更新日志
-- 2018-09-23 --> 2.4.1
-  - tjupt 所有图片使用 sm 链接。
-  - 依据系统负载添加分阶延时已解决致命99.9%校验不通过。
-  - 添加 say thanks。_没什么卵用_
-  - rhilip 大佬的简介生成站坏了，暂时未修改基于 web 的方案。
 
-- 2018-08-28 --> 2.4
-  - 添加对 北洋园pt 的支持。
-  - 修复部分错误。
-
-- 2018-08-23 --> 2.3
-  - 添加对 CMCT 的支持，以后不再维护该项。
-  - 提前生成简介(大约完成 70% 后开始，由 crontab 等驱动)。
-  - 优化结构，添加处理非法简介代码。
-  - 感谢 Rhilip 大佬的 python 模块。
-  - whu.pt 暂时需要使用 `transmission-edit` 修改 tracker 添加 `s`。
-
-- 2018-06-17 --> 2.2
-  - 添加对 BYRBT 的支持，图片自动转至其服务器。
-  - 添加处理脚本超时代码，默认 300 秒。
-  - 修复可能导致 bug 的代码。
-  - 这可能是最后一个 release 版本。
-
-- 2018-06-15 --> 2.1
-  - 修复 edit 中的错误参数。
-  - 加强 Dupe 判断逻辑。
-  - 修复 ttg 简介中 imdb 链接问题。
-  - 修复 hdc 海报外链问题，海报转至图床 https://sm.ms/ 。
-  - 修复几个分类判断问题。
-
-- 2018-06-10 --> 2.0
-  - 更新至2.0版。
-  - 支持三个源站点获取简介，不只是 iPad类型。
-  - 添加对南洋PT以及蒲公英PT的支持。
-  - 添加Dupe以及禁转判断代码。
-  - 使用本地正则表达式转换html至bbcode。
-  - 框架重构。
-
-- 2018-06-07 --> v1.7 （未发布）
-  - 添加对 NPUBITS 的支持。
-  - 修复上版 v1.6 引入的 bug。
-
-- 2018-06-04 --> v1.6
-  - 添加代码防止重复运行扰乱生成 LOG。
-  - 添加基于网络的 [html2bbcode](https://www.garyshood.com/htmltobb/) 代码。
-  - 使用绝对路径。
-  - 已知 bug：后台自动运行程序在 html2bbcode 处 bug，终端手动运行程序无此问题。
-
-- 2018-05-24 --> v1.5
-  - 修复简介获取失败，添加通过 detail 页面获取简介以及二次编辑代码(基于LOG)。
-  - 修复一些 bug。
-
-- 2018-05-21 --> v1.4
-  - 进一步模块化，添加对 WHUPT 的支持。
-
-- 2018-05-19 --> v1.2 v1.3
-  - 完成 debug 工作。
-
-- 2018-05-17 --> v1.0
-  - 首次提交，错误较多。
-
-## 实现流程（v1.6）
-
-```flow
-st=>start: 导入settings
-cond1=>condition: 监控目录是否有torrent文件?
-cond2=>condition: 变量TR_TORRENT_NAME是否为空?
-op1=>operation: 使用transmission-show重命名tr文件
-op2=>operation: 遍历每个tr文件
-cond3=>condition: 种子Name与完成种子匹配?
-op3=>operation: 生成种子Name
-op4=>operation: 获取简介页面
-op5=>operation: 设置TR_TORRENT_NAME等于匹配项name
-op6=>operation: 根据 item 生成数组，用于截断简介
-cond4=>condition: Name遍历item，包含？
-op7=>operation: 过滤得到简介
-op8=>operation: 使用自定义消息代替
-op9=>operation: 根据enable项分别post发布
-cond5=>condition: 得到发布种子ID?
-op10=>operation: 构造下载链接（包含passkey）至tr-remote
-op11=>operation: 添加链接，设置下载位置至TR_TORRENT_DIR
-op12=>operation: 设置ratio，进入clean
-op13=>operation: 清理中间文件
-op14=>operation: 清理有问题的种子（红种），不删数据
-op15=>operation: 清理在TR_TORRENT_DIR中的不在tr列表的文件
-cond6=>condition: free空间是否符合settings值？
-op16=>operation: 清理tr中完成状态的种子
-e=>end: 退出
-
-st->cond1
-cond1(yes)->cond2
-cond1(no)->e
-cond2(yes)->op1->op3->op4->op6->cond4
-cond2(no)->op2->cond3
-cond3(no)->e
-cond3(yes)->op5->op1
-cond4(no)->op8->op9
-cond4(yes)->op7->op9->cond5
-cond5(no)->op13->e
-cond5(yes)->op10->op11->op12->op14->op15->cond6
-cond6(no)->op16->cond6
-cond6(yes)->e
-```
+- 2018-10-23 --> 3.0 (开发版,未完成)
+  - 重构部分代码，以支持更多的站点。
+  - 使用豆瓣豆瓣，尽量保留原始 iNFO 以及 screens，没有则生成。
+  - 目前修改了'get_desc'，以及部分 'post'，其他正在修改中……

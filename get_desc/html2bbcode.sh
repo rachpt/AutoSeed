@@ -2,10 +2,15 @@
 # FileName: get_desc/html2bbcode.sh
 #
 # Author: rachpt@126.com
-# Version: 2.4v
-# Date: 2018-10-19
+# Version: 3.0v
+# Date: 2018-10-22
 #
 #-------------------------------------#
+# 本 shell 脚本作用为转化原种 html 格式 iNFO 以及 screens页面至 bbcode。
+# 优先处理 font 标签，字体，颜色。
+# img 标签部分需要补全域名。
+#-------------------------------------#
+
 sed -i "s/id=\"[^\"]\"//g; s/alt=\"[^\"]\"//g" "$source_detail_desc"
 
 sed -i "s#<strong>#[b]#g;s#</strong>#[/b]#g" "$source_detail_desc"
@@ -48,7 +53,7 @@ sed -i "s#<#[#g;s#>#]#g" "$source_detail_desc"
 sed -i "s#\[url=[^\]]\+/\]\[url=\(.*\)\[/url\]\[/url\]#[url=\1[/url]#g" "$source_detail_desc"
 
 #---deal with hdc poster---#
-if [ "$source_site_URL" = "https://hdchina.org" ]; then
+if [ "$source_site_URL" = "https://hdchina.org111" ]; then
     hdc_poster_counter=0
     while true; do
         hdc_poster_url="$(egrep -o "${source_site_URL}/attachments[^\[]+" "$source_detail_desc"|head -n 1)"
@@ -57,14 +62,8 @@ if [ "$source_site_URL" = "https://hdchina.org" ]; then
         elif [ $hdc_poster_counter -gt 8 ]; then
             break # jump out
         fi
-        tmp_poster_file="$AUTO_ROOT_PATH/tmp/$(echo $RANDOM)-$(echo $RANDOM)-$(echo "${hdc_poster_url##*/}"|sed -r "s/title/no-n/ig;s/meta/no-n/ig;s/script/no-n/ig;s/span/no-n/ig;s#[^-a-zA-Z0-9.]##g")"
 
-        http --ignore-stdin -dco "$tmp_poster_file" "$hdc_poster_url" "$cookie_source_site"
-        new_poster_url="$(http --ignore-stdin -f POST 'https://sm.ms/api/upload' smfile@"$tmp_poster_file"|egrep -o "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')"
-        new_poster_url_byrbt="$(http --ignore-stdin -f POST 'https://bt.byr.cn/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images' upload@"$tmp_poster_file" "$cookie_byrbt"|egrep -o "http[-a-zA-Z0-9./:()]+images[-a-zA-Z0-9./:(_ )]+[^\',\"]*"|sed 's/http:/https:/g')"  # byrbt
         sed -i "s#$hdc_poster_url#$new_poster_url#g" "$source_detail_desc"
-        sed -i "s#$hdc_poster_url#$new_poster_url_byrbt#g" "$source_detail_html" # byrbt
-        rm -f "$tmp_poster_file"
         hdc_poster_url=''
         tmp_poster_file=''
         hdc_poster_counter=`expr $hdc_poster_counter + 1`
