@@ -17,15 +17,16 @@ function is_locked()
     fi
 }
 
-function create_lock()
-{
-    touch "$lock_file"
-}
-
 function remove_lock()
 {
     rm -f "$lock_file"
     rm -f "$source_detail_desc" "$source_detail_html"
+}
+
+function create_lock()
+{
+    touch "$lock_file"
+    trap remove_lock EXIT
 }
 
 #----------------log func---------------#
@@ -79,6 +80,7 @@ function main_loop()
         #---generate desc before done---#
         if [ ! -s "${AUTO_ROOT_PATH}/tmp/${dot_name}_desc.txt" ]; then
             completion="$("$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep "$new_torrent_name"|head -n 1|awk '{print $2}'|sed 's/%//')"
+            [ "$test_func_probe" ] && completion=100 && TR_TORRENT_NAME="$new_torrent_name" # convenient for test
             [ "$completion" ] && if [ $completion -ge 70 ]; then
                 unset completion
                 source "$AUTO_ROOT_PATH/get_desc/desc.sh"
@@ -129,22 +131,19 @@ TimeOut()
 #---start check---#
 if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
     is_locked
+    number_of_cpus="$(grep 'model name' /proc/cpuinfo|wc -l)"
     get_cpu_current_usage() {
-        cpu_current_usage="$(echo $(uptime |awk -F 'average:' '{print $2}'|awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100|bc|awk -F '.' '{print $1}')"
+        cpu_current_usage="$(echo $(uptime |awk -F 'average:' '{print $2}'|awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100/$number_of_cpus|bc|awk -F '.' '{print $1}')"
     }
-    cpu_threshold_90="$(echo $(grep 'model name' /proc/cpuinfo|wc -l)*100*0.9|bc|awk -F '.' '{print $1}')"
-    cpu_threshold_70="$(echo $(grep 'model name' /proc/cpuinfo|wc -l)*100*0.7|bc|awk -F '.' '{print $1}')"
-    cpu_threshold_50="$(echo $(grep 'model name' /proc/cpuinfo|wc -l)*100*0.5|bc|awk -F '.' '{print $1}')"
-    cpu_threshold_30="$(echo $(grep 'model name' /proc/cpuinfo|wc -l)*100*0.3|bc|awk -F '.' '{print $1}')"
-    get_cpu_current_usage && [ "$cpu_current_usage" -ge "$cpu_threshold_90" ] && sleep 20 
-    get_cpu_current_usage && [ "$cpu_current_usage" -ge "$cpu_threshold_70" ] && sleep 13 
-    get_cpu_current_usage && [ "$cpu_current_usage" -ge "$cpu_threshold_50" ] && sleep  9 
-    get_cpu_current_usage && [ "$cpu_current_usage" -ge "$cpu_threshold_30" ] && sleep  5 
+
+    get_cpu_current_usage && [ "$cpu_current_usage" -ge 90 ] && sleep 20 
+    get_cpu_current_usage && [ "$cpu_current_usage" -ge 70 ] && sleep 13 
+    get_cpu_current_usage && [ "$cpu_current_usage" -ge 50 ] && sleep  9 
+    get_cpu_current_usage && [ "$cpu_current_usage" -ge 30 ] && sleep  5 
 
     if [ "$test_func_probe" ]; then
         main_loop
     else
         TimeOut main_loop
     fi
-    trap remove_lock EXIT
 fi
