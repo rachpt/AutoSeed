@@ -21,7 +21,7 @@ if [ -s "$source_detail_html" ]; then
     $(cat "$source_detail_html")"
 else
     byrbt_des="$descrCom_complex_html
-    <br /><br /><br /><strong><span style=\"font-size:30px;\">获取简介失败。无人职守！！！ 不喜勿下！ 如果帮助修改，在此非常感谢！</span></strong><br /><br />"
+    <br /><br /><br /><strong><span style=\"font-size:30px;\">获取简介失败！！！</span></strong><br /><br />"
 fi
 
 movie_type_byrbt="$(egrep "[类分][　 ]*[别类型]" "$source_detail_desc"|head -n 1|sed "s/.*[类分][　 ]*[别类型][ 　]*//g;s/[ ]*//g;s/[\n\r]*//g")"

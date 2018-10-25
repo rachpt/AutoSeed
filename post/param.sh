@@ -2,20 +2,14 @@
 # FileName: post/param.sh
 #
 # Author: rachpt@126.com
-# Version: 2.4v
-# Date: 2018-10-20
+# Version: 2.4.2v
+# Date: 2018-10-23
 #
 #-------------------------------------#
-from_desc_get_prarm()
-{
-    #---test name,avoid special characters in name---#
-    plain_name_tmp="$(echo "$TR_TORRENT_NAME"|sed "s/‘/\'/g;s/“/\"/g;s/。/./g;s/，/,/g;s/：/:/g;s/；/;/g;s/！/!/g")"
-    if [ "$plain_name_tmp" != "$TR_TORRENT_NAME" ]; then
-        mv "${flexget_path}/${new_torrent_name}.torrent" "${flexget_path}/${plain_name_tmp}.torrent"
-        torrentPath="${flexget_path}/${plain_name_tmp}.torrent"
-        new_torrent_name="$plain_name_tmp"
-        TR_TORRENT_NAME="$plain_name_tmp"
-        plain_name_tmp=''
+from_desc_get_prarm() {
+    # tjupt
+    if [ "$enable_tjupt" = 'yes' ]; then
+        source_detail_desc2tjupt="${AUTO_ROOT_PATH}/tmp/${dot_name}_desc2tjupt.txt"
     fi
     #---name for post---#
     no_dot_name="$(echo "$dot_name"|sed 's/\./ /g'|sed "s/DD2 0/DD2.0/ig;s/H 26/H.26/ig;s/5 1/5.1/g;s/7 1/7.1/g;s/\(.*\) mp4[ ]*$/\1/i;s/\(.*\) mkv[ ]*$/\1/i;s/\(.*\) ts[ ]*$/\1/i")"
@@ -147,14 +141,13 @@ from_desc_get_prarm()
         imdbUrl="$default_imdb_url"
     fi
 
-
     #---join desc---#
     if [ -s "$source_detail_desc" ]; then
         simple_des="${descrCom_simple}
         $(cat "$source_detail_desc")"
         
         tjupt_des="${descrCom_simple}
-        $(cat "$source_detail_desc2tjupt"|sed '/jpg\|png\|jpeg\|gif\|webp/{/i\.loli\.net/!d}')" # use single quote mark
+        $(cat "$source_detail_desc2tjupt")"
 
         complex_des="${descrCom_complex}
         $(cat "$source_detail_desc")"
@@ -169,7 +162,6 @@ from_desc_get_prarm()
         complex_des="${descrCom_complex}
         $failed_to_get_des"
     fi
-
         nanyangpt_des="$simple_des"
         npupt_des="$simple_des"
         cmct_des="$simple_des"
@@ -202,7 +194,6 @@ from_desc_get_prarm()
     fi
     #---com info---#
     movie_country_byrbt="$(egrep "[国地产][　 ]*[家区地]" "$source_detail_desc"|head -n 1|sed "s/.*[国地产][　 ]*[家区地][ 　]*//g;s/,/\//g;;s/[ ]*//g;s/[\n\r]*//g")"
-
 }
 
 #-------------------------------#

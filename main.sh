@@ -2,51 +2,38 @@
 # FileName: main.sh
 #
 # Author: rachpt@126.com
-# Version: 2.4v
-# Date: 2018-10-20
+# Version: 2.4.2v
+# Date: 2018-10-23
 #
 #-----------import settings-------------#
 AUTO_ROOT_PATH="$(dirname "$(readlink -f "$0")")"
 source "$AUTO_ROOT_PATH/settings.sh"
 source "$AUTO_ROOT_PATH/test.sh"
 #----------------lock func--------------#
-function is_locked()
-{
-    if [ -f "$lock_file" ]; then
-        exit
-    fi
-}
-
-function remove_lock()
-{
+function remove_lock() {
     rm -f "$lock_file"
-    rm -f "$source_detail_desc" "$source_detail_html"
-}
-
-function create_lock()
-{
-    touch "$lock_file"
-    trap remove_lock EXIT
+    [ ! "$test_func_probe" ] && rm -f "$source_detail_desc" "$source_detail_html"
 }
 
 #----------------log func---------------#
-write_log_main()
-{
+write_log_main() {
     echo "+++++++++++++++++++++++++++++++++"   >> "$log_Path"
     echo -e "[`date '+%Y-%m-%d %H:%M:%S'`]\c"  >> "$log_Path"
     echo "发布了：[$dot_name]"                 >> "$log_Path"
 }
 
 #------------get torrent name-----------#
-get_torrent_func()
-{
-if [ -z "$TR_TORRENT_NAME" ]; then
-    for oneTorrentID in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep '100%'|awk '{print $1}'|sed 's/\*//g'|sort -nr`
+get_torrent_func() {
+if [ ! "$TR_TORRENT_NAME" ]; then
+    local one
+    for one in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep '100%'|awk '{print $1}'|sed 's/\*//g'|sort -nr`
     do
-        oneTorrent=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'Name'|head -n 1|sed -r 's/Name: //'`
-        if [ "$new_torrent_name" = "$oneTorrent" ]; then
-	        TR_TORRENT_NAME="$oneTorrent"
-	        TR_TORRENT_DIR=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $oneTorrentID -i |grep 'Location'|head -n 1|awk '{print $2}'`
+        # before Name have 2 spacings
+        local one_name
+        one_name=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $one -i |grep 'Name'|head -1|sed 's/[ ]*Name: //'`
+        if [ "$new_torrent_name" = "$one_name" ]; then
+	        TR_TORRENT_NAME="$one_name"
+	        TR_TORRENT_DIR=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $one -i |grep 'Location'|head -1|sed 's/[ ]*Location: //'`
 	        break
         fi
     done
@@ -54,19 +41,19 @@ fi
 }
 
 #-------------main loop func-------------#
-function main_loop()
-{
-    create_lock  # lock file
+function main_loop() {
+    touch "$lock_file"  # creat lock file 
     IFS_OLD=$IFS
     IFS=$'\n'
     #---loop for torrent in flexget path ---#
     for i in $(find "$flexget_path" -iname "*.torrent*" |awk -F "/" '{print $NF}')
     do
-   	    new_torrent_name=`$trans_show "${flexget_path}/$i"|grep 'Name'|head -n 1|sed -r 's/Name:[ ]+//'`
+        # before Name have no spacings
+   	    new_torrent_name=`$trans_show "${flexget_path}/$i"|grep 'Name'|head -n 1|sed 's/Name: //'`
         #---use dot separated name for saving desc---#
         if [ "$new_torrent_name" != "$(echo "$new_torrent_name"|grep -oP "[-\.a-zA-Z0-9\!\'@_’:：（）()\[\] ]+")" ]; then
             #---special for non-standard 0day-name---#
-            dot_name="$($trans_show "${flexget_path}/$i"|grep -A 10 'FILES'|egrep -i '[\.0-9]+[ ]*(GB|MB)'|egrep -io "[-\.\'a-z0-9\!@_ ]+"|tail -n 2|head -n 1|sed -r 's/^[\. ]+//;s/\.[a-z4 ]{2,5}$//i'|sed -r 's/\.sample//i;s/[ ]+/./g')"
+            dot_name="$($trans_show "${flexget_path}/$i"|grep -A 10 'FILES'|egrep -i '[\.0-9]+[ ]*(GB|MB)'|egrep -io "[-\.\'a-z0-9\!@_ ]+"|tail -2|head -1|sed -r 's/^[\. ]+//;s/\.[a-z4 ]{2,5}$//i'|sed -r 's/\.sample//i;s/[ ]+/./g')"
         else
             dot_name="$(echo "$new_torrent_name"|sed -r "s/[ ]+/./g;s/\.[a-z4]{2,3}$//i;")"
         fi
@@ -76,30 +63,40 @@ function main_loop()
         fi
         #---.tr file path---#
         torrentPath="${flexget_path}/${new_torrent_name}.torrent"
+        # temp desc file name
+        source_detail_desc="${AUTO_ROOT_PATH}/tmp/${dot_name}_desc.txt"
+        [ "$enable_byrbt" = 'yes' ] && source_detail_html="${AUTO_ROOT_PATH}/tmp/${dot_name}_html.txt"
+        [ "$enable_tjupt" = 'yes' ] && source_detail_desc2tjupt="${AUTO_ROOT_PATH}/tmp/${dot_name}_desc2tjupt.txt"
 
         #---generate desc before done---#
-        if [ ! -s "${AUTO_ROOT_PATH}/tmp/${dot_name}_desc.txt" ]; then
-            completion="$("$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep "$new_torrent_name"|head -n 1|awk '{print $2}'|sed 's/%//')"
+        if [ ! -s "$source_detail_desc" ]; then
+            completion="$("$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep "$new_torrent_name"|head -1|awk '{print $2}'|sed 's/%//')"
             [ "$test_func_probe" ] && completion=100 && TR_TORRENT_NAME="$new_torrent_name" # convenient for test
             [ "$completion" ] && if [ $completion -ge 70 ]; then
                 unset completion
-                source "$AUTO_ROOT_PATH/get_desc/desc.sh"
+                source "$AUTO_ROOT_PATH/get_desc/desc.sh" # run only once
                 [ ! "$test_func_probe" ] && [ ! "$TR_TORRENT_NAME" ] && break   # must have not completed
             fi
         fi
 
         #---if completed---#
         get_torrent_func            # get TR_NAME
+        echo  "$new_torrent_name" = "$TR_TORRENT_NAME" 
         if [ "$new_torrent_name" = "$TR_TORRENT_NAME" ]; then
             IFS=$IFS_OLD
             echo "+++++++++++++[start]+++++++++++++" >> "$log_Path"
             echo "[`date '+%Y-%m-%d %H:%M:%S'`] 准备发布 [$dot_name]" >> "$log_Path"
+            # httpie 对文件名有要求，如包含特殊字符，可能 POST 不成功，只改torrent文件名。
+            local plain_name_tmp="autoseed_$(date +%s%N).torrent"
+            mv "${flexget_path}/${new_torrent_name}.torrent" "${flexget_path}/${plain_name_tmp}"
+            torrentPath="${flexget_path}/${plain_name_tmp}"
+
             source "$AUTO_ROOT_PATH/post/post.sh"
 
             write_log_main          # write log
             unset TR_TORRENT_NAME   # next torrent
-            rm -f "$torrentPath"    # delete uploaded torrent
-            clean_commit_main=1
+            [ ! "$test_func_probe" ] && rm -f "$torrentPath"    # delete uploaded torrent
+            [ ! "$test_func_probe" ] && clean_commit_main=1
         fi
     done
     IFS=$IFS_OLD
@@ -110,19 +107,17 @@ function main_loop()
 }
 
 #--------------timeout func--------------#
-TimeOut()
-{
+TimeOut() {
     waitfor=460
     main_loop_command=$*
     $main_loop_command &
     main_loop_pid=$!
 
-    ( sleep $waitfor ; kill -9 $main_loop_pid  > /dev/null 2>&1 && echo -e "脚本因超时被强制中断\n" >> "$log_Path" ) &
+    ( sleep $waitfor ; kill -9 $main_loop_pid &>/dev/null && echo -e "脚本因超时被强制中断\n" >> "$log_Path" ) &
     main_loop_sleep_pid=$!
 
-    wait $main_loop_pid > /dev/null 2>&1
-    sleep 2
-    kill -9 $main_loop_sleep_pid > /dev/null 2>&1
+    wait $main_loop_pid &> /dev/null
+    kill -9 $main_loop_sleep_pid &> /dev/null
 }
 
 #-------------start function------------#
@@ -130,7 +125,8 @@ TimeOut()
 
 #---start check---#
 if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
-    is_locked
+    [ -f "$lock_file" ] && exit
+
     number_of_cpus="$(grep 'model name' /proc/cpuinfo|wc -l)"
     get_cpu_current_usage() {
         cpu_current_usage="$(echo $(uptime |awk -F 'average:' '{print $2}'|awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100/$number_of_cpus|bc|awk -F '.' '{print $1}')"
@@ -140,6 +136,8 @@ if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
     get_cpu_current_usage && [ "$cpu_current_usage" -ge 70 ] && sleep 13 
     get_cpu_current_usage && [ "$cpu_current_usage" -ge 50 ] && sleep  9 
     get_cpu_current_usage && [ "$cpu_current_usage" -ge 30 ] && sleep  5 
+
+    trap remove_lock EXIT
 
     if [ "$test_func_probe" ]; then
         main_loop

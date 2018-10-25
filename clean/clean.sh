@@ -2,8 +2,8 @@
 # FileName: clean/clean.sh
 #
 # Author: rachpt@126.com
-# Version: 2.2v
-# Date: 2018-06-23
+# Version: 2.4.2v
+# Date: 2018-10-23
 #-----------------------------#
 #
 # Auto clean old files/folders in 
@@ -13,8 +13,8 @@
 #---------Settings------------#
 
 #-----------------------------#
-DELTE_OLD_and_ERROE_TORRENT()
-{
+# 删除红种(被删的种)，不会删除下载的数据
+DELTE_OLD_and_ERROE_TORRENT() {
     for eachTorrentID in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep '[1]\?[0-9]\{1,2\}%'|awk '{print $1}'|sed "s/\*//g"`
     do
         #---error torrent---#
@@ -34,14 +34,14 @@ DELTE_OLD_and_ERROE_TORRENT()
     done
 }
 #-----------------------------#
-IS_SEEDING()
-{
+# 判断目录下的文件或者文件夹是否处于做种中，否则删掉 数据
+IS_SEEDING() {
     IFS=$IFS_OLD
     delete_commit=0
     if [ -n "$1" ]; then
         for eachTorrentID in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep '%'| awk '{print $1}'`
         do
-	        eachTorrent=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i |grep 'Name'|head -n 1|awk '{print $2}'`
+            eachTorrent=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i |grep 'Name'|head -n 1|awk '{print $2}'`
             if [ "$1" = "$eachTorrent" ]; then
 		        delete_commit=1
             fi
@@ -54,8 +54,8 @@ IS_SEEDING()
     fi
 }
 #-----------------------------#
-IS_FILE_OLD()
-{
+# 用于处理长时间下载某个种子情况，超过设定时间下载未完成，则删之。
+IS_FILE_OLD() {
     IFS=$IFS_OLD
     fileDate=`stat "$FILE_PATH/$1" |grep Modify|awk '{print $2}'`
     fileTime=`stat "$FILE_PATH/$1" |grep Modify|awk '{split($3,var,"."); print var[1]}'`
@@ -67,8 +67,8 @@ IS_FILE_OLD()
     fi
 }
 #-----------------------------#
-COMPARER_FILE_and_DELETE()
-{
+# 比较文件是否在 TR 做种列表中
+COMPARER_FILE_and_DELETE() {
     IFS_OLD=$IFS
     IFS=$'\n'
     for i in `ls -1 $FILE_PATH`
@@ -81,14 +81,14 @@ COMPARER_FILE_and_DELETE()
     IFS=$IFS_OLD
 }
 #-----------------------------#
-DISK_CHECK()
-{
+# 检查磁盘可用空间大小
+DISK_CHECK() {
     DISK_AVAIL=`df -h $FILE_PATH | grep -v Mounted | awk '{print $4}' | cut -d 'G' -f 1`
     DISK_OVER=`awk 'BEGIN{print('$DISK_AVAIL'<'$DISK_AVAIL_MIN')}'`
 }
 #-----------------------------#
-DISK_IS_OVER_USE()
-{
+# 判断磁盘可用空间是否低于阈值，是则删掉 TR 靠前的种子，直到不低于阈值。
+DISK_IS_OVER_USE() {
     DISK_CHECK
     if [ "$DISK_OVER" = "1" ]; then
         for i in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep 100% |grep Done| awk '{print $1}'|grep -v ID`

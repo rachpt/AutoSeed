@@ -6,36 +6,34 @@
 # Date: 2018-10-20
 #
 #-------------------------------------#
-get_source_site()
-{
+get_source_site() {
     tracker_source_infos=`"$trans_show" "$torrentPath" |grep -A 5 'TRACKERS'`
 
-    if [ "`echo $tracker_source_infos|grep -i 'hdsky'`" ]; then
+    if [ "`echo "$tracker_source_infos"|grep -i 'hdsky'`" ]; then
         source_site_URL='https://hdsky.me'
         cookie_source_site="$cookie_hds"
         echo "got source_site" >> "$log_Path"
-    elif [ "`echo $tracker_source_infos|grep -i 'totheglory'`" ]; then
+    elif [ "`echo "$tracker_source_infos"|grep -i 'totheglory'`" ]; then
         source_site_URL='https://totheglory.im'
         cookie_source_site="$cookie_ttg"
         echo "got source_site" >> "$log_Path"
-    elif [ "`echo $tracker_source_infos|grep -i 'hdchina'`" ]; then
+    elif [ "`echo "$tracker_source_infos"|grep -i 'hdchina'`" ]; then
         source_site_URL='https://hdchina.org'
         cookie_source_site="$cookie_hdc"
         echo "got source_site" >> "$log_Path"
-    elif [ "`echo $tracker_source_infos|grep -i 'tp.m-team.cc'`" ]; then
+    elif [ "`echo "$tracker_source_infos"|grep -i 'tp.m-team.cc'`" ]; then
         source_site_URL='https://tp.m-team.cc'
         cookie_source_site="$cookie_mt"
         echo "got source_site" >> "$log_Path"
-    elif [ "`echo $tracker_source_infos|grep -i 'hdcmct.org'`" ]; then
+    elif [ "`echo "$tracker_source_infos"|grep -i 'hdcmct.org'`" ]; then
         source_site_URL='https://hdcmct.org'
         cookie_source_site="$cookie_cmct"
         echo "got source_site" >> "$log_Path"
-    #elif [ "`echo $tracker_source_infos|grep -i 'new'`" ]; then
+    #elif [ "`echo $tracker_source_infos"|grep -i 'new'`" ]; then
     #    source_site_URL='https://new.tracker.com'
     fi
 }
-set_source_site_cookie()
-{
+set_source_site_cookie() {
     if [ "$source_site_URL" = "https://hdsky.me" ]; then
         cookie_source_site="$cookie_hds"
     elif [ "$source_site_URL" = "https://totheglory.im" ]; then
@@ -50,8 +48,7 @@ set_source_site_cookie()
 }
 
 #-------------------------------------#
-form_source_site_get_tID()
-{
+form_source_site_get_tID() {
     if [ "$source_site_URL" = "https://totheglory.im" ]; then
         source_site_search_URL="${source_site_URL}/browse.php?c=M&search_field=$(echo "${dot_name}"|sed -r "s/\.[a-z4]{2,4}$//i")"
     else
@@ -68,8 +65,7 @@ form_source_site_get_tID()
 }
 
 #-------------------------------------#
-get_original_subname()
-{
+get_original_subname() {
     if [ "$source_site_URL" = "https://totheglory.im" ]; then
         original_subname_info="$(grep 'h1.*\[.*\]' "$source_detail_full"|head -n 1|sed "s#.*\[\(.*\)</h1>#\1#g")"
         if [ "$original_subname_info" ]; then
@@ -93,8 +89,7 @@ get_original_subname()
 }
 
 #-------------------------------------#
-form_source_site_get_Desc()
-{
+form_source_site_get_Desc() {
     form_source_site_get_tID
 
     if [ -n "${source_t_id}" ]; then
@@ -146,7 +141,7 @@ form_source_site_get_Desc()
         
         sed -i "/doubanio\.com/d" "$source_detail_desc"
         #---copy as a duplication---#
-        cat "$source_detail_desc" > "$source_detail_html"
+        [ "$enable_byrbt" = 'yes' ] && cat "$source_detail_desc" > "$source_detail_html"
 
         imdbUrl="$(grep -o 'tt[0-9]\{7\}' "$source_detail_full"|head -n 1)"
         doubanUrl="$(grep -o 'http[s]*://movie\.douban\.com/subject/[0-9]\{8\}[/]*' "$source_detail_full"|head -n 1)"
@@ -159,8 +154,7 @@ form_source_site_get_Desc()
 }
 
 #-------------------------------------#
-detail_main_func()
-{
+detail_main_func() {
     #---define temp file name---#
     source_detail_full="${AUTO_ROOT_PATH}/tmp/${dot_name}_full.txt"
 

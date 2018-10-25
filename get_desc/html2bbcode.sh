@@ -2,8 +2,8 @@
 # FileName: get_desc/html2bbcode.sh
 #
 # Author: rachpt@126.com
-# Version: 2.4v
-# Date: 2018-10-19
+# Version: 2.4.2v
+# Date: 2018-10-23
 #
 #-------------------------------------#
 sed -i "s/id=\"[^\"]\"//g; s/alt=\"[^\"]\"//g" "$source_detail_desc"

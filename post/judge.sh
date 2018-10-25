@@ -6,8 +6,7 @@
 # Date: 2018-08-16
 #
 #----------------------------------------#
-function judge_torrent()
-{
+function judge_torrent() {
     base_movie_name_search="$(echo "$new_torrent_name" |egrep -o '.*[12][098][0-9]{2}')"
     if [ "`echo "$new_torrent_name"|grep -i 'ipad'|grep -i 'BluRay'`" ]; then
         url="${postUrl%/*}/torrents.php?search=${base_movie_name_search}+iPad+BluRay"

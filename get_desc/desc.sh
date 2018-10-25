@@ -2,13 +2,21 @@
 # FileName: get_desc/desc.sh
 #
 # Author: rachpt@126.com
-# Version: 2.4v
-# Date: 2018-10-19
+# Version: 2.4.2v
+# Date: 2018-10-23
 #
 #-------------------------------------#
-#
-source_detail_desc="${AUTO_ROOT_PATH}/tmp/${dot_name}_desc.txt"
-source_detail_html="${AUTO_ROOT_PATH}/tmp/${dot_name}_html.txt"
+# this file will be include main.sh and edit.sh
+#-------------------------------------#
+if [ ! "$dot_name" ]; then
+    if [ "$new_torrent_name" != "$(echo "$new_torrent_name"|grep -oP "[-\.a-zA-Z0-9\!\'@_’:：（）()\[\] ]+")" ]; then
+        #---special for non-standard 0day-name---#
+        dot_name="$($trans_show "${flexget_path}/$i"|grep -A 10 'FILES'|egrep -i '[\.0-9]+[ ]*(GB|MB)'|egrep -io "[-\.\'a-z0-9\!@_ ]+"|tail -2|head -1|sed -r 's/^[\. ]+//;s/\.[a-z4 ]{2,5}$//i'|sed -r 's/\.sample//i;s/[ ]+/./g')"
+    else
+        dot_name="$(echo "$new_torrent_name"|sed -r "s/[ ]+/./g;s/\.[a-z4]{2,3}$//i;")"
+    fi
+fi 
+#-------------------------------------#
 # import functions
 source "$AUTO_ROOT_PATH/get_desc/detail_page.sh"
 
@@ -52,15 +60,13 @@ if [ ! -s "$source_detail_desc" ]; then
         unset source_detail_desc_tmp    source_detail_html_tmp
         #---
     fi
-    echo "$subname_tmp_1 $subname_tmp_2"
 
     unset subname_tmp_1 subname_tmp_2
     
-    unset avoid_infinite_loops  chs_name_douban  desc_json_info
+    unset desc_json_info
     unset tmp_poster_file  new_poster_url  new_poster_url_byrbt
+    #---poster---#
+    sed -r -i "1 {s/^[ \t]+//}" "$source_detail_desc"
+    source "$AUTO_ROOT_PATH/get_desc/poster.sh"
 fi
-
-#---poster---#
-sed -r -i "1 {s/^[ \t]+//}" "$source_detail_desc"
-source "$AUTO_ROOT_PATH/get_desc/poster.sh"
 
