@@ -76,6 +76,10 @@ function main_loop() {
                 source "$AUTO_ROOT_PATH/get_desc/desc.sh" # run only once
                 [ ! "$test_func_probe" ] && [ ! "$TR_TORRENT_NAME" ] && break   # must have not completed
             fi
+        else
+            # get source site to log file
+            source "$AUTO_ROOT_PATH/get_desc/detail_page.sh"
+            get_source_site         # get_desc/detail_page.sh
         fi
 
         #---if completed---#
