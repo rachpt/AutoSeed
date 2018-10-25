@@ -29,8 +29,7 @@ if [ ! "$TR_TORRENT_NAME" ]; then
     for one in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep '100%'|awk '{print $1}'|sed 's/\*//g'|sort -nr`
     do
         # before Name have 2 spacings
-        local one_name
-        one_name=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $one -i |grep 'Name'|head -1|sed 's/[ ]*Name: //'`
+        local one_name=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $one -i |grep 'Name'|head -1|sed 's/[ ]*Name: //'`
         if [ "$new_torrent_name" = "$one_name" ]; then
 	        TR_TORRENT_NAME="$one_name"
 	        TR_TORRENT_DIR=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $one -i |grep 'Location'|head -1|sed 's/[ ]*Location: //'`
@@ -49,7 +48,7 @@ function main_loop() {
     for i in $(find "$flexget_path" -iname "*.torrent*" |awk -F "/" '{print $NF}')
     do
         # before Name have no spacings
-   	    new_torrent_name=`$trans_show "${flexget_path}/$i"|grep 'Name'|head -n 1|sed 's/Name: //'`
+        new_torrent_name=`$trans_show "${flexget_path}/$i"|grep 'Name'|head -n 1|sed 's/Name: //'`
         #---use dot separated name for saving desc---#
         if [ "$new_torrent_name" != "$(echo "$new_torrent_name"|grep -oP "[-\.a-zA-Z0-9\!\'@_’:：（）()\[\] ]+")" ]; then
             #---special for non-standard 0day-name---#

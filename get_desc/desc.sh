@@ -6,7 +6,7 @@
 # Date: 2018-10-23
 #
 #-------------------------------------#
-# this file will be include main.sh and edit.sh
+# this file will be included in main.sh and edit.sh
 #-------------------------------------#
 if [ ! "$dot_name" ]; then
     if [ "$new_torrent_name" != "$(echo "$new_torrent_name"|grep -oP "[-\.a-zA-Z0-9\!\'@_’:：（）()\[\] ]+")" ]; then
