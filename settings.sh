@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-10-23
+# Date: 2018-11-21
 #
 # Environmental requirements:
 # - transmission-[show,remote,daemon or gtk]
@@ -12,14 +12,16 @@
 #
 #----------------[main]----------------#
 #---use yes to disable all---#
-disable_AutoSeed='no'
-
+Disable_AutoSeed='no'
+# set 'yes' allow say thanks 
+Allow_Say_Thanks='yes'
 # set 'yes', will use python local,otherwise use web 
 USE_Local_Gen='yes'
 #
 #---torrent file path---#
 flexget_path="/home/rachpt/Downloads/tmp"
 #
+TR_Client='qbittorrent' # qbittorrent or transmission
 #----------------[clean]---------------#
 # Watch folder for clean.
 # If not set, will clean just finished one's folder.
@@ -39,6 +41,7 @@ MAX_SEED_TIME=13
 ########################################
 #---[hudbt]---#
 enable_hudbt='yes'
+say_thanks_hudbt='yes'
 #
 default_select_type_hudbt='415'
 default_standard_hudbt='3'
@@ -51,6 +54,7 @@ passkey_hudbt='1234567890987654321123423442'
 ########################################
 #---[whu]---#
 enable_whu='yes'
+say_thanks_whu='yes'
 #
 default_select_type_whu='415'
 default_standard_whu='0'
@@ -63,6 +67,7 @@ passkey_whu='12345678909876543211123456789987'
 ########################################
 #---[npupt]---#
 enable_npupt='yes'
+say_thanks_npupt='yes' # not work
 #
 default_select_type_npupt='401'
 default_standard_npupt='7'
@@ -75,6 +80,7 @@ passkey_npupt='12345678909876543211234567887'
 ########################################
 #---[nanyangpt]---#
 enable_nanyangpt='yes'
+say_thanks_nanyangpt='yes'
 #
 default_select_type_nanyangpt='401'
 anonymous_nanyangpt='yes'
@@ -86,6 +92,7 @@ passkey_nanyangpt='12345678909876543212345654'
 ########################################
 #---[byrbt]---#
 enable_byrbt='yes'
+say_thanks_byrbt='yes'
 #---use 'yes' delete screens img---#
 just_poster_byrbt='yes'
 default_select_type_byrbt='408'
@@ -99,6 +106,7 @@ passkey_byrbt='12345678909876543212345654'
 ########################################
 #---[cmct]---#
 enable_cmct='yes'
+say_thanks_cmct='yes'
 #---delete screens img---#
 default_select_type_cmct='501'
 default_medium_sel_cmct='6'  # mkv 6, mp4 7.
@@ -114,6 +122,7 @@ passkey_cmct='12345678909876543212345654'
 ########################################
 #---[tjupt]---#
 enable_tjupt='yes'
+say_thanks_tjupt='yes'
 #
 default_select_type_tjupt='401' # 401 电影, 411 纪录片
 default_subsinfo_tjupt='6' # 其他 ## 字幕

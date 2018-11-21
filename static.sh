@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-11-20
+# Date: 2018-11-21
 #
 #--------------------------------------#
 #--log path (do not change)---#
@@ -14,11 +14,6 @@ debug_log="$AUTO_ROOT_PATH/tmp/debug"
 lock_file="$AUTO_ROOT_PATH/tmp/LOCK"
 #
 #--------------------------------------#
-#---path of transmission-show---#
-trans_show="transmission-show"
-#
-#---path of transmission-remote---#
-trans_remote='transmission-remote'
 #
 #---path of python3---#
 python3='python3'
@@ -61,4 +56,40 @@ descrCom_complex_html="<br />
 <br />
 <br />"
 #
+#--------------------------------------#
 
+
+#--------------------------------------#
+# declare -A  定义关联数组 类似字典 键值对
+declare -A trackers
+declare -A post_site
+
+[[ $enable_hudbt = 'yes' ]] && { trackers[hudbt]='hudbt.hust.edu.cn'
+    post_site[hudbt]='https://hudbt.hust.edu.cn'; }
+[[ $enable_whu = 'yes' ]] && { trackers[whu]='tracker.whupt.net'
+    post_site[whu]='https://whu.pt'; }
+[[ $enable_npupt = 'yes' ]] && { trackers[npupt]='npupt.com'
+    post_site[npupt]='https://npupt.com'; }
+[[ $enable_nanyangpt = 'yes' ]] && { trackers[nanyangpt]='tracker.nanyangpt.com'
+    post_site[nanyangpt]='https://nanyangpt.com'; }
+[[ $enable_byrbt = 'yes' ]] && { trackers[byr]='tracker.byr.cn'
+    post_site[byrbt]='https://bt.byr.cn'; }
+[[ $enable_cmct = 'yes' ]] && { trackers[cmct]='tracker.hdcmct.org'
+    post_site[cmct]='https://hdcmct.org'; }
+[[ $enable_tjupt = 'yes' ]] && { trackers[tjupt]='pttrackertju.tjupt.org'
+    post_site='https://tjupt.org'; }
+#--------------------------------------#
+
+#[[ $Allow_Say_Thanks != 'yes' ]] && for tracker in ${!trackers[*]}; do
+    #tr_set_commit[$tracker]='init'
+#done
+
+if [ "$TR_Client" = 'qbittorrent' ]; then
+    source "$AUTO_ROOT_PATH/qbittorrent.sh"
+elif [ "$TR_Client" = 'transmission' ]; then
+    source "$AUTO_ROOT_PATH/transmission.sh"
+else
+    echo '###### Error!' >> "$debug_log"
+fi
+
+#--------------------------------------#
