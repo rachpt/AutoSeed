@@ -36,7 +36,7 @@ sed -i "s/<font face=\"[cC]ourier [nN]ew\">/[font=monospace]/g;s/<font face=\"mo
 sed -i "s#<table[^>]\+>#[quote]#g;s#</table>#[/quote]\n#g;" "$source_detail_desc"
 
 #---img---#
-sed -i "s#\"[^\"]*attachments\([^\"]\+\)#\"${source_site_URL}/attachments\1#g" "$source_detail_desc"
+sed -i "s!\"[^\"]*attachments\([^\"]\+\)!\"${source_site_URL}/attachments\1!g" "$source_detail_desc"
 sed -i "s#<img[^>]\+src=\"\(.[^\"]\+\)\"[^>]*>#[img]\1[/img]#g" "$source_detail_desc"
 sed -i "s#\]attachments#\]${source_site_URL}/attachments#g" "$source_detail_desc"
 
@@ -50,7 +50,7 @@ sed -i "s#<legend>[^>]\+引用[^>]\+</legend>##g;s#fieldset#quote#g" "$source_de
 sed -i "s#<#[#g;s#>#]#g" "$source_detail_desc"
 
 #---double url---#
-sed -i "s#\[url=[^\]]\+/\]\[url=\(.*\)\[/url\]\[/url\]#[url=\1[/url]#g" "$source_detail_desc"
+sed -i "s!\[url=[^\]]\+/\]\[url=\(.*\)\[/url\]\[/url\]![url=\1[/url]!g" "$source_detail_desc"
 
 #---deal with hdc poster---#
 if [ "$source_site_URL" = "https://hdchina.org111" ]; then
@@ -71,8 +71,8 @@ if [ "$source_site_URL" = "https://hdchina.org111" ]; then
 fi
 
 #---ttg imdb url---#
-sed -i "s#\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\]\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\]\(http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\)\[/url\]\[/url\]#\1#g" "$source_detail_desc"
-sed -i "s#\[url=http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\]\[url=http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\]\(http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\)\[/url\]\[/url\]#\1#g" "$source_detail_desc"
+sed -i "s!\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\]\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\]\(http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\)\[/url\]\[/url\]!\1!g" "$source_detail_desc"
+sed -i "s!\[url=http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\]\[url=http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\]\(http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\)\[/url\]\[/url\]!\1!g" "$source_detail_desc"
 
 sed -i -r '/quote/{s/font color=["]([a-zA-Z]+)["]/color=\1/g;s/\[\/font\]/[\/size]/;s/\[\/font\]/[\/color]/}' "$source_detail_desc"
 

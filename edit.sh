@@ -14,8 +14,8 @@ if [ $? -eq 0 ]; then
 fi
 #---import settings---#
 if [ -z "$log_Path"]; then
-    AUTO_ROOT_PATH="$(dirname "$(readlink -f "$0")")"
-    source "$AUTO_ROOT_PATH/settings.sh"
+    ROOT_PATH="$(dirname "$(readlink -f "$0")")"
+    source "$ROOT_PATH/settings.sh"
 fi
 #----------------post----------------#
 function edit_post_normal()
@@ -53,38 +53,38 @@ do
             #---clean---#
             rm -f "$source_detail_desc" "$source_detail_html"
             dot_name="$(echo "$new_torrent_name"|sed "s/[ ]\+/./g;s/\(.*\)\.mp4/\1/g;s/\(.*\)\.mkv/\1/g")"
-    	      source "$AUTO_ROOT_PATH/get_desc/desc.sh"
-            source "$AUTO_ROOT_PATH/post/param.sh"
+    	      source "$ROOT_PATH/get_desc/desc.sh"
+            source "$ROOT_PATH/post/param.sh"
         fi
 
         echo $imdbUrl
         if [ "$check_site" = "https://hudbt.hust.edu.cn" ]; then
-            source "$AUTO_ROOT_PATH/post/hudbt.sh"
+            source "$ROOT_PATH/post/hudbt.sh"
             edit_post_normal
             echo "$default_subname" "$smallDescr"
             sed -i "${edit_loop}s#$default_subname#$smallDescr#" "$log_Path"
         elif [ "$check_site" = "https://whu.pt" ]; then
-            source "$AUTO_ROOT_PATH/post/whu.sh"
+            source "$ROOT_PATH/post/whu.sh"
             edit_post_normal
             echo "$default_subname" "$smallDescr"
             sed -i "${edit_loop}s#$default_subname#$smallDescr#" "$log_Path"
         elif [ "$check_site" = "https://npupt.com" ]; then
-            source "$AUTO_ROOT_PATH/post/npupt.sh"
+            source "$ROOT_PATH/post/npupt.sh"
             edit_post_npupt
             echo "$default_subname" "$smallDescr"
             sed -i "${edit_loop}s#$default_subname#$smallDescr#" "$log_Path"
         elif [ "$check_site" = "https://nanyangpt.com" ]; then
-            source "$AUTO_ROOT_PATH/post/nanyangpt.sh"
+            source "$ROOT_PATH/post/nanyangpt.sh"
             edit_post_nanyangpt
             echo "$default_subname" "$smallDescr"
             sed -i "${edit_loop}s#$default_subname#$smallDescr#" "$log_Path"
         elif [ "$check_site" = "https://bt.byr.cn" ]; then
-            source "$AUTO_ROOT_PATH/post/byrbt.sh"
+            source "$ROOT_PATH/post/byrbt.sh"
             edit_post_byrbt
             echo "$default_subname" "$smallDescr"
             sed -i "${edit_loop}s#$default_subname#$smallDescr#" "$log_Path"
         elif [ "$check_site" = "https://tjupt.org" ]; then
-            source "$AUTO_ROOT_PATH/post/tjupt.sh"
+            source "$ROOT_PATH/post/tjupt.sh"
             edit_post_tjupt
             echo "$default_subname" "$smallDescr"
             sed -i "${edit_loop}s#$default_subname#$smallDescr#" "$log_Path"

@@ -3,47 +3,52 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-10-22
+# Date: 2018-12-03
 #
 #-------------------------------------#
 # 调函数，生成简介
+# 提前生成简介，post，重编辑会用到该文件
 #-------------------------------------#
+# 最后发布前会再次重命名为简单的名字减少莫名其妙的bug。
+# dot_name即点分隔名，用作 0day 名，以及构成保存简介文件名。
+if [ "$(echo "$org_tr_name"|sed 's/[a-z0-9[:punct:]]//ig')" ]; then
+    #---special for non-standard 0day-name---#
+    dot_name="$("$tr_show" "${flexget_path}/$tr_i"|grep -A10 'FILES'|grep -Ei '[\.0-9]+[ ]*(GB|MB)'|grep -Eio "[-\.\'a-z0-9\!@_ ]+"|tail -2|head -1|sed -r 's/^[\. ]+//;s/\.[a-z4 ]{2,5}$//i'|sed -r 's/\.sample//i;s/[ ]+/./g')"
+else
+    # remove suffix name
+    dot_name="$(echo "$org_tr_name"|sed -Ee "s/[ ]+/./g;s/\.[a-z4]{2,3}$//i")"
+fi
 
-source_detail_desc="${AUTO_ROOT_PATH}/tmp/${dot_name}_desc.txt"
-# byrbt
-[ "$enable_byrbt" = 'yes' ] && source_detail_html="${AUTO_ROOT_PATH}/tmp/${dot_name}_html.txt"
-# import functions
-source "$AUTO_ROOT_PATH/get_desc/detail_page.sh"
-# 图片上传 API
-upload_poster_api='https://sm.ms/api/upload'
-upload_poster_api_byrbt='https://bt.byr.cn/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images'
+source_detail_desc="${ROOT_PATH}/tmp/${org_tr_name}_desc.txt"
+# byrbt, html format
+[ "$enable_byrbt" = 'yes' ] && \
+    source_detail_html="${ROOT_PATH}/tmp/${org_tr_name}_html.txt"
 
 #---to log and edit.sh---#
 if [ -z "$source_site_URL" ]; then
-    get_source_site          # get_desc/detail_page.sh
+    get_source_site            # get_desc/detail_page.sh
 else
-    set_source_site_cookie   # get_desc/detail_page.sh
+    set_source_site_cookie     # get_desc/detail_page.sh
 fi
 
 #---if not exist desc file---#
 if [ ! -s "$source_detail_desc" ]; then
     # 尝试搜索原种简介，以获取 iNFO 以及 screens
-    detail_main_func         # get_desc/detail_page.sh
-    
+    form_source_site_get_Desc  # get_desc/detail_page.sh
+    # generate info? 
     if [ ! -s "$source_detail_desc" ]; then
         # import functions
-        source "$AUTO_ROOT_PATH/get_desc/info.sh"
-        read_info_file       # get_desc/info.sh
+        source "$ROOT_PATH/get_desc/info.sh"
+        read_info_file         # get_desc/info.sh
     fi
-    # import functions generate desc
-    source "$AUTO_ROOT_PATH/get_desc/generate.sh"
-    generate_main_func       # get_desc/generate.sh
+    # import functions to generate desc
+    source "$ROOT_PATH/get_desc/generate.sh"
+    generate_main_func         # get_desc/generate.sh
+    #---screens---#
+    if [ "$enable_byrbt" = 'yes' ]; then
+        source "$ROOT_PATH/get_desc/screens.sh"
+        deal_with_byrbt_images     # get_desc/screens.sh
+    fi
 
-fi
-
-#---screens---#
-if [ "$enable_byrbt" = 'yes' ]; then
-    source "$AUTO_ROOT_PATH/get_desc/screens.sh"
-    deal_with_byrbt_images   # get_desc/screens.sh
 fi
 

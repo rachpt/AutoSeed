@@ -3,18 +3,16 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-11-21
+# Date: 2018-12-04
 #
 #-------------settings----------------#
 
 torrent2add="${download_url}&passkey=${passkey}"
 
-#-------------functions---------------#
 #-----------call function-------------#
-if [ "$Tr_Path" ]; then
+if [ "$one_TR_Dir" ]; then
     if [ "$postUrl" = "${post_site[whu]}/takeupload.php" ]; then
-        http --ignore-stdin -d "$torrent2add" -o \
-            "${AUTO_ROOT_PATH}/tmp/${t_id}.torrent"
+        http --ignore-stdin -d "$torrent2add" -o "${ROOT_PATH}/tmp/${t_id}.torrent"
 
         if [ "$TR_Client" = 'qbittorrent' ]; then
             qb_add_torrent_file
@@ -33,7 +31,7 @@ if [ "$Tr_Path" ]; then
         fi
     fi
     echo "+++++++++++++[added]+++++++++++++" >> "$log_Path"
-    rm -f "${AUTO_ROOT_PATH}/tmp/${t_id}.torrent"
+    rm -f "${ROOT_PATH}/tmp/${t_id}.torrent"
 else
     echo "没有找到本地文件！" >> "$log_Path"
 fi

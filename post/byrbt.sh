@@ -9,6 +9,7 @@
 cookie="$cookie_byrbt"
 passkey="$passkey_byrbt"
 anonymous="$anonymous_byrbt"
+ratio_set=$ratio_byrbt
 #---static---#
 postUrl='https://bt.byr.cn/takeupload.php'
 edit_postUrl='https://bt.byr.cn/takeedit.php'

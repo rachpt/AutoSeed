@@ -13,9 +13,8 @@
 # 后续合并通过豆瓣生成的简介。
 #-------------------------------------#
 
-get_source_site()
-{
-    tracker_source_infos=`"$trans_show" "$torrentPath" |grep -A 5 'TRACKERS'`
+get_source_site() {
+    tracker_source_infos="$( $trans_show "$torrent_Path"|grep -A5 'TRACKERS')"
     # 获取种子原站点
     if [ "`echo $tracker_source_infos|grep -i 'hdsky'`" ]; then
         source_site_URL='https://hdsky.me'
@@ -41,8 +40,7 @@ get_source_site()
     #    source_site_URL='https://new.tracker.com'
     fi
 }
-set_source_site_cookie()
-{
+set_source_site_cookie() {
     #i 供二次编辑简介使用
     if [ "$source_site_URL" = "https://hdsky.me" ]; then
         cookie_source_site="$cookie_hds"
@@ -58,39 +56,38 @@ set_source_site_cookie()
 }
 
 #-------------------------------------#
-form_source_site_get_tID()
-{
+form_source_site_get_tID() {
     # 构造原种搜索链接，以获取原种ID
     if [ "$source_site_URL" = "https://totheglory.im" ]; then
-        local source_site_search_URL="${source_site_URL}/browse.php?c=M&search_field=$(echo "${dot_name}"|sed -r "s/\.[a-z4]{2,4}$//i")"
+        local source_site_search_URL="${source_site_URL}/browse.php?c=M&search_field=${dot_name}"
     else
         # sed 用于过滤文件后缀
-        local source_site_search_URL="${source_site_URL}/torrents.php?search=$(echo "${dot_name}"|sed -r "s/\.[a-z4]{2,4}$//i")"
+        local source_site_search_URL="${source_site_URL}/torrents.php?search=${dot_name}"
     fi
 
-    source_t_id="$(http -b --ignore-stdin GET "$source_site_search_URL" "$cookie_source_site"|egrep -o 'id=[0-9]+.*hit=1'|head -1|egrep -o '[0-9]{4,}')"
+    source_t_id="$(http -b --ignore-stdin GET "$source_site_search_URL" "$cookie_source_site"|grep -Eo 'id=[0-9]+.*hit=1'|head -1|grep -Eo '[0-9]{4,}')"
 
     #---deal with wrong year---#
     if [ ! "$source_t_id" ]; then
         local source_site_search_URL="$(echo "$source_site_search_URL"|sed "s/[12][0789][0-9][0-9]//g")"
-        source_t_id="$(http -b --ignore-stdin GET "$source_site_search_URL" "$cookie_source_site"|egrep -o 'id=[0-9]+.*hit=1'|head -1|egrep -o '[0-9]{4,}')"
+        source_t_id="$(http -b --ignore-stdin GET "$source_site_search_URL" "$cookie_source_site"|grep -Eo 'id=[0-9]+.*hit=1'|head -1|grep -Eo '[0-9]{4,}')"
     fi
 }
 
 #-------------------------------------#
-form_source_site_get_Desc()
-{
+form_source_site_get_Desc() {
     form_source_site_get_tID
     # source_t_id will be unset in generate.sh
     if [ "${source_t_id}" ]; then
+        #---define temp file name---#
+        source_detail_full="${ROOT_PATH}/tmp/${org_tr_name}_full.txt"
         http -b --ignore-stdin GET "${source_site_URL}/details.php?id=${source_t_id}" "$cookie_source_site" > "$source_detail_full"
-    fi
-
+    #---
     if [ -s "$source_detail_full" ]; then
         # imdb 和豆瓣链接
-        imdb_url="$(egrep -o 'tt[0-9]{7}' "$source_detail_full"|head -1)"
-        douban_url="$(egrep -o 'https?://movie\.douban\.com/subject/[0-9]{8}/?' "$source_detail_full"|head -1)"
-        [ "$(egrep '禁止转载|禁转资源|谢绝转发|独占资源' "$source_detail_desc")" ] && local prohibit_upload=1
+        imdb_url="$(grep -Eo 'tt[0-9]{7}' "$source_detail_full"|head -1)"
+        douban_url="$(grep -Eo 'https?://movie\.douban\.com/subject/[0-9]{8}/?' "$source_detail_full"|head -1)"
+        [ "$(grep -E '禁止转载|禁转资源|谢绝转发|独占资源' "$source_detail_desc")" ] && local prohibit_upload=1
 
         # 匹配官方组 简介中的 info 以及 screens 所在行号
         if [ "$source_site_URL" = "https://hdsky.me" ]; then
@@ -124,30 +121,23 @@ form_source_site_get_Desc()
         sed -i "s/.*id='kdescr'>//g;s/onclick=\"Previewurl([^)]*)[;]*\"//g;s/onload=\"Scale([^)]*)[;]*\"//g;s/onmouseover=\"[^\"]*;\"//g" "$source_detail_desc"
         sed -i "s#onclick=\"Previewurl.*/><br />#/><br />#g" "$source_detail_desc"
         sed -i "/本资源仅限会员测试带宽之用，严禁用于商业用途！/d; /对用于商业用途所产生的法律责任，由使用者自负！/d" "$source_detail_desc"
-        sed -i "s#\"[^\"]*attachments\([^\"]\+\)#\"${source_site_URL}/attachments\1#g;s#src=\"attachments#src=\"${source_site_URL}/attachments#g" "$source_detail_desc"
-        sed -i "s#onmouseover=\"[^\"]*[;]*\"##g" "$source_detail_desc"
-        sed -i "s#onload=\"[^\"]*[;]*\"##g" "$source_detail_desc"
-        sed -i "s#onclick=\"[^\"]*[;)]*\"##g" "$source_detail_desc"
+        sed -Ei "s@\"[^\"]*attachments([^\"]+)@\"${source_site_URL}/attachments\1@ig;s#src=\"attachments#src=\"${source_site_URL}/attachments#ig" "$source_detail_desc"
+        sed -i "s#onmouseover=\"[^\"]*[;]*\"##ig" "$source_detail_desc"
+        sed -i "s#onload=\"[^\"]*[;]*\"##ig" "$source_detail_desc"
+        sed -i "s#onclick=\"[^\"]*[;)]*\"##ig" "$source_detail_desc"
         
         #---copy as a duplication for byrbt---#
-        [ "$enable_byrbt" = 'yes' ] && cp "$source_detail_desc" "$source_detail_html"
+        [ "$enable_byrbt" = 'yes' ] && cp -f "$source_detail_desc" "$source_detail_html"
 
         #---html2bbcode---#
-	      source "$AUTO_ROOT_PATH/get_desc/html2bbcode.sh"
+	      source "$ROOT_PATH/get_desc/html2bbcode.sh"
         [ "$prohibit_upload" -eq 1 ] && echo -e "\n&禁止转载&\n" >> "$source_detail_desc"
         unset prohibit_upload
+        rm -f "$source_detail_full"
+        unset source_detail_full
     fi
-}
-
-#-------------------------------------#
-detail_main_func()
-{
-    #---define temp file name---#
-    source_detail_full="${AUTO_ROOT_PATH}/tmp/${dot_name}_full.txt"
-
-    form_source_site_get_Desc
-    rm -f "$source_detail_full"
-    unset source_detail_full
+    #---
+    fi
 }
 
 #-------------------------------------#

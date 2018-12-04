@@ -37,9 +37,9 @@ function tr_set_ratio() {
 #------------add torrent--------------#
 function tr_add_torrent_file()
 {
-    $tr_edit -r 'http://' 'https://' "${AUTO_ROOT_PATH}/tmp/${t_id}.torrent"
+    $tr_edit -r 'http://' 'https://' "${ROOT_PATH}/tmp/${t_id}.torrent"
 
-    $tr_remote --add "${AUTO_ROOT_PATH}/tmp/${t_id}.torrent" -w "$one_TR_Dir"
+    $tr_remote --add "${ROOT_PATH}/tmp/${t_id}.torrent" -w "$one_TR_Dir"
     #---set seed ratio---#
     tr_set_ratio
 }

@@ -7,11 +7,11 @@
 #
 #--------------------------------------#
 #--log path (do not change)---#
-log_Path="$AUTO_ROOT_PATH/tmp/log"
+log_Path="$ROOT_PATH/tmp/log"
 #--log path (do not change)---#
-debug_log="$AUTO_ROOT_PATH/tmp/debug"
+debug_log="$ROOT_PATH/tmp/debug"
 #---lock path (do not change)---#
-lock_file="$AUTO_ROOT_PATH/tmp/LOCK"
+lock_file="$ROOT_PATH/tmp/LOCK"
 #
 #--------------------------------------#
 #
@@ -85,9 +85,9 @@ declare -A post_site
 #done
 
 if [ "$TR_Client" = 'qbittorrent' ]; then
-    source "$AUTO_ROOT_PATH/qbittorrent.sh"
+    source "$ROOT_PATH/qbittorrent.sh"
 elif [ "$TR_Client" = 'transmission' ]; then
-    source "$AUTO_ROOT_PATH/transmission.sh"
+    source "$ROOT_PATH/transmission.sh"
 else
     echo '###### Error!' >> "$debug_log"
 fi
