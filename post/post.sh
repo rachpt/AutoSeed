@@ -21,7 +21,7 @@ judge_before_upload() {
     [ "$postUrl" = "${post_site[nanyangpt]}/takeupload.php" ] && \
         judge_torrent_func
     #---necessary judge---# 
-    if [ "$(grep -E '禁止转载|禁转|情色' "$source_detail_desc")" ]; then
+    if [ "$(grep -E '禁止转载|禁转|情色' "$source_desc")" ]; then
         up_status=0  # give up upload
         echo "禁转禁发资源" >> "$log_Path"
     fi
@@ -53,8 +53,8 @@ add_t_id_2_client() {
 }
 #---------------------------------------#
 unset_tempfiles() {
-    #rm -f "$source_detail_desc" "$source_detail_html" "$source_detail_desc2tjupt"
-    unset source_detail_desc source_detail_html source_detail_desc2tjupt
+    #rm -f "$source_desc" "$source_html" "$source_desc2tjupt"
+    unset source_desc source_html source_desc2tjupt
     unset douban_poster_url source_site_URL source_t_id imdb_url
     echo "++++++++++[deleted tmp]++++++++++"     >> "$log_Path"
 }

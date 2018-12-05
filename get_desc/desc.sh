@@ -19,10 +19,10 @@ else
     dot_name="$(echo "$org_tr_name"|sed -Ee "s/[ ]+/./g;s/\.[a-z4]{2,3}$//i")"
 fi
 
-source_detail_desc="${ROOT_PATH}/tmp/${org_tr_name}_desc.txt"
+source_desc="${ROOT_PATH}/tmp/${org_tr_name}_desc.txt"
 # byrbt, html format
 [ "$enable_byrbt" = 'yes' ] && \
-    source_detail_html="${ROOT_PATH}/tmp/${org_tr_name}_html.txt"
+    source_html="${ROOT_PATH}/tmp/${org_tr_name}_html.txt"
 
 #---to log and edit.sh---#
 if [ -z "$source_site_URL" ]; then
@@ -32,11 +32,11 @@ else
 fi
 
 #---if not exist desc file---#
-if [ ! -s "$source_detail_desc" ]; then
+if [ ! -s "$source_desc" ]; then
     # 尝试搜索原种简介，以获取 iNFO 以及 screens
     form_source_site_get_Desc  # get_desc/detail_page.sh
     # generate info? 
-    if [ ! -s "$source_detail_desc" ]; then
+    if [ ! -s "$source_desc" ]; then
         # import functions
         source "$ROOT_PATH/get_desc/info.sh"
         read_info_file         # get_desc/info.sh

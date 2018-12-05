@@ -45,12 +45,12 @@ delete_screenshots_img() {
 #-------------------------------------#
 deal_with_byrbt_images() {
     # delete small images
-    [ "$enable_byrbt" = 'yes' ] && [ "$just_poster_byrbt" = "yes" ] && delete_screenshots_img "$source_detail_html"
+    [ "$enable_byrbt" = 'yes' ] && [ "$just_poster_byrbt" = "yes" ] && delete_screenshots_img "$source_html"
     # tjupt
     if [ "$enable_tjupt" = 'yes' ]; then
-        source_detail_desc2tjupt="${ROOT_PATH}/tmp/${org_tr_name}_desc2tjupt.txt"
-        cp "$source_detail_desc" "$source_detail_desc2tjupt"
-        [ "$just_poster_tjupt" = "yes" ] && delete_screenshots_img "$source_detail_desc2tjupt"
+        source_desc2tjupt="${ROOT_PATH}/tmp/${org_tr_name}_desc2tjupt.txt"
+        cp "$source_desc" "$source_desc2tjupt"
+        [ "$just_poster_tjupt" = "yes" ] && delete_screenshots_img "$source_desc2tjupt"
     fi
     
     # 遍历 html 简介中的非法图片
@@ -58,9 +58,9 @@ deal_with_byrbt_images() {
     while true; do
         if [ "$enable_byrbt" = 'yes' ]; then
             # 获取不包含 byrbt 域名的图片链接
-            local img_in_desc_url="$(grep -Eo "src=[\"\']http[^\'\"]+" "$source_detail_html"|sed "/bt\.byr\.cn/d"|head -1|sed "s/src=[\"\']//g")"
+            local img_in_desc_url="$(grep -Eo "src=[\"\']http[^\'\"]+" "$source_html"|sed "/bt\.byr\.cn/d"|head -1|sed "s/src=[\"\']//g")"
         elif [ "$enable_tjupt" = 'yes' ]; then
-            local img_in_desc_url="$(grep -Eio "[img]http.*[/img]" "$source_detail_desc2tjupt"|sed "/i\.loli\.net/d"|head -1|sed -E "s!\[/?img\]!!ig")"
+            local img_in_desc_url="$(grep -Eio "[img]http.*[/img]" "$source_desc2tjupt"|sed "/i\.loli\.net/d"|head -1|sed -E "s!\[/?img\]!!ig")"
         fi
         # 跳出循环条件
         if [ ! "$img_in_desc_url" ]; then
@@ -72,16 +72,16 @@ deal_with_byrbt_images() {
         local tmp_desc_img_file="$AUTO_ROOT_PATH/tmp/autoseed-pic-$(date +%s%N)$(echo "${img_in_desc_url##*/}"|sed -r 's/.*(\.[jpgb][pnim]e?[gfp]).*/\1/i')"
         http --ignore-stdin -dco "$tmp_desc_img_file" "$img_in_desc_url" >/dev/null 2>&1
         # byrbt
-        [ "$enable_byrbt" = 'yes' ] && byr_upload_img_url="$(http -f POST "$upload_poster_api_byrbt" upload@"$tmp_desc_img_file" "$cookie_byrbt"|grep -Eo "http[-a-zA-Z0-9./:()]+images[-a-zA-Z0-9./:(_ )]+[^\',\"]*" |sed "s/http:/https:/g")" && sed -i "s#$img_in_desc_url#$byr_upload_img_url#g" "$source_detail_html" && unset byr_upload_img_url
+        [ "$enable_byrbt" = 'yes' ] && byr_upload_img_url="$(http -f POST "$upload_poster_api_byrbt" upload@"$tmp_desc_img_file" "$cookie_byrbt"|grep -Eo "http[-a-zA-Z0-9./:()]+images[-a-zA-Z0-9./:(_ )]+[^\',\"]*" |sed "s/http:/https:/g")" && sed -i "s#$img_in_desc_url#$byr_upload_img_url#g" "$source_html" && unset byr_upload_img_url
         # tjupt
-        [ "$enable_tjupt" = 'yes' ] && [ ! "$(echo "$img_in_desc_url"|grep "i\.loli\.net")" ] && new_poster_url_sm="$(http --ignore-stdin -f POST "$upload_poster_api" smfile@"$tmp_desc_img_file"|grep -Eo "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" && sed -i "s#$img_in_desc_url#$new_poster_url_sm#g" "$source_detail_desc2tjupt" && unset new_poster_url_sm 
+        [ "$enable_tjupt" = 'yes' ] && [ ! "$(echo "$img_in_desc_url"|grep "i\.loli\.net")" ] && new_poster_url_sm="$(http --ignore-stdin -f POST "$upload_poster_api" smfile@"$tmp_desc_img_file"|grep -Eo "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" && sed -i "s#$img_in_desc_url#$new_poster_url_sm#g" "$source_desc2tjupt" && unset new_poster_url_sm 
 
         rm -f "$tmp_desc_img_file"
         unset img_in_desc_url  tmp_desc_img_file
         ((img_counter_reupload++)) # C 形式的增1
     done
     # tjupt images
-    [ "$enable_tjupt" = 'yes' ] && sed -i '/jpg\|png\|jpeg\|gif\|webp/ {/i\.loli\.net/!d}' "$source_detail_desc2tjupt"
+    [ "$enable_tjupt" = 'yes' ] && sed -i '/jpg\|png\|jpeg\|gif\|webp/ {/i\.loli\.net/!d}' "$source_desc2tjupt"
 }
 
 #-------------------------------------#

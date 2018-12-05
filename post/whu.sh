@@ -14,7 +14,7 @@ postUrl="${post_site[whu]}/takeupload.php"
 editUrl="${post_site[whu]}/takeedit.php"
 downloadUrl="${post_site[whu]}/download.php?id="
 #-------------------------------------#
-com_des="$(echo "$complex_des"|sed "s/&ratio_in_desc&/$ratio_whu/g")"
+whu_des="$(echo "$complex_des"|sed "s/&ratio_in_desc&/$ratio_whu/g")"
 
 #-------------------------------------#
 # 判断类型，纪录片、电影、剧集
@@ -125,12 +125,12 @@ whu_small_descr="$chinese_title $chs_included"
 # 6  有损音乐
 
 #-------------------------------------#
-t_id=$(http --ignore-stdin -f --print=h POST "$postUrl"\
+t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
     'name'="$noDot_name"\
     'small_descr'="$whu_small_descr"\
     'url'="$imdb_url"\
-    'url_douban'="$( [ ! "$imdb_url" ] && echo "$douban_url")"\
-    'descr'="$com_des"\
+    'url_douban'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo '11')"\
+    'descr'="$whu_des"\
     'type'="$whu_type"\
     'standard_sel'="$whu_stardand"\
     'uplver'="$anonymous_whu"\
@@ -139,15 +139,15 @@ t_id=$(http --ignore-stdin -f --print=h POST "$postUrl"\
 
 if [ -z "$t_id" ]; then
     # 辅种
-    t_id=$(http --ignore-stdin -f -b POST "$postUrl"\
+    t_id=$(http --verify=no --ignore-stdin -f -b POST "$postUrl"\
         name="$noDot_name"\
         small_descr="$whu_small_descr"\
         url="$imdb_url"\
         url_douban="$( [ ! "$imdb_url" ] && echo "$douban_url")"\
-        descr="$com_des"\
+        descr="$whu_des"\
         type="$whu_type"\
         standard_sel="$whu_stardand"\
-        uplver="$anonymous"\
+        uplver="$anonymous_whu"\
         file@"${torrent_Path}"\
         "$cookie_whu"|grep 'id='|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
 fi

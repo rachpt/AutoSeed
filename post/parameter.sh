@@ -10,49 +10,63 @@
 # 一次获取，多站重复使用。
 # 对参数有特殊要求的站点，其规则会写到其对应的 post 文件中。
 #-------------------------------------#
-from_desc_get_prarm() {
+unset_all_parameter() {
+    unset noDot_name region serials season normal documentary genre language
+    unset chs_included chinese_title foreign_title imdb_url douban_url is_ipad
+    unset is_bd is_hdtv is_webdl is_4k is_1080p is_720p is_other file_type
+    unset is_package is_264 is_265 is_dts is_ac3 is_aac is_flac
+}
+from_desc_get_param() {
+    unset_all_parameter
     # httpie 对文件名有要求，如包含特殊字符，可能 POST 失败，只改torrent文件名。
-    local plain_name_tmp="autoseed.$(date +%s%N).torrent"
-    mv "${flexget_path}/${org_tr_name}.torrent" "${flexget_path}/${plain_name_tmp}"
-    torrent_Path="${flexget_path}/${plain_name_tmp}"
+    local pl_name_tmp="autoseed.$(date +%s%N).torrent"
+    mv "${flexget_path}/${org_tr_name}.torrent" "${flexget_path}/${pl_name_tmp}"
+    torrent_Path="${flexget_path}/${pl_name_tmp}"
     #---name for post---#
     noDot_name="$(echo "$dot_name"| \
         sed 's/\./ /g;s/ DD2 0/ DD2.0/i;s/ H 26/ H.26/i;s/5 1/5.1/;s/7 1/7.1/')"
 
     #----------操作 desc 简介文件--------
     # 获取国家，取第一个
-    region="$(grep -E '^.产　　地　.*$' "$source_detail_desc"|sed -r 's/.[产][　 ]*[地][　 ]*//'|sed -r 's#[ ]*(.*)/.*#\1#')"
+    region="$(grep -E '^.产　　地　.*$' "$source_desc"| \
+        sed -r 's/.[产][　 ]*[地][　 ]*//'|sed -r 's![ ]*([^/]+).*!\1!')"
     # 剧集或者普通类别
-    if [ "$(grep -E '^.集　　数　.*$' "$source_detail_desc")" ]; then
+    if [ "$(grep -E '^.集　　数　.*$' "$source_desc")" ]; then
         serials='yes'
         # 剧集季度
-        season="$(echo "$dot_name"|sed -r 's/(.*)\.([-sEp0-9]+)\..*/\1/i'|sed 's/[a-z]/\u&/g')"
+        season="$(echo "$dot_name"|sed -r 's/(.*)\.([-sEp0-9]+)\..*/\1/i'| \
+            sed 's/[a-z]/\u&/g')"
     else
         normal='yes'
     fi
     # 是否为纪录片
-    if [ "$(grep -E '^.类　　别　.*$' "$source_detail_desc"|grep -o '纪录片')" ]; then
+    if [ "$(grep -E '^.类　　别　.*$' "$source_desc"|grep -o '纪录片')" ]; then
         documentary='yes'
     else
-        genre="$(grep -E '^.类　　别　.*$' "$source_detail_desc"|sed -r 's/.类　　别　//;s/ //g')"
+        genre="$(grep -E '^.类　　别　.*$' "$source_desc"| \
+            sed -r 's/.类　　别　//;s/ //g')"
         normal='yes'
     fi
     # 语言
-    language="$(grep -E '^.语　　言　.*$' "$source_detail_desc"|sed -r 's/.语　　言　//'|sed -r 's#[ ]+##g')"
+    language="$(grep -E '^.语　　言　.*$' "$source_desc"| \
+        sed -r 's/.语　　言　//'|sed -r 's#[ ]+##g')"
     # 中文字幕
-    [ "$(grep -i "CH[ST]" "$source_detail_desc")" ] && chs_included='中文字幕'
+    [ "$(grep -i "CH[ST]" "$source_desc")" ] && chs_included='中文字幕'
 
     # 中文名
-    chinese_title="$(grep '&chs_name_douban&' "$source_detail_desc"|sed 's/&chs_name_douban&//')"
+    chinese_title="$(grep '&chs_name_douban&' "$source_desc"| \
+        sed 's/&chs_name_douban&//')"
 
     # 英文名
-    foreign_title="$(grep '&eng_name_douban&' "$source_detail_desc"|sed 's/&eng_name_douban&//')"
+    foreign_title="$(grep '&eng_name_douban&' "$source_desc"| \
+        sed 's/&eng_name_douban&//')"
 
     # 删除 简介中的中英文名
-    sed -i '/&chs_name_douban&/d;/&eng_name_douban&/d' "$source_detail_desc"
+    sed -i '/&chs_name_douban&/d;/&eng_name_douban&/d' "$source_desc"
 
-    imdb_url="$(grep -Eo 'tt[0-9]{7}' "$source_detail_desc"|head -1)"
-    douban_url="$(grep -Eo 'https?://movie\.douban\.com/subject/[0-9]{8}/?' "$source_detail_desc"|head -1)"
+    imdb_url="$(grep -Eo 'tt[0-9]{7}' "$source_desc"|head -1)"
+    douban_url="$(grep -Eo 'https?://movie\.douban\.com/subject/[0-9]{8}/?' \
+        "$source_desc"|head -1)"
 
     #----------操作 0day 名--------
     # 识别 iPad 以及视频分辨率，以及介质(BD、hdtv、web-dl)
@@ -107,7 +121,6 @@ from_desc_get_prarm() {
             ;;
     esac
 
-
     # 文件格式
     if [ "$("$tr_show" "$torrent_Path"|grep -A10 'FILES'|grep -i '\.mkv')" ]; then
         file_type='MKV'
@@ -121,17 +134,43 @@ from_desc_get_prarm() {
         file_type='其他'
     fi
 
+    # 音频编码格式
+    case "$dot_name" in
+        *[Dd][Tt][Ss]*)
+            is_dts='yes'
+            ;;
+        *[Aa][Cc]-3*)
+            is_ac3='yes'
+            ;;
+        *[Aa][Aa][Cc]*)
+            is_aac='yes'
+            ;;
+        *[Ff][Ll][Aa][Cc]*)
+            is_flac='yes'
+            ;;
+    esac
+    # 视频编码格式
+    case "$dot_name" in
+        *264*)
+            is_264='yes'
+            ;;
+        *265*)
+            is_265='yes'
+            ;;
+    esac
+ 
+    #-------------------------------------------------------------#
 
     #---hudbt & whu---#
-    if [ "`egrep '[国地产][　 ]*[家区地][　 ]*中国大陆|[国地产][　 ]*[家区地][　 ]*中国[　 ]*$' "$source_detail_desc"`" ]; then
+    if [ "`egrep '[国地产][　 ]*[家区地][　 ]*中国大陆|[国地产][　 ]*[家区地][　 ]*中国[　 ]*$' "$source_desc"`" ]; then
         whu_selectType='401'
         hudbt_selectType='401'
         source_sel_cmct='1'
         team_sel_tjupt='2'
-    elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*马来西亚|[国地产][　 ]*[家区地][　 ]*日本|[国地产][　 ]*[家区地][　 ]*韩国|[国地产][　 ]*[家区地][　 ]*印度|[国地产][　 ]*[家区地][　 ]*泰国|[国地产][　 ]*[家区地][　 ]*伊朗' "$source_detail_desc"`" ]; then
+    elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*马来西亚|[国地产][　 ]*[家区地][　 ]*日本|[国地产][　 ]*[家区地][　 ]*韩国|[国地产][　 ]*[家区地][　 ]*印度|[国地产][　 ]*[家区地][　 ]*泰国|[国地产][　 ]*[家区地][　 ]*伊朗' "$source_desc"`" ]; then
         whu_selectType='414'
         hudbt_selectType='414'
-    elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*中国台湾|[国地产][　 ]*[家区地][　 ]*台湾|[国地产][　 ]*[家区地][　 ]*香港|[国地产][　 ]*[家区地][　 ]*中国香港|[国地产][　 ]*[家区地][　 ]*澳门' "$source_detail_desc"`" ]; then
+    elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*中国台湾|[国地产][　 ]*[家区地][　 ]*台湾|[国地产][　 ]*[家区地][　 ]*香港|[国地产][　 ]*[家区地][　 ]*中国香港|[国地产][　 ]*[家区地][　 ]*澳门' "$source_desc"`" ]; then
         whu_selectType='413'
         hudbt_selectType='413'
         source_sel_cmct='2'
@@ -178,7 +217,7 @@ from_desc_get_prarm() {
             ;;
     esac
 	#---纪录片---#
-	if [ "`egrep '类[　 ]*别[　 ]*纪录片' "$source_detail_desc"`" ]; then
+	if [ "`egrep '类[　 ]*别[　 ]*纪录片' "$source_desc"`" ]; then
         nanyangpt_selectType='406'
         npupt_selectType='404'
         hudbt_selectType='404'
@@ -199,15 +238,15 @@ from_desc_get_prarm() {
     npupt_select_source=''
     second_type_byrbt=''
     source_sel_cmct=''
-    if [ "`egrep '[国地产][　 ]*[家区地][　 ]*大陆|[国地产][　 ]*[家区地][　 ]*中国|[国地产][　 ]*[家区地][　 ]*台湾|[国地产][　 ]*[家区地][　 ]*香港' "$source_detail_desc"`" ]; then
+    if [ "`egrep '[国地产][　 ]*[家区地][　 ]*大陆|[国地产][　 ]*[家区地][　 ]*中国|[国地产][　 ]*[家区地][　 ]*台湾|[国地产][　 ]*[家区地][　 ]*香港' "$source_desc"`" ]; then
         npupt_select_source='6'
         second_type_byrbt='11'
-    elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*日本|[国地产][　 ]*[家区地][　 ]*韩国' "$source_detail_desc"`" ]; then
+    elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*日本|[国地产][　 ]*[家区地][　 ]*韩国' "$source_desc"`" ]; then
         npupt_select_source='4'
         second_type_byrbt='14'
         source_sel_cmct='10'
         team_sel_tjupt='3'
-    elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*美国|[国地产][　 ]*[家区地][　 ]*英国|[国地产][　 ]*[家区地][　 ]*加拿大' "$source_detail_desc"`" ]; then
+    elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*美国|[国地产][　 ]*[家区地][　 ]*英国|[国地产][　 ]*[家区地][　 ]*加拿大' "$source_desc"`" ]; then
         npupt_select_source='5'
         team_sel_tjupt='1'
     fi
@@ -216,58 +255,28 @@ from_desc_get_prarm() {
     fi
 
     #---byr second_type---#
-    if [ "`egrep '[国地产][　 ]*[家区地][　 ]*美国|[国地产][　 ]*[家区地][　 ]*加拿大|[国地产][　 ]*[家区地][　 ]*墨西哥' "$source_detail_desc"`" ]; then
+    if [ "`egrep '[国地产][　 ]*[家区地][　 ]*美国|[国地产][　 ]*[家区地][　 ]*加拿大|[国地产][　 ]*[家区地][　 ]*墨西哥' "$source_desc"`" ]; then
         second_type_byrbt='13'
-    elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*法国|[国地产][　 ]*[家区地][　 ]*英国|[国地产][　 ]*[家区地][　 ]*德国|[国地产][　 ]*[家区地][　 ]*俄罗斯|[国地产][　 ]*[家区地][　 ]*丹麦|[国地产][　 ]*[家区地][　 ]*瑞士|[国地产][　 ]*[家区地][　 ]*西班牙|[国地产][　 ]*[家区地][　 ]*葡萄牙' "$source_detail_desc"`" ]; then
+    elif [ "`egrep '[国地产][　 ]*[家区地][　 ]*法国|[国地产][　 ]*[家区地][　 ]*英国|[国地产][　 ]*[家区地][　 ]*德国|[国地产][　 ]*[家区地][　 ]*俄罗斯|[国地产][　 ]*[家区地][　 ]*丹麦|[国地产][　 ]*[家区地][　 ]*瑞士|[国地产][　 ]*[家区地][　 ]*西班牙|[国地产][　 ]*[家区地][　 ]*葡萄牙' "$source_desc"`" ]; then
         second_type_byrbt='12'
     fi
     if [ -z "$second_type_byrbt" ]; then
         second_type_byrbt="$default_second_type_byrbt" #1
     fi
-           
-    #---get 2 subname---#
-    if [ -n "`grep -i "CH[ST]" "$source_detail_desc"`" ]; then
-        subname_chs_include='中文字幕'
-        subsinfo_tjupt='2'
-    elif [ "$original_other_info" ]; then
-        subname_chs_include="$original_other_info"
-    else
-        subname_chs_include=''
-    fi
-    subname_1=`grep "译[　 ]*名" "$source_detail_desc" |sed "s/.*译[　 ]*名[　 ]*//;s/\n//g;s/\r//g;s/[ ]*//g"|sed "s#[/]\?[a-zA-Z0-9:‘' ]\{3,\}[/]\?##g"`
-    subname_2=`grep "片[　 ]*名" "$source_detail_desc" |sed "s/.*片[　 ]*名[　 ]*//;s/\n//g;s/\r//g;s/[ ]*//g"|sed "s#[/]\?[a-zA-Z0-9:‘' ]\{3,\}[/]\?##g"`
-
     
     #---join desc---#
-    if [ -s "$source_detail_desc" ]; then
         simple_des="${descrCom_simple}
-        $(cat "$source_detail_desc")"
+        $(cat "$source_desc")"
         
         tjupt_des="${descrCom_simple}
-        $(cat "$source_detail_desc2tjupt"|sed '/jpg\|png\|jpeg\|gif\|webp/{/i\.loli\.net/!d}')" # use single quote mark
+        $(cat "$source_desc2tjupt"|sed '/jpg\|png\|jpeg\|gif\|webp/{/i\.loli\.net/!d}')" # use single quote mark
 
         complex_des="${descrCom_complex}
-        $(cat "$source_detail_desc")"
+        $(cat "$source_desc")"
 
-    else
-        simple_des="${descrCom_simple}
-        $failed_to_get_des"
-
-        tjupt_des="${descrCom_simple}
-        $failed_to_get_des"
-
-        complex_des="${descrCom_complex}
-        $failed_to_get_des"
-    fi
-
-        nanyangpt_des="$simple_des"
-        npupt_des="$simple_des"
-        cmct_des="$simple_des"
-#        hudbt_des="$complex_des"
-#        whu_des="$complex_des"
 
     #---subtitle---#
-    if [ "`egrep '国[　 ]+家[　 ]+中国大陆[ ]*$|国[　 ]+家[　 ]+中[　 ]*国[ ]*$' $source_detail_desc`" ] && [ "$subname_2" != "`echo "$subname_2"|egrep -o "[,\':a-zA-Z ]+"`" ]; then
+    if [ "`egrep '国[　 ]+家[　 ]+中国大陆[ ]*$|国[　 ]+家[　 ]+中[　 ]*国[ ]*$' $source_desc`" ] && [ "$subname_2" != "`echo "$subname_2"|egrep -o "[,\':a-zA-Z ]+"`" ]; then
         smallDescr="$subname_2 $subname_chs_include"
         smallDescr_byrbt="$subname_2"
     else
@@ -278,7 +287,7 @@ from_desc_get_prarm() {
             smallDescr="$subname_2 $subname_chs_include"
             smallDescr_byrbt="$subname_2"
         else
-            if [ -s "$source_detail_desc" ] && [ "$original_subname" ]; then
+            if [ -s "$source_desc" ] && [ "$original_subname" ]; then
                 smallDescr="$original_subname $subname_chs_include"
                 smallDescr_byrbt="$original_subname"
             elif [ "$chs_name_douban" ]; then
@@ -291,10 +300,10 @@ from_desc_get_prarm() {
         fi
     fi
     #---com info---#
-    movie_country_byrbt="$(egrep "[国地产][　 ]*[家区地]" "$source_detail_desc"|head -n 1|sed "s/.*[国地产][　 ]*[家区地][ 　]*//g;s/,/\//g;;s/[ ]*//g;s/[\n\r]*//g")"
+    movie_country_byrbt="$(egrep "[国地产][　 ]*[家区地]" "$source_desc"|head -n 1|sed "s/.*[国地产][　 ]*[家区地][ 　]*//g;s/,/\//g;;s/[ ]*//g;s/[\n\r]*//g")"
 
 }
 
 #-------------------------------#
-from_desc_get_prarm
+from_desc_get_param
 

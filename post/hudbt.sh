@@ -14,7 +14,7 @@ postUrl="${post_site[hudbt]}/takeupload.php"
 editUrl="${post_site[hudbt]}/takeedit.php"
 downloadUrl="${post_site[hudbt]}/download.php?id="
 #-------------------------------------#
-com_des="$(echo "$complex_des"|sed "s/&ratio_in_desc&/$ratio_hudbt/g")"
+hudbt_des="$(echo "$complex_des"|sed "s/&ratio_in_desc&/$ratio_hudbt/g")"
 
 #-------------------------------------#
 # 判断类型，纪录片、电影、剧集
@@ -24,19 +24,7 @@ elif [ "$is_ipad" = 'yes' ]; then
     hudbt_type='430'
 else
     if [ "$serials" = 'yes' ]; then
-        case "$region" in
-            *中国大陆*)
-                hudbt_type='401' ;;
-            *香港*|*台湾*|*澳门*)
-                hudbt_type='413' ;;
-            *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
-                hudbt_type='414' ;;
-            *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
-                hudbt_type='415' ;;
-            *)
-                hudbt_type='409' ;;
-        esac
-    else
+        # 剧集分类
         case "$region" in
             *中国大陆*)
                 hudbt_type='402' ;;
@@ -46,6 +34,20 @@ else
                 hudbt_type='416' ;;
             *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
                 hudbt_type='418' ;;
+            *)
+                hudbt_type='409' ;;
+        esac
+    else
+        # 电影类别
+        case "$region" in
+            *中国大陆*)
+                hudbt_type='401' ;;
+            *香港*|*台湾*|*澳门*)
+                hudbt_type='413' ;;
+            *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
+                hudbt_type='414' ;;
+            *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+                hudbt_type='415' ;;
             *)
                 hudbt_type='409' ;;
         esac
@@ -125,12 +127,12 @@ t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
     'name'="$noDot_name"\
     'small_descr'="$hudbt_small_descr"\
     'url'="$imdb_url"\
-    'descr'="$com_des"\
+    'descr'="$hudbt_des"\
     'type'="$hudbt_type"\
     'standard_sel'="$hudbt_stardand"\
     'uplver'="$anonymous_hudbt"\
     file@"${torrent_Path}"\
-    "$cookie" | grep "id=" |grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
+    "$cookie_hudbt"|grep "id="|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
 
 if [ -z "$t_id" ]; then
     # 辅种
@@ -138,10 +140,10 @@ if [ -z "$t_id" ]; then
         name="$noDot_name"\
         small_descr="$hudbt_small_descr"\
         url="$imdb_url"\
-        descr="$com_des"\
+        descr="$hudbt_des"\
         type="$hudbt_type"\
         standard_sel="$hudbt_stardand"\
         uplver="$anonymous_hudbt"\
         file@"${torrent_Path}"\
-        "$cookie"|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
+        "$cookie_hudbt"|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
 fi

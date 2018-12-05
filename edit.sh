@@ -51,7 +51,7 @@ do
     if [ "$t_id" ]; then
         if [ "$new_torrent_name" != "$old_new_torrent_name" ]; then
             #---clean---#
-            rm -f "$source_detail_desc" "$source_detail_html"
+            rm -f "$source_desc" "$source_html"
             dot_name="$(echo "$new_torrent_name"|sed "s/[ ]\+/./g;s/\(.*\)\.mp4/\1/g;s/\(.*\)\.mkv/\1/g")"
     	      source "$ROOT_PATH/get_desc/desc.sh"
             source "$ROOT_PATH/post/param.sh"
@@ -96,4 +96,4 @@ done
 
 #------------------------------------#
 #---clean---#
-rm -f "$source_detail_desc" "$source_detail_html"
+rm -f "$source_desc" "$source_html"

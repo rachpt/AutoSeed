@@ -14,57 +14,74 @@ postUrl="${post_site[tjupt]}/takeupload.php"
 editUrl="${post_site[tjupt]}/takeedit.php"
 downloadUrl="${post_site[tjupt]}/download.php?id="
 #-------------------------------------#
-selectType="$tjupt_selectType"
-[ ! "$team_sel_tjupt" ] && team_sel_tjupt="$default_team_sel_tjupt"
-[ ! "$subsinfo_tjupt" ] && subsinfo_tjupt="$default_subsinfo_tjupt"
 tjupt_des="$(echo "$tjupt_des"|sed "s/&ratio_in_desc&/$ratio_tjupt/g")"
 
-smallDescr_tjupt="$smallDescr_byrbt"
+#-------------------------------------#
+tjupt_year="$(echo "$dot_name"|grep -Eo '[12][089][0-9]{2}'|sed '/1080/d'|tail -1)"
+[ ! "$tjupt_year" ] $$ tjupt_year=2018  # 默认年份
 
-#---tjupt date---#
-issuedate_tjupt="$(echo "$dot_name"|egrep -o '[12][089][0-9]{2}'|sed '/1080/d'|tail -n 1)"
-#---tjupt format ratio---#
-formatratio_tjupt="$(echo "$dot_name"|egrep -io '720p|1080p')"
-#---tjupt source sel---#
-if [ "$(echo "$dot_name"|egrep -i 'blu[-]*ray|bdrip')" ]; then
-    source_sel_tjupt='1'
-elif [ "$(echo "$dot_name"|egrep -i 'hdtv')" ]; then
-    source_sel_tjupt='4'
-elif [ "$(echo "$dot_name"|egrep -i 'web[-]*dl')" ]; then
-    source_sel_tjupt='7'
+# 电影格式
+if [ "$is_1080p" = 'yes' ]; then
+    jutpt_stardand='1080p'
+elif [ "$is_720p" = 'yes' ]; then
+    jutpt_stardand='720p'
 else
-    source_sel_tjupt="$default_source_sel_tjupt"
-fi
-#---tjupt language---#
-language_tjupt="$(egrep "[语][　 ]*[言]" "$source_detail_desc"|head -n 1|sed "s/.*[语][　 ]*[言][ 　]*//g;s/[ ]*//g;s/[\n\r]*//g")"
-
-district_tjupt="$movie_country_byrbt"
-#---country---#
-if [ "$(echo "$district_tjupt"|grep '香港')" ]; then
-    country_tjupt='香港'
-elif [ "$(echo "$district_tjupt"|grep '台湾')" ]; then
-    country_tjupt='台湾'
-elif [ "$(echo "$district_tjupt"|egrep '中国|大陆')" ]; then
-    country_tjupt='大陆'
-elif [ "$(echo "$district_tjupt"|grep '日本')" ]; then
-    country_tjupt='日本'
-elif [ "$(echo "$district_tjupt"|grep '韩国')" ]; then
-    country_tjupt='韩国'
-elif [ "$(echo "$district_tjupt"|grep '美国')" ]; then
-    country_tjupt='美国'
-elif [ "$(echo "$district_tjupt"|grep '英国')" ]; then
-    country_tjupt='英国'
-elif [ "$(echo "$district_tjupt"|grep '法国')" ]; then
-    country_tjupt='法国'
-elif [ "$(echo "$district_tjupt"|grep '德国')" ]; then
-    country_tjupt='德国'
-elif [ "$(echo "$district_tjupt"|grep '澳大利亚')" ]; then
-    country_tjupt='澳大利亚'
-elif [ "$(echo "$district_tjupt"|grep '墨西哥')" ]; then
-    country_tjupt='北美'
-elif [ "$(echo "$district_tjupt"|grep '加拿大')" ]; then
-    country_tjupt='北美'
-else
-    country_tjupt='其他'
+    jutpt_stardand='none'
 fi
 
+if [ "$chs_included" ]; then
+    tjupt_subsinfo=2
+else
+    tjupt_subsinfo=6
+fi
+
+#-------------------------------------#
+# 来源
+if [ "$is_bd" = 'yes' ]; then
+    tjupt_source='1'
+elif [ "$is_hdtv" = 'yes' ]; then
+    tjupt_source='4'
+elif [ "$is_webdl" = 'yes' ]; then
+    tjupt_source='7'
+else
+    tjupt_source='8'
+fi
+
+#-------------------------------------#
+# 地区
+case "$region" in
+    *中国大陆*)
+        tjupt_team='2' ;;
+    *香港*|*台湾*|*澳门*)
+        tjupt_team='5' ;;
+    *日本*|*韩国*)
+        tjupt_team='3' ;;
+    *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+        tjupt_team='1' ;;
+    *)
+        tjupt_team='7' ;;
+esac
+#-------------------------------------#
+t_id="$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
+    'small_descr'="$chs_included"\
+    'url'="$imdb_url"\
+    'descr'="$tjupt_des"\
+    'type'="$tjupt_type"\
+    'cname'="$chinese_title"\
+    'ename'="$dot_name"\
+    'issuedate'="$tjupt_year"\
+    'language'="$language"\
+    'format'="$jutpt_stardand"\
+    'formatratio'="$jutpt_stardand"\
+    'subsinfo'="$tjupt_subsinfo"\
+    'district'="$region"\
+    'source_sel'="$tjupt_source"\
+    'team_sel'="$tjupt_team"\
+    'uplver'="$anonymous_tjupt"\
+    file@"${torrent_Path}"\
+    "$cookie_tjupt"|grep "id="|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)"
+
+if [ -z "$t_id" ]; then
+    # 辅种
+    :
+fi

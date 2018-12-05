@@ -17,67 +17,59 @@ downloadUrl="${post_site[byrbt]}/download.php?id="
 #-------------------------------------#
 # 需要的参数
 
-if [ -s "$source_detail_html" ]; then
+if [ -s "$source_html" ]; then
     byrbt_des="$descrCom_complex_html
-    $(cat "$source_detail_html")"
+    $(cat "$source_html")"
 else
     byrbt_des="$descrCom_complex_html
     <br /><br /><br /><strong><span style=\"font-size:30px;\">\
         获取简介失败！！！</span></strong><br /><br />"
 fi
 
-movie_type_byrbt="$(egrep "[类分][　 ]*[别类型]" "$source_detail_desc"| \
-    head -n 1|sed "s/.*[类分][　 ]*[别类型][ 　]*//g;s/[ ]*//g;s/[\n\r]*//g")"
-
-
 # 判断类型，纪录片、电影、剧集
 if [ "$documentary" = 'yes' ]; then
     byrbt_type='410'
 else
     if [ "$serials" = 'yes' ]; then
+        # 剧集
         byrbt_type='401'
+        # 二级分类
+        case "$region" in
+            *中国大陆*)
+                byrbt_tv_type='大陆'
+                byrbt_second_type='15' ;;
+            *香港*|*台湾*|*澳门*)
+                byrbt_tv_type='港台'
+                byrbt_second_type='18' ;;
+            *日本*|*韩国*)
+                byrbt_tv_type='日韩'
+                byrbt_second_type='16' ;;
+            *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+                byrbt_tv_type='欧美'
+                byrbt_second_type='17' ;;
+            *)
+                byrbt_tv_type='其他'
+                byrbt_second_type='2' ;;
+        esac
+        byrbt_tv_season="$season"
+        byrbt_tv_filetype="$file_type"
     else 
         # 默认电影类
         byrbt_type='408'
+        # 二级分类
+        case "$region" in
+            *中国大陆*|*香港*|*台湾*|*澳门*)
+                byrbt_second_type='11' ;;
+            *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
+                byrbt_second_type='14' ;;
+            *英国*|*德国*|*法国*|*俄罗斯*|*西班牙*|*澳大利亚*)
+                byrbt_second_type='12' ;;
+            *美国*|*墨西哥*|*加拿大*)
+                byrbt_second_type='13' ;;
+            *)
+                byrbt_second_type='1' ;;
+        esac
     fi
-fi
-
-# 二级分类
-if [ "$byrbt_type" = '401' ]; then
-    # 剧集
-    case "$region" in
-        *中国大陆*)
-            byrbt_tv_type='大陆'
-            byrbt_second_type='15' ;;
-        *香港*|*台湾*|*澳门*)
-            byrbt_tv_type='港台'
-            byrbt_second_type='18' ;;
-        *日本*|*韩国*)
-            byrbt_tv_type='日韩'
-            byrbt_second_type='16' ;;
-        *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
-            byrbt_tv_type='欧美'
-            byrbt_second_type='17' ;;
-        *)
-            byrbt_tv_type='其他'
-            byrbt_second_type='2' ;;
-    esac
-    byrbt_tv_season="$season"
-    byrbt_tv_filetype="$file_type"
-elif [ "$byrbt_type" = '408' ]; then
-    # 电影
-    case "$region" in
-        *中国大陆*|*香港*|*台湾*|*澳门*)
-            byrbt_second_type='11' ;;
-        *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
-            byrbt_second_type='14' ;;
-        *英国*|*德国*|*法国*|*俄罗斯*|*西班牙*|*澳大利亚*)
-            byrbt_second_type='12' ;;
-        *美国*|*墨西哥*|*加拿大*)
-            byrbt_second_type='13' ;;
-        *)
-            byrbt_second_type='1' ;;
-    esac
 fi
 
 #-------------------------------------#
@@ -118,13 +110,13 @@ fi
 #-------------------------------------#
 if [ "$byrbt_type" = '408' ]; then
     # 电影 POST
-    t_id=$(http --ignore-stdin -f --print=h POST "$postUrl"\
+    t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
         'movie_cname'="$chinese_title"\
         'ename0day'="$dot_name"\
         'type'="$byrbt_type"\
         'small_descr'="$chs_included"\
         'url'="$imdb_url"\
-        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url")"\
+        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo 'none')"\
         'descr'="$byrbt_des"\
         'type'="$byrbt_type"\
         'second_type'="$byrbt_second_type"\
@@ -132,29 +124,30 @@ if [ "$byrbt_type" = '408' ]; then
         'movie_country'="$region"\
         'uplver'="$anonymous_byrbt"\
         file@"${torrent_Path}"\
-        "$cookie_byrbt" | grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
+        "$cookie_byrbt"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
 
     if [ -z "$t_id" ]; then
         # 辅种
-        t_id=$(http --ignore-stdin -f -b POST "$postUrl"\
-            movie_cname="$smallDescr_byrbt"\
-            ename0day="$dot_name"\
-            type="$byrbt_selectType"\
-            small_descr="$chs_included"\
-            url="$imdb_url"\
-            descr="$byrbt_des"\
-            type="$byrbt_selectType"\
-            second_type="$byrbt_second_type"\
-            movie_type="$movie_type_byrbt"\
-            movie_country="$movie_country_byrbt"\
-            uplver="$anonymous_byrbt"\
-            file@"${torrent_Path}"\
-            "$cookie_byrbt"|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
+        :
+        #tid=$(http --ignore-stdin -f -b POST "$postUrl"\
+            #movie_cname="$smallDescr_byrbt"\
+            #ename0day="$dot_name"\
+            #type="$byrbt_selectType"\
+            #small_descr="$chs_included"\
+            #url="$imdb_url"\
+            #descr="$byrbt_des"\
+            #type="$byrbt_selectType"\
+            #second_type="$byrbt_second_type"\
+            #movie_type="$genre"\
+            #movie_country="$region"\
+            #uplver="$anonymous_byrbt"\
+            #file@"${torrent_Path}"\
+            #"$cookie_byrbt"|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
 
     fi
 elif [ "$byrbt_type" = '401' ]; then
     # 剧集 POST
-    t_id=$(http --ignore-stdin -f --print=h POST "$postUrl"\
+    t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
         'type'="$byrbt_type"\
         'second_type'="$byrbt_second_type"\
         'tv_type'="$byrbt_tv_type"\
@@ -165,12 +158,16 @@ elif [ "$byrbt_type" = '401' ]; then
         'type'="$byrbt_type"\
         'small_descr'="$chs_included"\
         'url'="$imdb_url"\
-        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url")"\
+        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo 'none')"\
         'descr'="$byrbt_des"\
         'movie_type'="$genre"\
         'uplver'="$anonymous_byrbt"\
         file@"${torrent_Path}"\
         "$cookie_byrbt" | grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
+    if [ -z "$t_id" ]; then
+        # 辅种
+        :
+    fi
 elif [ "$byrbt_type" = '410' ]; then
     # 纪录片 POST
     :

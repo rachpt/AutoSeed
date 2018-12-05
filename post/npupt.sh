@@ -16,26 +16,69 @@ downloadUrl="${post_site[npupt]}/download.php?id="
 #-------------------------------------#
 # 需要的参数
 npupt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_npupt/g")
-$(cat "$source_detail_desc")"
+$(cat "$source_desc")"
 
+#-------------------------------------#
+# 判断类型，纪录片、电影、剧集
+if [ "$documentary" = 'yes' ]; then
+    npupt_type='404'
+    npupt_source='41'
+else
+    if [ "$serials" = 'yes' ]; then
+        # 剧集分类
+        npupt_type='402'
+        case "$region" in
+            *中国大陆*)
+                npupt_source='23' ;;
+            *香港*|*台湾*|*澳门*)
+                npupt_source='24' ;;
+            *日本*)
+                npupt_source='26' ;;
+            *韩国*)
+                npupt_source='27' ;;
+            *美国*)
+                npupt_source='25' ;;
+            *英国*)
+                npupt_source='65' ;;
+            *)
+                npupt_source='63' ;;
+        esac
+    else
+        # 电影类别
+        npupt_type='401'
+        case "$region" in
+            *中国大陆*|*香港*|*台湾*|*澳门*)
+                npupt_source='6' ;;
+            *日本*|*韩国*)
+                npupt_source='4' ;;
+            *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+                npupt_source='5' ;;
+            *)
+                npupt_source='7' ;;
+        esac
 
-
-
+    fi
+fi
+#-------------------------------------#
 #---base64 encode---#
 des_enc="$(echo "$npupt_des"|base64)"
 name_enc="$(echo "$dot_name"|base64)"
 sub_title_enc="$(echo "$smallDescr"|base64)"
 #---post data---#
-t_id=$(http --ignore-stdin -f --print=h POST "$postUrl"\
+t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
     'name'="$name_enc"\
     'small_descr'="$sub_title_enc"\
     'descr'="$des_enc"\
-    'type'="$npupt_selectType"\
-    'source_sel'="$npupt_select_source"\
+    'type'="$npupt_type"\
+    'source_sel'="$npupt_source"\
     'uplver'="$anonymous_npupt"\
     file@"${torrent_Path}"\
     "$cookie_npupt"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
 
+#if [ -z "$t_id" ]; then
+    #t_id=`http --ignore-stdin -f POST "$postUrl" name="$name_enc" small_descr="$sub_title_enc" descr="$des_enc" type="$npupt_selectType" source_sel="$npupt_select_source" uplver="$anonymous" file@"$torrent_Path" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
+#fi
 if [ -z "$t_id" ]; then
-    t_id=`http --ignore-stdin -f POST "$postUrl" name="$name_enc" small_descr="$sub_title_enc" descr="$des_enc" type="$npupt_selectType" source_sel="$npupt_select_source" uplver="$anonymous" file@"$torrent_Path" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
+    # 辅种
+    :
 fi

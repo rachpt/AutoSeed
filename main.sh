@@ -102,9 +102,9 @@ function main_loop() {
                 write_log_begin         # write log
                 source "$ROOT_PATH/post/post.sh"
                 write_log_end           # write log
-                #rm -f "$torrent_Path"   # delete uploaded torrent
-                #sed -i '1,2d' "$queue"
-                #clean_commit_main=1
+                rm -f "$torrent_Path"   # delete uploaded torrent
+                sed -i '1,2d' "$queue"
+                clean_commit_main=1
             fi
         fi
     done

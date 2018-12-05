@@ -9,6 +9,7 @@
 # - transmission-[show,remote,daemon or gtk]
 # - httpie, head, awk, sed, find, egrep, curl
 # - cut, cat, mktemp, sort, tail, stat, python3
+# - base64
 #
 #----------------[main]----------------#
 #---use yes to disable all---#
@@ -143,7 +144,7 @@ tr_USER='username'
 tr_PASSWORD='passkey'
 
 qb_HOST='http://127.0.0.1'
-qb_PORT='8112'
+qb_PORT='8080'
 qb_USER='username'
 qb_PASSWORD='passkey'
 qb_Cookie='cookie:none'

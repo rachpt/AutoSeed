@@ -16,7 +16,7 @@ downloadUrl="${post_site[nanyangpt]}/download.php?id="
 #-------------------------------------#
 # 需要的参数
 nanyangpt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_nanyangpt/g")
-$(cat "$source_detail_desc")"
+$(cat "$source_desc")"
 
 if [ "$documentary" = 'yes' ]; then
     # 纪录片
@@ -57,14 +57,14 @@ nanyangpt_small_descr="$chinese_title $chs_included"
 
 if [ "$nanyangpt_type" = '401' ]; then
     # 电影 POST
-    t_id=$(http --ignore-stdin -f --print=h POST "$postUrl"\
+    t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
         'name'="$dot_name"\
         'movie_enname'="$dot_name"\
         'small_descr'="$nanyangpt_small_descr"\
         'url'="$imdb_url"\
-        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url")"\
+        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo 'none')"\
         'descr'="$nanyangpt_des"\
-        'type'="$nanyangpt_selectType"\
+        'type'="$nanyangpt_type"\
         'uplver'="$anonymous_nanyangpt"\
         file@"${torrent_Path}"\
         "$cookie_nanyangpt"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
@@ -72,36 +72,44 @@ if [ "$nanyangpt_type" = '401' ]; then
     if [ -z "$t_id" ]; then
         # 辅种
         :
-        t_id=`http --ignore-stdin -f POST "$postUrl" name="$dot_name" movie_enname="$dot_name" small_descr="$smallDescr" url="$imdbUrl" descr="$nanyangpt_des" type="$nanyangpt_selectType" uplver="$anonymous" file@"$torrent_Path" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
     fi
 elif [ "$nanyangpt_type" = '402' ]; then
     # 剧集 POST
-    t_id=$(http --ignore-stdin -f --print=h POST "$postUrl"\
+    t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
         'name'="$dot_name"\
         'series_enname'="$dot_name"\
         'small_descr'="$nanyangpt_small_descr"\
         'url'="$imdb_url"\
-        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url")"\
+        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo 'none')"\
         'descr'="$nanyangpt_des"\
-        'type'="$nanyangpt_selectType"\
+        'type'="$nanyangpt_type"\
         'uplver'="$anonymous_nanyangpt"\
         file@"${torrent_Path}"\
         "$cookie_nanyangpt"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
 
+    if [ -z "$t_id" ]; then
+        # 辅种
+        :
+    fi
+
 elif [ "$nanyangpt_type" = '406' ]; then
     # 纪录片 POST
-    t_id=$(http --ignore-stdin -f --print=h POST "$postUrl"\
+    t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
         'name'="$dot_name"\
         'doc_enname'="$dot_name"\
         'small_descr'="$nanyangpt_small_descr"\
         'url'="$imdb_url"\
-        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url")"\
+        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo 'none')"\
         'descr'="$nanyangpt_des"\
-        'type'="$nanyangpt_selectType"\
+        'type'="$nanyangpt_type"\
         'uplver'="$anonymous_nanyangpt"\
         file@"${torrent_Path}"\
         "$cookie_nanyangpt"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
-    :
+
+    if [ -z "$t_id" ]; then
+        # 辅种
+        :
+    fi
 else
     # 其他 POST
     :

@@ -9,7 +9,7 @@
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
 # 只有预定义的站点才有效。
 # 获得的原种简介仅筛选 iNFO 以及 screens 保留到临时文件
-# source_detail_desc[html 用于 byrbt]，
+# source_desc[html 用于 byrbt]，
 # 后续合并通过豆瓣生成的简介。
 #-------------------------------------#
 
@@ -82,61 +82,61 @@ form_source_site_get_Desc() {
     # source_t_id will be unset in generate.sh
     if [ "$source_t_id" ]; then
         #---define temp file name---#
-        source_detail_full="${ROOT_PATH}/tmp/${org_tr_name}_full.txt"
-        http -b --ignore-stdin GET "${source_site_URL}/details.php?id=${source_t_id}" "$cookie_source_site" > "$source_detail_full"
+        source_full="${ROOT_PATH}/tmp/${org_tr_name}_full.txt"
+        http -b --ignore-stdin GET "${source_site_URL}/details.php?id=${source_t_id}" "$cookie_source_site" > "$source_full"
     #---
-    if [ -s "$source_detail_full" ]; then
+    if [ -s "$source_full" ]; then
         # imdb 和豆瓣链接
-        imdb_url="$(grep -Eo 'tt[0-9]{7}' "$source_detail_full"|head -1)"
-        douban_url="$(grep -Eo 'https?://movie\.douban\.com/subject/[0-9]{8}/?' "$source_detail_full"|head -1)"
-        [ "$(grep -E '禁止转载|禁转资源|谢绝转发|独占资源' "$source_detail_desc")" ] && local prohibit_upload=1
+        imdb_url="$(grep -Eo 'tt[0-9]{7}' "$source_full"|head -1)"
+        douban_url="$(grep -Eo 'https?://movie\.douban\.com/subject/[0-9]{8}/?' "$source_full"|head -1)"
+        [ "$(grep -E '禁止转载|禁转资源|谢绝转发|独占资源' "$source_desc")" ] && local prohibit_upload=1
 
         # 匹配官方组 简介中的 info 以及 screens 所在行号
         if [ "$source_site_URL" = "https://hdsky.me" ]; then
-            local source_start_line_html=$(sed -n '/影片参数/=' "$source_detail_full"|head -1|)
-            local source_end_line_html=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_detail_full"|head -1) # 第一个
+            local source_start_line_html=$(sed -n '/影片参数/=' "$source_full"|head -1|)
+            local source_end_line_html=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -1) # 第一个
 
         elif [ "$source_site_URL" = "https://hdchina.org" ]; then
-            local source_start_line_html=$(sed -n '<fieldset><legend>' "$source_detail_full"|tail -1|)
-            local source_end_line_html=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_detail_full"|head -2|tail -1) # 第二个
+            local source_start_line_html=$(sed -n '<fieldset><legend>' "$source_full"|tail -1|)
+            local source_end_line_html=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -2|tail -1) # 第二个
 
         elif [ "$source_site_URL" = "https://totheglory.im" ] || [ "$source_site_URL" = "https://tp.m-team.cc" ]; then
-            local source_start_line_html=$(sed -n '/.[cC]omparisons/=' "$source_detail_full"|head -1|)
-            local source_temp_line=$(sed -n '/.x264.[iI]nfo/=' "$source_detail_full"|head -1|)
-            local source_end_line_html=$(sed -n "$source_tmp_line,$(expr $source_end_line_html + 10)p" "$source_detail_full|"sed -n '<\/table><br><br \/>/='|head -1) # ttg
+            local source_start_line_html=$(sed -n '/.[cC]omparisons/=' "$source_full"|head -1|)
+            local source_temp_line=$(sed -n '/.x264.[iI]nfo/=' "$source_full"|head -1|)
+            local source_end_line_html=$(sed -n "$source_tmp_line,$(expr $source_end_line_html + 10)p" "$source_full|"sed -n '<\/table><br><br \/>/='|head -1) # ttg
 
         elif [ "$source_site_URL" = "https://tp.m-team.cc" ]; then
-            local source_start_line_html=$(sed -n 'codetop' "$source_detail_full"|head -1|)
-            local source_end_line_html=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_detail_full"|head -1) # 第一个
+            local source_start_line_html=$(sed -n 'codetop' "$source_full"|head -1|)
+            local source_end_line_html=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -1) # 第一个
 
         elif [ "$source_site_URL" = "https://hdcmct.org" ]; then
-            local source_start_line_html=$(sed -n '/参数信息/=' "$source_detail_full"|head -1|)
-            local source_end_line_html=$(sed -n '/下载信息/=' "$source_detail_full"|head -1) # 第一个
+            local source_start_line_html=$(sed -n '/参数信息/=' "$source_full"|head -1|)
+            local source_end_line_html=$(sed -n '/下载信息/=' "$source_full"|head -1) # 第一个
 
         fi
         # 裁剪简介获取 iNFO 以及 screens
         if [ "$source_start_line_html" ] && [[ $source_start_line_html -lt $source_end_line_html ]]; then
-            sed -n "${source_start_line_html},${source_end_line_html}p" "$source_detail_full" > "$source_detail_desc"
+            sed -n "${source_start_line_html},${source_end_line_html}p" "$source_full" > "$source_desc"
         fi
         unset source_start_line_html source_end_line_html
         #---filter html code---#
-        sed -i "s/.*id='kdescr'>//g;s/onclick=\"Previewurl([^)]*)[;]*\"//g;s/onload=\"Scale([^)]*)[;]*\"//g;s/onmouseover=\"[^\"]*;\"//g" "$source_detail_desc"
-        sed -i "s#onclick=\"Previewurl.*/><br />#/><br />#g" "$source_detail_desc"
-        sed -i "/本资源仅限会员测试带宽之用，严禁用于商业用途！/d; /对用于商业用途所产生的法律责任，由使用者自负！/d" "$source_detail_desc"
-        sed -Ei "s@\"[^\"]*attachments([^\"]+)@\"${source_site_URL}/attachments\1@ig;s#src=\"attachments#src=\"${source_site_URL}/attachments#ig" "$source_detail_desc"
-        sed -i "s#onmouseover=\"[^\"]*[;]*\"##ig" "$source_detail_desc"
-        sed -i "s#onload=\"[^\"]*[;]*\"##ig" "$source_detail_desc"
-        sed -i "s#onclick=\"[^\"]*[;)]*\"##ig" "$source_detail_desc"
+        sed -i "s/.*id='kdescr'>//g;s/onclick=\"Previewurl([^)]*)[;]*\"//g;s/onload=\"Scale([^)]*)[;]*\"//g;s/onmouseover=\"[^\"]*;\"//g" "$source_desc"
+        sed -i "s#onclick=\"Previewurl.*/><br />#/><br />#g" "$source_desc"
+        sed -i "/本资源仅限会员测试带宽之用，严禁用于商业用途！/d; /对用于商业用途所产生的法律责任，由使用者自负！/d" "$source_desc"
+        sed -Ei "s@\"[^\"]*attachments([^\"]+)@\"${source_site_URL}/attachments\1@ig;s#src=\"attachments#src=\"${source_site_URL}/attachments#ig" "$source_desc"
+        sed -i "s#onmouseover=\"[^\"]*[;]*\"##ig" "$source_desc"
+        sed -i "s#onload=\"[^\"]*[;]*\"##ig" "$source_desc"
+        sed -i "s#onclick=\"[^\"]*[;)]*\"##ig" "$source_desc"
         
         #---copy as a duplication for byrbt---#
-        [ "$enable_byrbt" = 'yes' ] && cp -f "$source_detail_desc" "$source_detail_html"
+        [ "$enable_byrbt" = 'yes' ] && cp -f "$source_desc" "$source_html"
 
         #---html2bbcode---#
 	      source "$ROOT_PATH/get_desc/html2bbcode.sh"
-        [ "$prohibit_upload" -eq 1 ] && echo -e "\n&禁止转载&\n" >> "$source_detail_desc"
+        [ "$prohibit_upload" -eq 1 ] && echo -e "\n&禁止转载&\n" >> "$source_desc"
         unset prohibit_upload
-        rm -f "$source_detail_full"
-        unset source_detail_full
+        rm -f "$source_full"
+        unset source_full
     fi
     #---
     fi

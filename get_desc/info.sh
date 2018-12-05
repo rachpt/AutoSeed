@@ -14,14 +14,14 @@
 # 读取主文件以获得info，提前生成简介将失效
 generate_info_local() {
     # 本地简介大小为零
-    if [ ! -s "$source_detail_desc" ]; then
+    if [ ! -s "$source_desc" ]; then
         # 种子文件绝对路径
         local main_file_dir="${one_TR_Dir}/${one_TR_Name}"
         # 使用 mediainfo 生成种子中体积最大文件的 iNFO
         local info_generated="$($mediainfo "$(find "$main_file_dir" -type f -exec stat -c "%s %n" {} \;|sort -nr|head -1)"|sed '/Unique/d;/Encoding settings/d;/Complete name/d;/Writing library/d;/Writing application/d')"
         # 存档
         if [ "$info_generated" ]; then
-            echo "$info_generated" > "$source_detail_desc"
+            echo "$info_generated" > "$source_desc"
         fi
     fi
 }
@@ -38,15 +38,15 @@ read_info_file() {
                 local judge_download_nfo=$((nfo_file_downloaded/100))
                 local judge_nfo_file=$(echo "$nfo_file_size * 10"|bc|awk -F '.' '{print $1}')
                 if [ "$judge_download_nfo" -eq  "$judge_nfo_file" ]; then
-                    cat "$nfo_file_path" > "$source_detail_desc"
+                    cat "$nfo_file_path" > "$source_desc"
                 fi
             fi
         else
             generate_info_local
         fi
         # byrbt bbcode to html
-        [ "$enable_byrbt" = 'yes' ] && [ -s "$source_detail_desc" ] && \
-            sed 's!$!&<br />!g' "$source_detail_desc" > "$source_detail_html" 
+        [ "$enable_byrbt" = 'yes' ] && [ -s "$source_desc" ] && \
+            sed 's!$!&<br />!g' "$source_desc" > "$source_html" 
     fi
 }
 

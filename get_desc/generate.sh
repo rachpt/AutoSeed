@@ -75,9 +75,9 @@ generate_main_func() {
     from_douban_get_desc
 
     # bbcode
-    source_detail_desc_tmp="${gen_desc_bbcode}
+    source_desc_tmp="${gen_desc_bbcode}
 
-    [quote]$(cat "$source_detail_desc")[/quote]
+    [quote][font=Courier New]$(cat "$source_desc")[/font][/quote]
     $(if [ $source_t_id ]; then
         echo -e "\n[quote][b]本种来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}[/quote]"
     else
@@ -88,8 +88,8 @@ generate_main_func() {
 "
 
     # byrbt 所需要的 html 简介
-    [[ $enable_byrbt = yes ]] && source_detail_html_tmp="${gen_desc_html}<br /><br />
-    <fieldset><br /> $(cat "$source_detail_html") <fieldset><br />
+    [[ $enable_byrbt = yes ]] && source_html_tmp="${gen_desc_html}<br /><br />
+    <fieldset><br /> $(cat "$source_html") <fieldset><br />
     $(echo -e "\n<br /><br /><br /><fieldset><br />\n")
     $(if [ $source_t_id ]; then
         echo '<span style="font-size:20px;">本种来自： '${source_site_URL}/details.php?id=${source_t_id}'</span>'
@@ -99,10 +99,10 @@ generate_main_func() {
     echo -e "\n<br /></fieldset><br /><br />\n")"
 
     # 简介保存至文件 
-    echo "$source_detail_desc_tmp" > "$source_detail_desc"
-    echo "$source_detail_html_tmp" > "$source_detail_html"
+    echo "$source_desc_tmp" > "$source_desc"
+    echo "$source_html_tmp" > "$source_html"
     # 清空变量，防止不同种子简介互串
-    unset source_detail_desc_tmp  source_detail_html_tmp  source_t_id
+    unset source_desc_tmp  source_html_tmp  source_t_id
     unset chs_name_douban  eng_name_douban  douban_poster_url
 }
 
