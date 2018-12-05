@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-10-22
+# Date: 2018-12-05
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -28,22 +28,26 @@ generate_info_local() {
 
 # 首先判断是否有 nfo 文件，以及nfo是否下载完成
 read_info_file() {
-    local nfo_file_size=$("$trans_show" "$torrent_Path"|grep -Eo '\.nfo \([0-9\. ]+[kKbB]+\)'|egrep -o '[0-9]+\.?[0-9]*')
-    if [[ $nfo_file_size ]]; then
-        local nfo_file_path="$(find "${one_TR_Dir}/${one_TR_Name}" -iname '*.nfo'|head -1)"
-        local nfo_file_downloaded=$(stat --format=%s "$nfo_file_path")
-        if [[ $nfo_file_downloaded ]]; then
-            local judge_download_nfo=$((nfo_file_downloaded/100))
-            local judge_nfo_file=$(echo "$nfo_file_size * 10"|bc|awk -F '.' '{print $1}')
-            if [ "$judge_download_nfo" -eq  "$judge_nfo_file" ]; then
-                cat "$nfo_file_path" > "$source_detail_desc"
+    if [ "$one_TR_Dir" ]; then
+        local nfo_file_size=$("$tr_show" "$torrent_Path"| \
+            grep -Eo '\.nfo \([0-9\. ]+[kKbB]+\)'|grep -Eo '[0-9]+\.?[0-9]*')
+        if [[ $nfo_file_size ]]; then
+            local nfo_file_path="$(find "${one_TR_Dir}/${one_TR_Name}" -iname '*.nfo'|head -1)"
+            local nfo_file_downloaded=$(stat --format=%s "$nfo_file_path")
+            if [[ $nfo_file_downloaded ]]; then
+                local judge_download_nfo=$((nfo_file_downloaded/100))
+                local judge_nfo_file=$(echo "$nfo_file_size * 10"|bc|awk -F '.' '{print $1}')
+                if [ "$judge_download_nfo" -eq  "$judge_nfo_file" ]; then
+                    cat "$nfo_file_path" > "$source_detail_desc"
+                fi
             fi
+        else
+            generate_info_local
         fi
-    else
-        generate_info_local
+        # byrbt bbcode to html
+        [ "$enable_byrbt" = 'yes' ] && [ -s "$source_detail_desc" ] && \
+            sed 's!$!&<br />!g' "$source_detail_desc" > "$source_detail_html" 
     fi
-    # byrbt bbcode to html
-    [ "$enable_byrbt" = 'yes' ] && [ -s "$source_detail_desc" ] && sed 's!$!&<br />!g' "$source_detail_desc" > "$source_detail_html" 
 }
 
 #-------------------------------------#

@@ -6,9 +6,6 @@
 # Date: 2018-11-21
 #
 #---------------------------------------#
-#---path of transmission-show---#
-tr_show="transmission-show"
-tr_edit="transmission-edit"
 #
 #---path of transmission-remote---#
 tr_remote="transmission-remote ${tr_HOST}:${tr_PORT} \

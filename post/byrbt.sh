@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-10-23
+# Date: 2018-12-05
 #
 #-------------settings---------------#
 cookie="$cookie_byrbt"
@@ -11,9 +11,9 @@ passkey="$passkey_byrbt"
 anonymous="$anonymous_byrbt"
 ratio_set=$ratio_byrbt
 #---static---#
-postUrl='https://bt.byr.cn/takeupload.php'
-edit_postUrl='https://bt.byr.cn/takeedit.php'
-site_download_url='https://bt.byr.cn/download.php?id='
+postUrl="${post_site[byrbt]}/takeupload.php"
+editUrl="${post_site[byrbt]}/takeedit.php"
+downloadUrl="${post_site[byrbt]}/download.php?id="
 #-------------------------------------#
 # 需要的参数
 
@@ -22,10 +22,12 @@ if [ -s "$source_detail_html" ]; then
     $(cat "$source_detail_html")"
 else
     byrbt_des="$descrCom_complex_html
-    <br /><br /><br /><strong><span style=\"font-size:30px;\">获取简介失败！！！</span></strong><br /><br />"
+    <br /><br /><br /><strong><span style=\"font-size:30px;\">\
+        获取简介失败！！！</span></strong><br /><br />"
 fi
 
-movie_type_byrbt="$(egrep "[类分][　 ]*[别类型]" "$source_detail_desc"|head -n 1|sed "s/.*[类分][　 ]*[别类型][ 　]*//g;s/[ ]*//g;s/[\n\r]*//g")"
+movie_type_byrbt="$(egrep "[类分][　 ]*[别类型]" "$source_detail_desc"| \
+    head -n 1|sed "s/.*[类分][　 ]*[别类型][ 　]*//g;s/[ ]*//g;s/[\n\r]*//g")"
 
 
 # 判断类型，纪录片、电影、剧集
@@ -129,7 +131,7 @@ if [ "$byrbt_type" = '408' ]; then
         'movie_type'="$genre"\
         'movie_country'="$region"\
         'uplver'="$anonymous_byrbt"\
-        file@"${torrentPath}"\
+        file@"${torrent_Path}"\
         "$cookie_byrbt" | grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
 
     if [ -z "$t_id" ]; then
@@ -146,7 +148,7 @@ if [ "$byrbt_type" = '408' ]; then
             movie_type="$movie_type_byrbt"\
             movie_country="$movie_country_byrbt"\
             uplver="$anonymous_byrbt"\
-            file@"${torrentPath}"\
+            file@"${torrent_Path}"\
             "$cookie_byrbt"|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
 
     fi
@@ -167,7 +169,7 @@ elif [ "$byrbt_type" = '401' ]; then
         'descr'="$byrbt_des"\
         'movie_type'="$genre"\
         'uplver'="$anonymous_byrbt"\
-        file@"${torrentPath}"\
+        file@"${torrent_Path}"\
         "$cookie_byrbt" | grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
 elif [ "$byrbt_type" = '410' ]; then
     # 纪录片 POST

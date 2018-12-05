@@ -5,11 +5,9 @@
 # Version: 3.0v
 # Date: 2018-12-04
 #
-#-------------settings----------------#
-
-torrent2add="${download_url}&passkey=${passkey}"
-
-#-----------call function-------------#
+#---------------------------------------#
+# 将发布后的种子添加到客户端做种
+#-------------call function-------------#
 if [ "$one_TR_Dir" ]; then
     if [ "$postUrl" = "${post_site[whu]}/takeupload.php" ]; then
         http --ignore-stdin -d "$torrent2add" -o "${ROOT_PATH}/tmp/${t_id}.torrent"
@@ -35,3 +33,4 @@ if [ "$one_TR_Dir" ]; then
 else
     echo "没有找到本地文件！" >> "$log_Path"
 fi
+#---------------------------------------#

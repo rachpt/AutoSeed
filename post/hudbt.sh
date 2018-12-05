@@ -3,16 +3,16 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-10-22
+# Date: 2018-12-05
 #
 #-------------settings---------------#
 cookie="$cookie_hudbt"
 passkey="$passkey_hudbt"
 anonymous="$anonymous_hudbt"
 #---static---#
-postUrl='https://hudbt.hust.edu.cn/takeupload.php'
-edit_postUrl='https://hudbt.hust.edu.cn/takeedit.php'
-site_download_url='https://hudbt.hust.edu.cn/download.php?id='
+postUrl="${post_site[hudbt]}/takeupload.php"
+editUrl="${post_site[hudbt]}/takeedit.php"
+downloadUrl="${post_site[hudbt]}/download.php?id="
 #-------------------------------------#
 com_des="$(echo "$complex_des"|sed "s/&ratio_in_desc&/$ratio_hudbt/g")"
 
@@ -121,27 +121,27 @@ hudbt_small_descr="$chinese_title $chs_included"
 
 
 #-------------------------------------#
-t_id=$(http --ignore-stdin -f --print=h POST "$postUrl"\
-    'name'="$no_dot_name"\
+t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
+    'name'="$noDot_name"\
     'small_descr'="$hudbt_small_descr"\
     'url'="$imdb_url"\
     'descr'="$com_des"\
     'type'="$hudbt_type"\
     'standard_sel'="$hudbt_stardand"\
     'uplver'="$anonymous_hudbt"\
-    file@"${torrentPath}"\
+    file@"${torrent_Path}"\
     "$cookie" | grep "id=" |grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
 
 if [ -z "$t_id" ]; then
     # 辅种
-    t_id=$(http --ignore-stdin -f POST "$postUrl"\
-        name="$no_dot_name"\
+    t_id=$(http --verify=no --ignore-stdin -f POST "$postUrl"\
+        name="$noDot_name"\
         small_descr="$hudbt_small_descr"\
         url="$imdb_url"\
         descr="$com_des"\
         type="$hudbt_type"\
         standard_sel="$hudbt_stardand"\
         uplver="$anonymous_hudbt"\
-        file@"${torrentPath}"\
+        file@"${torrent_Path}"\
         "$cookie"|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
 fi

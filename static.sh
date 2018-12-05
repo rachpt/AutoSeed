@@ -3,18 +3,24 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-11-21
+# Date: 2018-12-05
 #
 #--------------------------------------#
+source "$ROOT_PATH/test.sh"
 #--log path (do not change)---#
 log_Path="$ROOT_PATH/tmp/log"
 #--log path (do not change)---#
 debug_log="$ROOT_PATH/tmp/debug"
 #---lock path (do not change)---#
 lock_file="$ROOT_PATH/tmp/LOCK"
+#---queue path (do not change)---#
+queue="$ROOT_PATH/tmp/queue"
 #
 #--------------------------------------#
 #
+#---path of transmission-show---#
+tr_show="transmission-show"
+tr_edit="transmission-edit"
 #---path of python3---#
 python3='python3'
 #--------------------------------------#
@@ -64,19 +70,19 @@ descrCom_complex_html="<br />
 declare -A trackers
 declare -A post_site
 
-[[ $enable_hudbt = 'yes' ]] && { trackers[hudbt]='hudbt.hust.edu.cn'
+[[ $enable_hudbt = yes ]] && { trackers[hudbt]='hudbt.hust.edu.cn'
     post_site[hudbt]='https://hudbt.hust.edu.cn'; }
-[[ $enable_whu = 'yes' ]] && { trackers[whu]='tracker.whupt.net'
+[[ $enable_whu = yes ]] && { trackers[whu]='tracker.whupt.net'
     post_site[whu]='https://whu.pt'; }
-[[ $enable_npupt = 'yes' ]] && { trackers[npupt]='npupt.com'
+[[ $enable_npupt = yes ]] && { trackers[npupt]='npupt.com'
     post_site[npupt]='https://npupt.com'; }
-[[ $enable_nanyangpt = 'yes' ]] && { trackers[nanyangpt]='tracker.nanyangpt.com'
+[[ $enable_nanyangpt = yes ]] && { trackers[nanyangpt]='tracker.nanyangpt.com'
     post_site[nanyangpt]='https://nanyangpt.com'; }
-[[ $enable_byrbt = 'yes' ]] && { trackers[byr]='tracker.byr.cn'
+[[ $enable_byrbt = yes ]] && { trackers[byr]='tracker.byr.cn'
     post_site[byrbt]='https://bt.byr.cn'; }
-[[ $enable_cmct = 'yes' ]] && { trackers[cmct]='tracker.hdcmct.org'
+[[ $enable_cmct = yes ]] && { trackers[cmct]='tracker.hdcmct.org'
     post_site[cmct]='https://hdcmct.org'; }
-[[ $enable_tjupt = 'yes' ]] && { trackers[tjupt]='pttrackertju.tjupt.org'
+[[ $enable_tjupt = yes ]] && { trackers[tjupt]='pttrackertju.tjupt.org'
     post_site='https://tjupt.org'; }
 #--------------------------------------#
 

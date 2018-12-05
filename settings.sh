@@ -142,11 +142,11 @@ tr_PORT='9091'
 tr_USER='username'
 tr_PASSWORD='passkey'
 
-qb_HOST='127.0.0.1'
-qb_PORT='9091'
+qb_HOST='http://127.0.0.1'
+qb_PORT='8112'
 qb_USER='username'
 qb_PASSWORD='passkey'
-qb_Cookie=''
+qb_Cookie='cookie:none'
 #----------------[site]----------------#
 #---cookie for source site---#
 cookie_hds='Cookie:c_secure_uid=XXXXXX; c_secure_pass=xxxxxxxxxxxxxxxxxxxxxxxxxxxxx; c_secure_login=bm9wZQ=='

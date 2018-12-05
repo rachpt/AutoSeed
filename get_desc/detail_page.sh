@@ -14,7 +14,7 @@
 #-------------------------------------#
 
 get_source_site() {
-    tracker_source_infos="$( $trans_show "$torrent_Path"|grep -A5 'TRACKERS')"
+    tracker_source_infos="$($tr_show "$torrent_Path"|grep -A5 'TRACKERS')"
     # 获取种子原站点
     if [ "`echo $tracker_source_infos|grep -i 'hdsky'`" ]; then
         source_site_URL='https://hdsky.me'
@@ -57,6 +57,7 @@ set_source_site_cookie() {
 
 #-------------------------------------#
 form_source_site_get_tID() {
+if [ "$source_site_URL" ]; then
     # 构造原种搜索链接，以获取原种ID
     if [ "$source_site_URL" = "https://totheglory.im" ]; then
         local source_site_search_URL="${source_site_URL}/browse.php?c=M&search_field=${dot_name}"
@@ -72,13 +73,14 @@ form_source_site_get_tID() {
         local source_site_search_URL="$(echo "$source_site_search_URL"|sed "s/[12][0789][0-9][0-9]//g")"
         source_t_id="$(http -b --ignore-stdin GET "$source_site_search_URL" "$cookie_source_site"|grep -Eo 'id=[0-9]+.*hit=1'|head -1|grep -Eo '[0-9]{4,}')"
     fi
+fi
 }
 
 #-------------------------------------#
 form_source_site_get_Desc() {
     form_source_site_get_tID
     # source_t_id will be unset in generate.sh
-    if [ "${source_t_id}" ]; then
+    if [ "$source_t_id" ]; then
         #---define temp file name---#
         source_detail_full="${ROOT_PATH}/tmp/${org_tr_name}_full.txt"
         http -b --ignore-stdin GET "${source_site_URL}/details.php?id=${source_t_id}" "$cookie_source_site" > "$source_detail_full"

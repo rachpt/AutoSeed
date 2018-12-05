@@ -10,7 +10,7 @@ test_func()
 {
     test_func_probe=1
     #---[hudbt]---#
-    enable_hudbt='no'
+    enable_hudbt='yes'
     #---[whu]---#
     enable_whu='no'
     #---[npupt]---#
@@ -22,9 +22,9 @@ test_func()
     #---[cmct]---#
     enable_cmct='no'
     #---[tjupt]---#
-    enable_tjupt='yes'
+    enable_tjupt='no'
     #
 }
 #--------------------------------------#
-#test_func
-
+test_func  #--
+#

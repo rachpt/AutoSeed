@@ -3,12 +3,11 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-11-21
+# Date: 2018-12-05
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
 source "$ROOT_PATH/settings.sh"
-source "$ROOT_PATH/test.sh"
 #---------------------------------------#
 # import functions
 source "$ROOT_PATH/get_desc/detail_page.sh"
@@ -29,12 +28,12 @@ function is_locked() {
 write_log_begin() {
     echo "+++++++++++++[start]+++++++++++++"   >> "$log_Path"
     echo -e "[`date '+%Y-%m-%d %H:%M:%S'`]\c"  >> "$log_Path"
-    echo "准备发布：[$dot_name]"               >> "$log_Path"
+    echo "准备发布：[$org_tr_name]"            >> "$log_Path"
 }
 write_log_end() {
     echo "+++++++++++++++++++++++++++++++++"   >> "$log_Path"
     echo -e "[`date '+%Y-%m-%d %H:%M:%S'`]\c"  >> "$log_Path"
-    echo "以发布：[$dot_name]"                 >> "$log_Path"
+    echo "以发布：[$org_tr_name]"              >> "$log_Path"
 }
 
 #---------------------------------------#
@@ -53,21 +52,22 @@ torrent_completed_precent() {
 generate_desc() {
     IFS_OLD=$IFS; IFS=$'\n'
     #---loop for torrent in flexget path ---#
-    for tr_i in $(find "$flexget_path" -iname "*.torrent*"|awk -F '/' '{print $NF}')
+    for tr_i in $(find "$flexget_path" -iname '*.torrent*'|awk -F '/' '{print $NF}')
     do
         IFS=$IFS_OLD
         # new_torrent_name 用于和 transmission 中的种子名进行比较，
         # 以决定是否发布种子，作为方便，重命名 torrent 为该名，
-        org_tr_name="$( $tr_show "${flexget_path}/$tr_i"|grep 'Name'|head -1|sed -r 's/Name:[ ]+//')"
+        org_tr_name="$($tr_show "${flexget_path}/$tr_i"|grep 'Name'|head -1|sed -r 's/Name:[ ]+//')"
 
         if [ "$tr_i" != "${org_tr_name}.torrent" ]; then
             mv "${flexget_path}/${tr_i}" "${flexget_path}/${org_tr_name}.torrent"
         fi
+        local one_TR_Name="$org_tr_name"
+        local one_TR_Dir="$(grep -A2 "$org_tr_name" "$queue"|tail -1)"
         torrent_Path="${flexget_path}/${org_tr_name}.torrent"
-
         #---generate desc before done---#
         if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
-            torrent_completed_precent
+            [ ! "$test_func_probe" ] && torrent_completed_precent
             [ "$test_func_probe" ] && completion=100      # convenient for test
             [ "$completion" ] && [ $completion -ge 70 ] && {
                 unset completion
@@ -76,7 +76,7 @@ generate_desc() {
             }
         fi
     done
-    unset tr_i org_tr_name 
+    unset tr_i org_tr_name one_TR_Name one_TR_Dir
 }
 
 #-------------main loop func-------------#
@@ -87,7 +87,7 @@ function main_loop() {
     do
         IFS=$IFS_OLD
         #----------------------------------------------
-        org_tr_name="$("$trans_show" "${flexget_path}/$tr_i"|grep 'Name'|head -1|sed -r 's/Name:[ ]+//')"
+        org_tr_name="$("$tr_show" "${flexget_path}/$tr_i"|grep 'Name'|head -1|sed -r 's/Name:[ ]+//')"
         
         #---.tr file path---#
         torrent_Path="${flexget_path}/${org_tr_name}.torrent"
@@ -102,9 +102,9 @@ function main_loop() {
                 write_log_begin         # write log
                 source "$ROOT_PATH/post/post.sh"
                 write_log_end           # write log
-                rm -f "$torrent_Path"   # delete uploaded torrent
-                sed -i '1,2d' "$ROOT_PATH/tmp/queue"
-                clean_commit_main=1
+                #rm -f "$torrent_Path"   # delete uploaded torrent
+                #sed -i '1,2d' "$queue"
+                #clean_commit_main=1
             fi
         fi
     done
@@ -144,15 +144,15 @@ else
     Torrent_Name="$TR_TORRENT_NAME"
     Tr_Path="$TR_TORRENT_DIR"
 fi
-[ "$Torrent_Name" ] && echo "$Torrent_Name" >> "$ROOT_PATH/tmp/queue"
-[ "$Tr_Path" ] && echo "$Tr_Path" >> "$ROOT_PATH/tmp/queue"
+[ "$Torrent_Name" ] && echo "$Torrent_Name" >> "$queue"
+[ "$Tr_Path" ] && echo "$Tr_Path" >> "$queue"
 generate_desc
 #---------------------------------------#
 #---start check---#
 while true; do
     is_locked
-    one_TR_Name="$(head -1 "$ROOT_PATH/tmp/queue")"
-    one_TR_Dir="$(sed -ne '2p;3q' "$ROOT_PATH/tmp/queue")"
+    one_TR_Name="$(head -1 "$queue")"
+    one_TR_Dir="$(sed -n '2p;3q' "$queue")"
     [[ ! "$one_TR_Name" || ! "$one_TR_Dir" ]] && break
 
     if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then

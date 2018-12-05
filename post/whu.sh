@@ -3,16 +3,16 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-10-23
+# Date: 2018-12-05
 #
 #-------------settings---------------#
 cookie="$cookie_whu"
 passkey="$passkey_whu"
 anonymous="$anonymous_whu"
 #---static---#
-postUrl='https://whu.pt/takeupload.php'
-edit_postUrl='https://whu.pt/takeedit.php'
-site_download_url='https://whu.pt/download.php?id='
+postUrl="${post_site[whu]}/takeupload.php"
+editUrl="${post_site[whu]}/takeedit.php"
+downloadUrl="${post_site[whu]}/download.php?id="
 #-------------------------------------#
 com_des="$(echo "$complex_des"|sed "s/&ratio_in_desc&/$ratio_whu/g")"
 
@@ -126,7 +126,7 @@ whu_small_descr="$chinese_title $chs_included"
 
 #-------------------------------------#
 t_id=$(http --ignore-stdin -f --print=h POST "$postUrl"\
-    'name'="$no_dot_name"\
+    'name'="$noDot_name"\
     'small_descr'="$whu_small_descr"\
     'url'="$imdb_url"\
     'url_douban'="$( [ ! "$imdb_url" ] && echo "$douban_url")"\
@@ -134,13 +134,13 @@ t_id=$(http --ignore-stdin -f --print=h POST "$postUrl"\
     'type'="$whu_type"\
     'standard_sel'="$whu_stardand"\
     'uplver'="$anonymous_whu"\
-    file@"${torrentPath}"\
+    file@"${torrent_Path}"\
     "$cookie_whu"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
 
 if [ -z "$t_id" ]; then
     # 辅种
     t_id=$(http --ignore-stdin -f -b POST "$postUrl"\
-        name="$no_dot_name"\
+        name="$noDot_name"\
         small_descr="$whu_small_descr"\
         url="$imdb_url"\
         url_douban="$( [ ! "$imdb_url" ] && echo "$douban_url")"\
@@ -148,6 +148,6 @@ if [ -z "$t_id" ]; then
         type="$whu_type"\
         standard_sel="$whu_stardand"\
         uplver="$anonymous"\
-        file@"${torrentPath}"\
+        file@"${torrent_Path}"\
         "$cookie_whu"|grep 'id='|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
 fi

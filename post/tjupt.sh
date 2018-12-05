@@ -2,17 +2,17 @@
 # FileName: post/tjupt.sh
 #
 # Author: rachpt@126.com
-# Version: 2.4v
-# Date: 2018-09-23
+# Version: 3.0v
+# Date: 2018-12-05
 #
 #-------------settings---------------#
 cookie="$cookie_tjupt"
 passkey="$passkey_tjupt"
 anonymous="$anonymous_tjupt"
 #---static---#
-postUrl='https://tjupt.org/takeupload.php'
-edit_postUrl='https://tjupt.org/takeedit.php'
-site_download_url='https://tjupt.org/download.php?id='
+postUrl="${post_site[tjupt]}/takeupload.php"
+editUrl="${post_site[tjupt]}/takeedit.php"
+downloadUrl="${post_site[tjupt]}/download.php?id="
 #-------------------------------------#
 selectType="$tjupt_selectType"
 [ ! "$team_sel_tjupt" ] && team_sel_tjupt="$default_team_sel_tjupt"

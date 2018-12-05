@@ -20,7 +20,7 @@ poster_up_to_sm_and_byr() {
     if [ "$douban_poster_url" ]; then
         local tmp_poster_file="$ROOT_PATH/tmp/autoseed-pic-$(date +%s%N)$(echo "${douban_poster_url##*/}"|sed -E 's/.*(\.[jpgb][pnim]e?[gfp]).*/\1/i')"
         http --ignore-stdin -dco "$tmp_poster_file" "$douban_poster_url" # download poster
-        new_poster_url="$(http --ignore-stdin -f POST "$upload_poster_api" smfile@"$tmp_poster_file"|egrep -o "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" # sm.ms
+        new_poster_url="$(http --ignore-stdin -f POST "$upload_poster_api" smfile@"$tmp_poster_file"|grep -Eo "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" # sm.ms
         [ "$enable_byrbt" = 'yes' ] && new_poster_url_byrbt="$(http -b --ignore-stdin -f POST "$upload_poster_api_byrbt" upload@"$tmp_poster_file" "$cookie_byrbt"|awk -F ',' '{print $2}'|sed -r "s!.*https?://!https://!;s/'[ ]*$//")"  # byrbt
 
         rm -f "$tmp_poster_file"

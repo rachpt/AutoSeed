@@ -65,7 +65,7 @@ from_douban_get_desc() {
         # 英文名
         eng_name_douban="$(echo "$desc_json_info"|grep 'foreign_title'|head -1|awk -F '"' '{print $4}')"
 
-        [ "$enable_byrbt" = 'yes' ] && gen_desc_html="$(echo "$gen_desc_bbcode"|sed "1c <img src=\"$douban_poster_url\" />"|sed 's#$#&<br />#g')" # byrbt
+        [[ $enable_byrbt = yes ]] && gen_desc_html="$(echo "$gen_desc_bbcode"|sed "1c <img src=\"$douban_poster_url\" />"|sed 's#$#&<br />#g')" # byrbt
     fi
 }
 
@@ -75,23 +75,29 @@ generate_main_func() {
     from_douban_get_desc
 
     # bbcode
-    source_detail_desc_tmp="$(cat "$source_detail_desc")
+    source_detail_desc_tmp="${gen_desc_bbcode}
+
+    [quote]$(cat "$source_detail_desc")[/quote]
     $(if [ $source_t_id ]; then
         echo -e "\n[quote][b]本种来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}[/quote]"
     else
         echo -e "\n[quote][b]本种来自：[/b] ${source_site_URL}[/quote]"
-    fi
-    )$(echo -e "\n&chs_name_douban&${chs_name_douban}\n&eng_name_douban&${eng_name_douban}\n")"
+    fi )
+&chs_name_douban&${chs_name_douban}
+&eng_name_douban&${eng_name_douban}
+"
 
     # byrbt 所需要的 html 简介
-    [ "$enable_byrbt" = 'yes' ] && source_detail_html_tmp="$(cat "$source_detail_html")
+    [[ $enable_byrbt = yes ]] && source_detail_html_tmp="${gen_desc_html}<br /><br />
+    <fieldset><br /> $(cat "$source_detail_html") <fieldset><br />
     $(echo -e "\n<br /><br /><br /><fieldset><br />\n")
     $(if [ $source_t_id ]; then
         echo '<span style="font-size:20px;">本种来自： '${source_site_URL}/details.php?id=${source_t_id}'</span>'
     else
         echo '<span style="font-size:20px;">本种来自： '${source_site_URL}'</span>'
     fi
-    )$(echo -e "\n<br /></fieldset><br /><br />\n")"
+    echo -e "\n<br /></fieldset><br /><br />\n")"
+
     # 简介保存至文件 
     echo "$source_detail_desc_tmp" > "$source_detail_desc"
     echo "$source_detail_html_tmp" > "$source_detail_html"

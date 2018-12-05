@@ -3,16 +3,16 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-10-23
+# Date: 2018-12-05
 #
 #-------------settings---------------#
 cookie="$cookie_nanyangpt"
 passkey="$passkey_nanyangpt"
 anonymous="$anonymous_nanyangpt"
 #---static---#
-postUrl='https://nanyangpt.com/takeupload.php'
-edit_postUrl='https://nanyangpt.com/takeedit.php'
-site_download_url='https://nanyangpt.com/download.php?id='
+postUrl="${post_site[nanyangpt]}/takeupload.php"
+editUrl="${post_site[nanyangpt]}/takeedit.php"
+downloadUrl="${post_site[nanyangpt]}/download.php?id="
 #-------------------------------------#
 # 需要的参数
 nanyangpt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_nanyangpt/g")
@@ -66,13 +66,13 @@ if [ "$nanyangpt_type" = '401' ]; then
         'descr'="$nanyangpt_des"\
         'type'="$nanyangpt_selectType"\
         'uplver'="$anonymous_nanyangpt"\
-        file@"${torrentPath}"\
+        file@"${torrent_Path}"\
         "$cookie_nanyangpt"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
 
     if [ -z "$t_id" ]; then
         # 辅种
         :
-        t_id=`http --ignore-stdin -f POST "$postUrl" name="$dot_name" movie_enname="$dot_name" small_descr="$smallDescr" url="$imdbUrl" descr="$nanyangpt_des" type="$nanyangpt_selectType" uplver="$anonymous" file@"$torrentPath" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
+        t_id=`http --ignore-stdin -f POST "$postUrl" name="$dot_name" movie_enname="$dot_name" small_descr="$smallDescr" url="$imdbUrl" descr="$nanyangpt_des" type="$nanyangpt_selectType" uplver="$anonymous" file@"$torrent_Path" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
     fi
 elif [ "$nanyangpt_type" = '402' ]; then
     # 剧集 POST
@@ -85,7 +85,7 @@ elif [ "$nanyangpt_type" = '402' ]; then
         'descr'="$nanyangpt_des"\
         'type'="$nanyangpt_selectType"\
         'uplver'="$anonymous_nanyangpt"\
-        file@"${torrentPath}"\
+        file@"${torrent_Path}"\
         "$cookie_nanyangpt"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
 
 elif [ "$nanyangpt_type" = '406' ]; then
@@ -99,7 +99,7 @@ elif [ "$nanyangpt_type" = '406' ]; then
         'descr'="$nanyangpt_des"\
         'type'="$nanyangpt_selectType"\
         'uplver'="$anonymous_nanyangpt"\
-        file@"${torrentPath}"\
+        file@"${torrent_Path}"\
         "$cookie_nanyangpt"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
     :
 else
