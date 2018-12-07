@@ -26,16 +26,19 @@ get_douban_url_by_keywords() {
     elif [ "$(echo "$dot_name"|sed -r 's/(.*)\.Complete\..*/\1/i')" ]; then
         local search_base_name="$(echo "$dot_name"|sed -r 's/(.*)\.Complete\..*/\1/i')"
     else
-        local search_base_name="$(echo "$dot_name"|sed -r 's/(.*)\.BluRay\..*/\1/i;s/(.*)\.hdtv\..*/\1/i;s/(.*)\.web-?dl\..*/\1/i;')"
+        local search_base_name="$(echo "$dot_name"| \
+            sed -r 's/(.*)\.BluRay\..*/\1/i;s/(.*)\.hdtv\..*/\1/i;s/(.*)\.web-?dl\..*/\1/i;')"
     fi
 
-    search_get_douban_url="$(http -b --pretty=format --ignore-stdin GET "https://api.douban.com/v2/movie/search?q=${search_base_name}"|grep 'movie.douban.com/subject'|head -1|awk -F '"' '{print $4}')"
+    search_get_douban_url="$(http -b --verify=no --pretty=format --ignore-stdin \
+        --timeout=15 GET "https://api.douban.com/v2/movie/search?q=${search_base_name}"| \
+        grep 'movie.douban.com/subject'|head -1|awk -F '"' '{print $4}')"
     # 写入日志
     if [ "$search_get_douban_url" ]; then
         search_desc_url="$search_get_douban_url"
         echo "搜索得到豆瓣链接：$search_get_douban_url" >> "$log_Path"
     else
-        echo '未搜索到豆瓣链接！！！' >> "$log_Path"
+        echo '未搜索到豆瓣链接！！！'                   >> "$log_Path"
     fi
 }
 
@@ -51,21 +54,30 @@ from_douban_get_desc() {
     fi
     # 使用 API 或者 python 本地解析豆瓣简介
     if [ "$search_desc_url" ]; then
-        desc_json_info="$(http --pretty=format --ignore-stdin GET "https://api.rhilip.info/tool/movieinfo/gen?url=${search_desc_url}")"
+        desc_json_info="$(http --pretty=format --ignore-stdin --timeout=26 GET \
+            "https://api.rhilip.info/tool/movieinfo/gen?url=${search_desc_url}")"
         success_get_json_info="$(echo "$desc_json_info"|grep '"success": true')"
         if [ ! "$success_get_json_info" ] && [ "$Use_Local_Gen" = 'yes' ]; then
-            desc_json_info="$("$python3" -c "import sys;sys.path.append(\"${ROOT_PATH}/get_desc/\");from gen import Gen;import json;gen=Gen(\"${search_desc_url}\").gen(_debug=True);print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=False))")"
+            desc_json_info="$("$python3" -c  \
+"import sys;sys.path.append(\"${ROOT_PATH}/get_desc/\"); \
+from gen import Gen;import json;gen=Gen(\"${search_desc_url}\").gen(_debug=True); \
+print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=False))")"
         fi
 
-        gen_desc_bbcode="$(echo "$desc_json_info"|grep 'format'|awk -F '"' '{print $4}'|sed 's#\\n#\n#g')"
+        gen_desc_bbcode="$(echo "$desc_json_info"|grep 'format'| \
+            awk -F '"' '{print $4}'|sed 's#\\n#\n#g')"
 
-        douban_poster_url="$(echo "$desc_json_info"|grep '"poster":'|head -1|awk -F '"' '{print $4}')"
+        douban_poster_url="$(echo "$desc_json_info"|grep '"poster":'| \
+            head -1|awk -F '"' '{print $4}')"
         # 中文名
-        chs_name_douban="$(echo "$desc_json_info"|grep 'chinese_title'|head -1|awk -F '"' '{print $4}')"
+        chs_name_douban="$(echo "$desc_json_info"|grep 'chinese_title'| \
+            head -1|awk -F '"' '{print $4}')"
         # 英文名
-        eng_name_douban="$(echo "$desc_json_info"|grep 'foreign_title'|head -1|awk -F '"' '{print $4}')"
+        eng_name_douban="$(echo "$desc_json_info"|grep 'foreign_title'| \
+            head -1|awk -F '"' '{print $4}')"
 
-        [[ $enable_byrbt = yes ]] && gen_desc_html="$(echo "$gen_desc_bbcode"|sed "1c <img src=\"$douban_poster_url\" />"|sed 's#$#&<br />#g')" # byrbt
+        [[ $enable_byrbt = yes ]] && gen_desc_html="$(echo "$gen_desc_bbcode"| \
+            sed "1c <img src=\"$douban_poster_url\" />"|sed 's#$#&<br />#g')" # byrbt
     fi
 }
 
@@ -83,7 +95,7 @@ generate_main_func() {
     else
         echo -e "\n[quote][b]本种来自：[/b] ${source_site_URL}[/quote]"
     fi )
-&chs_name_douban&${chs_name_douban}
+&shc_name_douban&${chs_name_douban}
 &eng_name_douban&${eng_name_douban}
 "
 

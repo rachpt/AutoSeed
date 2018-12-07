@@ -14,83 +14,92 @@ postUrl="${post_site[cmct]}/takeupload.php"
 editUrl="${post_site[cmct]}/takeedit.php"
 downloadUrl="${post_site[cmct]}/download.php?id="
 #-------------------------------------#
-cmct_des="$(echo "${cmct_des}"|sed "s/&ratio_in_desc&/${ratio_cmct}/g")"
+cmct_npupt_parameter() {
+
+if [ -s "$source_desc" ]; then
+    cmct_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_cmct/g")
+$(cat "$source_desc")"
+else
+    cmct_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_cmct/g")
+$failed_to_get_des"
+fi
 
 #-------------------------------------#
-# 判断类型，纪录片、电影、剧集
-if [ "$documentary" = 'yes' ]; then
-    cmct_type='503'
-else
-    if [ "$serials" = 'yes' ]; then
-        # 剧集分类
-        cmct_type='502'
+    # 判断类型，纪录片、电影、剧集
+    if [ "$documentary" = 'yes' ]; then
+        cmct_type='503'
     else
-        # 电影类别
-        cmct_type='501'
+        if [ "$serials" = 'yes' ]; then
+            # 剧集分类
+            cmct_type='502'
+        else
+            # 电影类别
+            cmct_type='501'
+        fi
     fi
-fi
 #-------------------------------------#
-# 封装格式
-if [ "$file_type" = 'MKV']; then
-    cmct_medium=6
-elif [ "$file_type" = 'MP4']; then
-    cmct_medium=7
-elif [ "$file_type" = 'TS']; then
-    [ "$is_bd" ] && cmct_medium=4
-    [ "$is_hdtv" ] && cmct_medium=5
-else
-    cmct_medium=0
-fi
-# 视频编码
-if [ "$is_264" = 'yes' ]; then
-    cmct_codec=2
-elif [ "$is_265" = 'yes' ]; then
-    cmct_codec=1
-else
-    cmct_codec=0
-fi
+    # 封装格式
+    if [ "$file_type" = 'MKV']; then
+        cmct_medium=6
+    elif [ "$file_type" = 'MP4']; then
+        cmct_medium=7
+    elif [ "$file_type" = 'TS']; then
+        [ "$is_bd" ] && cmct_medium=4
+        [ "$is_hdtv" ] && cmct_medium=5
+    else
+        cmct_medium=0
+    fi
+    # 视频编码
+    if [ "$is_264" = 'yes' ]; then
+        cmct_codec=2
+    elif [ "$is_265" = 'yes' ]; then
+        cmct_codec=1
+    else
+        cmct_codec=0
+    fi
 
-# 音频编码
-if [ "$is_dts" = 'yes' ]; then
-    cmct_audio=3
-elif [ "$is_ac3" = 'yes' ]; then
-    cmct_audio=4
-elif [ "$is_aac" = 'yes' ]; then
-    cmct_audio=5
-elif [ "$is_flac" = 'yes' ]; then
-    cmct_audio=7
-else
-    cmct_audio=0
-fi
+    # 音频编码
+    if [ "$is_dts" = 'yes' ]; then
+        cmct_audio=3
+    elif [ "$is_ac3" = 'yes' ]; then
+        cmct_audio=4
+    elif [ "$is_aac" = 'yes' ]; then
+        cmct_audio=5
+    elif [ "$is_flac" = 'yes' ]; then
+        cmct_audio=7
+    else
+        cmct_audio=0
+    fi
 
-# 分辨率
-if [ "$is_4k" = 'yes' ]; then
-    cmct_standard='1'
-elif [ "$is_1080p" = 'yes' ]; then
-    cmct_standard='2'
-elif [ "$is_1080i" = 'yes' ]; then
-    cmct_standard='3'
-elif [ "$is_720p" = 'yes' ]; then
-    cmct_standard='4'
-else
-    cmct_standard='0'
-fi
+    # 分辨率
+    if [ "$is_4k" = 'yes' ]; then
+        cmct_standard='1'
+    elif [ "$is_1080p" = 'yes' ]; then
+        cmct_standard='2'
+    elif [ "$is_1080i" = 'yes' ]; then
+        cmct_standard='3'
+    elif [ "$is_720p" = 'yes' ]; then
+        cmct_standard='4'
+    else
+        cmct_standard='0'
+    fi
 
 # 地区
 case "$region" in
-    *中国大陆*)
-        cmct_source='1' ;;
-    *香港*|*台湾*|*澳门*)
-        cmct_source='2' ;;
-    *日本*|*韩国*)
-        cmct_source='10' ;;
-    *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
-        cmct_source='9' ;;
-    *)
-        cmct_source='3' ;;
+  *中国大陆*)
+      cmct_source='1' ;;
+  *香港*|*台湾*|*澳门*)
+      cmct_source='2' ;;
+  *日本*|*韩国*)
+      cmct_source='10' ;;
+  *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+      cmct_source='9' ;;
+  *)
+      cmct_source='3' ;;
 esac
 
-cmct_small_descr="$chinese_title $chs_included"
+    cmct_small_descr="$chinese_title $chs_included"
+}
 #-------------------------------------#
 
 #---类型---#
@@ -153,6 +162,9 @@ cmct_small_descr="$chinese_title $chs_included"
 # pack="yes"  合集
 
 #-------------------------------------#
+cmct_post_func() {
+    gen_cmct_parameter
+    #---post data---#
 t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
     'name'="$dot_name"\
     'small_descr'="$cmct_small_descr"\
@@ -169,11 +181,10 @@ t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
     file@"${torrent_Path}"\
     "$cookie_cmct"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
 
-#if [ -z "$t_id" ]; then
-    #t_id=`http --ignore-stdin -f POST "$postUrl" name="$dot_name" small_descr="$smallDescr" url="$imdbUrl" descr="$cmct_des" type="$selectType" medium_sel="$medium_sel_cmct" codec_sel="$codec_sel_cmct" standard_sel="$standardSel" source_sel="$source_sel_cmct" uplver="$anonymous" file@"$torrent_Path" "$cookie"|grep hit=1|head -n 1|cut -d = -f 5|cut -d '&' -f 1`
-#fi
+    if [ -z "$t_id" ]; then
+        # 辅种
+        :
+    fi
+}
 
-if [ -z "$t_id" ]; then
-    # 辅种
-    :
-fi
+#-------------------------------------#

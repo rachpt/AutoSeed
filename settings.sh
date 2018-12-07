@@ -3,21 +3,22 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-11-21
+# Date: 2018-12-06
 #
 # Environmental requirements:
 # - transmission-[show,remote,daemon or gtk]
 # - httpie, head, awk, sed, find, egrep, curl
 # - cut, cat, mktemp, sort, tail, stat, python3
-# - base64
+# - base64, iconv
 #
 #----------------[main]----------------#
 #---use yes to disable all---#
 Disable_AutoSeed='no'
+Speed=0.6
 # set 'yes' allow say thanks 
 Allow_Say_Thanks='yes'
-# set 'yes', will use python local,otherwise use web 
-USE_Local_Gen='yes'
+# set 'yes', will uselocal python gen while web method failed 
+Use_Local_Gen='yes'
 #
 #---torrent file path---#
 flexget_path="/home/rachpt/Downloads/tmp"
@@ -33,10 +34,10 @@ default_FILE_PATH='/mnt/ubuntu/mp4'
 TimeINTERVAL=172800
 #
 # The minimum allowed disk (G).
-DISK_AVAIL_MIN=50
+DISK_AVAIL_MIN=20
 # Over this time, torrent will be deleted (unit day).
 # It will not delete data.
-MAX_SEED_TIME=13
+MAX_SEED_TIME=10
 #
 #-------------[post site]--------------#
 ########################################

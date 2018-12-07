@@ -14,7 +14,15 @@ postUrl="${post_site[hudbt]}/takeupload.php"
 editUrl="${post_site[hudbt]}/takeedit.php"
 downloadUrl="${post_site[hudbt]}/download.php?id="
 #-------------------------------------#
-hudbt_des="$(echo "$complex_des"|sed "s/&ratio_in_desc&/$ratio_hudbt/g")"
+gen_hudbt_parameter() {
+
+if [ -s "$source_desc" ]; then
+    hudbt_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_hudbt/g")
+$(cat "$source_desc")"
+else
+    hudbt_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_hudbt/g")
+$failed_to_get_des"
+fi
 
 #-------------------------------------#
 # 判断类型，纪录片、电影、剧集
@@ -23,55 +31,55 @@ if [ "$documentary" = 'yes' ]; then
 elif [ "$is_ipad" = 'yes' ]; then
     hudbt_type='430'
 else
-    if [ "$serials" = 'yes' ]; then
-        # 剧集分类
-        case "$region" in
-            *中国大陆*)
-                hudbt_type='402' ;;
-            *香港*|*台湾*|*澳门*)
-                hudbt_type='417' ;;
-            *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
-                hudbt_type='416' ;;
-            *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
-                hudbt_type='418' ;;
-            *)
-                hudbt_type='409' ;;
-        esac
+  if [ "$serials" = 'yes' ]; then
+    # 剧集分类
+    case "$region" in
+      *中国大陆*)
+          hudbt_type='402' ;;
+      *香港*|*台湾*|*澳门*)
+          hudbt_type='417' ;;
+      *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
+          hudbt_type='416' ;;
+      *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+          hudbt_type='418' ;;
+      *)
+          hudbt_type='409' ;;
+    esac
+  else
+    # 电影类别
+    case "$region" in
+      *中国大陆*)
+          hudbt_type='401' ;;
+      *香港*|*台湾*|*澳门*)
+          hudbt_type='413' ;;
+      *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
+          hudbt_type='414' ;;
+      *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+          hudbt_type='415' ;;
+      *)
+          hudbt_type='409' ;;
+    esac
+  fi
+fi
+
+#-------------------------------------#
+    # 设置分辨率
+    if [ "$is_4k" = 'yes' ]; then
+        hudbt_stardand='0'
+    elif [ "$is_1080p" = 'yes' ]; then
+        hudbt_stardand='1'
+    elif [ "$is_1080i" = 'yes' ]; then
+        hudbt_stardand='2'
+    elif [ "$is_720p" = 'yes' ]; then
+        hudbt_stardand='3'
     else
-        # 电影类别
-        case "$region" in
-            *中国大陆*)
-                hudbt_type='401' ;;
-            *香港*|*台湾*|*澳门*)
-                hudbt_type='413' ;;
-            *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
-                hudbt_type='414' ;;
-            *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
-                hudbt_type='415' ;;
-            *)
-                hudbt_type='409' ;;
-        esac
+        hudbt_stardand='0'
     fi
-fi
 
 #-------------------------------------#
-# 设置分辨率
-if [ "$is_4k" = 'yes' ]; then
-    hudbt_stardand='0'
-elif [ "$is_1080p" = 'yes' ]; then
-    hudbt_stardand='1'
-elif [ "$is_1080i" = 'yes' ]; then
-    hudbt_stardand='2'
-elif [ "$is_720p" = 'yes' ]; then
-    hudbt_stardand='3'
-else
-    hudbt_stardand='0'
-fi
-
-#-------------------------------------#
-# 副标题
-hudbt_small_descr="$chinese_title $chs_included"
-
+    # 副标题
+    hudbt_small_descr="$chinese_title $chs_included"
+}
 #-------------------------------------#
 # file -> 种子文件(*)，dl-url -> 网盘下载
 # name -> 主标题(0day 不要点*)，url -> imdb链接
@@ -123,7 +131,9 @@ hudbt_small_descr="$chinese_title $chs_included"
 
 
 #-------------------------------------#
-t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
+hudbt_post_func() {
+    gen_hudbt_parameter
+t_id=$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
     'name'="$noDot_name"\
     'small_descr'="$hudbt_small_descr"\
     'url'="$imdb_url"\
@@ -136,7 +146,7 @@ t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
 
 if [ -z "$t_id" ]; then
     # 辅种
-    t_id=$(http --verify=no --ignore-stdin -f POST "$postUrl"\
+    t_id=$(http --verify=no --ignore-stdin -f --timeout=10 POST "$postUrl"\
         name="$noDot_name"\
         small_descr="$hudbt_small_descr"\
         url="$imdb_url"\
@@ -147,3 +157,6 @@ if [ -z "$t_id" ]; then
         file@"${torrent_Path}"\
         "$cookie_hudbt"|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
 fi
+}
+
+#-------------------------------------#

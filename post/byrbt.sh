@@ -16,6 +16,7 @@ editUrl="${post_site[byrbt]}/takeedit.php"
 downloadUrl="${post_site[byrbt]}/download.php?id="
 #-------------------------------------#
 # 需要的参数
+gen_byrbt_parameter() {
 
 if [ -s "$source_html" ]; then
     byrbt_des="$descrCom_complex_html
@@ -30,48 +31,48 @@ fi
 if [ "$documentary" = 'yes' ]; then
     byrbt_type='410'
 else
-    if [ "$serials" = 'yes' ]; then
-        # 剧集
-        byrbt_type='401'
-        # 二级分类
-        case "$region" in
-            *中国大陆*)
-                byrbt_tv_type='大陆'
-                byrbt_second_type='15' ;;
-            *香港*|*台湾*|*澳门*)
-                byrbt_tv_type='港台'
-                byrbt_second_type='18' ;;
-            *日本*|*韩国*)
-                byrbt_tv_type='日韩'
-                byrbt_second_type='16' ;;
-            *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
-                byrbt_tv_type='欧美'
-                byrbt_second_type='17' ;;
-            *)
-                byrbt_tv_type='其他'
-                byrbt_second_type='2' ;;
-        esac
-        byrbt_tv_season="$season"
-        byrbt_tv_filetype="$file_type"
-    else 
-        # 默认电影类
-        byrbt_type='408'
-        # 二级分类
-        case "$region" in
-            *中国大陆*|*香港*|*台湾*|*澳门*)
-                byrbt_second_type='11' ;;
-            *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
-                byrbt_second_type='14' ;;
-            *英国*|*德国*|*法国*|*俄罗斯*|*西班牙*|*澳大利亚*)
-                byrbt_second_type='12' ;;
-            *美国*|*墨西哥*|*加拿大*)
-                byrbt_second_type='13' ;;
-            *)
-                byrbt_second_type='1' ;;
-        esac
-    fi
+  if [ "$serials" = 'yes' ]; then
+    # 剧集
+    byrbt_type='401'
+    # 二级分类
+    case "$region" in
+      *中国大陆*)
+          byrbt_tv_type='大陆'
+          byrbt_second_type='15' ;;
+      *香港*|*台湾*|*澳门*)
+          byrbt_tv_type='港台'
+          byrbt_second_type='18' ;;
+      *日本*|*韩国*)
+          byrbt_tv_type='日韩'
+          byrbt_second_type='16' ;;
+      *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+          byrbt_tv_type='欧美'
+          byrbt_second_type='17' ;;
+      *)
+          byrbt_tv_type='其他'
+          byrbt_second_type='2' ;;
+    esac
+    byrbt_tv_season="$season"
+    byrbt_tv_filetype="$file_type"
+  else 
+    # 默认电影类
+    byrbt_type='408'
+    # 二级分类
+    case "$region" in
+      *中国大陆*|*香港*|*台湾*|*澳门*)
+          byrbt_second_type='11' ;;
+      *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
+          byrbt_second_type='14' ;;
+      *英国*|*德国*|*法国*|*俄罗斯*|*西班牙*|*澳大利亚*)
+          byrbt_second_type='12' ;;
+      *美国*|*墨西哥*|*加拿大*)
+          byrbt_second_type='13' ;;
+      *)
+          byrbt_second_type='1' ;;
+    esac
+  fi
 fi
-
+}
 #-------------------------------------#
 # type -> 类型(*)，second_type -> 二级分类
 # file -> 种子文件(*)，[tv_type -> 剧集类型]，movie_cname -> 中文名
@@ -108,9 +109,11 @@ fi
 # 18  港台
 # 2   其他
 #-------------------------------------#
+byrbt_post_func() {
+    gen_byrbt_parameter
 if [ "$byrbt_type" = '408' ]; then
     # 电影 POST
-    t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
+    t_id=$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
         'movie_cname'="$chinese_title"\
         'ename0day'="$dot_name"\
         'type'="$byrbt_type"\
@@ -129,25 +132,10 @@ if [ "$byrbt_type" = '408' ]; then
     if [ -z "$t_id" ]; then
         # 辅种
         :
-        #tid=$(http --ignore-stdin -f -b POST "$postUrl"\
-            #movie_cname="$smallDescr_byrbt"\
-            #ename0day="$dot_name"\
-            #type="$byrbt_selectType"\
-            #small_descr="$chs_included"\
-            #url="$imdb_url"\
-            #descr="$byrbt_des"\
-            #type="$byrbt_selectType"\
-            #second_type="$byrbt_second_type"\
-            #movie_type="$genre"\
-            #movie_country="$region"\
-            #uplver="$anonymous_byrbt"\
-            #file@"${torrent_Path}"\
-            #"$cookie_byrbt"|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
-
     fi
 elif [ "$byrbt_type" = '401' ]; then
     # 剧集 POST
-    t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
+    t_id=$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
         'type'="$byrbt_type"\
         'second_type'="$byrbt_second_type"\
         'tv_type'="$byrbt_tv_type"\
@@ -175,3 +163,7 @@ else
     # 其他 POST
     :
 fi
+}
+
+#-------------------------------------#
+

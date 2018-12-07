@@ -6,15 +6,14 @@
 # Date: 2018-09-23
 #
 #--------------------------------------#
-test_func()
-{
+test_func() {
     test_func_probe=1
     #---[hudbt]---#
-    enable_hudbt='yes'
+    enable_hudbt='no'
     #---[whu]---#
     enable_whu='no'
     #---[npupt]---#
-    enable_npupt='no'
+    enable_npupt='yes'
     #---[nanyangpt]---#
     enable_nanyangpt='no'
     #---[byrbt]---#

@@ -14,7 +14,15 @@ postUrl="${post_site[tjupt]}/takeupload.php"
 editUrl="${post_site[tjupt]}/takeedit.php"
 downloadUrl="${post_site[tjupt]}/download.php?id="
 #-------------------------------------#
-tjupt_des="$(echo "$tjupt_des"|sed "s/&ratio_in_desc&/$ratio_tjupt/g")"
+gen_tjupt_parameter() {
+
+if [ -s "$source_desc" ]; then
+tjupt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_tjupt/g")
+$(cat "$source_desc")"
+else
+tjupt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_tjupt/g")
+$failed_to_get_des"
+fi
 
 #-------------------------------------#
 tjupt_year="$(echo "$dot_name"|grep -Eo '[12][089][0-9]{2}'|sed '/1080/d'|tail -1)"
@@ -50,18 +58,22 @@ fi
 #-------------------------------------#
 # 地区
 case "$region" in
-    *中国大陆*)
-        tjupt_team='2' ;;
-    *香港*|*台湾*|*澳门*)
-        tjupt_team='5' ;;
-    *日本*|*韩国*)
-        tjupt_team='3' ;;
-    *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
-        tjupt_team='1' ;;
-    *)
-        tjupt_team='7' ;;
+  *中国大陆*)
+      tjupt_team='2' ;;
+  *香港*|*台湾*|*澳门*)
+      tjupt_team='5' ;;
+  *日本*|*韩国*)
+      tjupt_team='3' ;;
+  *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+      tjupt_team='1' ;;
+  *)
+      tjupt_team='7' ;;
 esac
+}
 #-------------------------------------#
+tjupt_post_func() {
+    gen_tjupt_parameter
+    #---post data---#
 t_id="$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
     'small_descr'="$chs_included"\
     'url'="$imdb_url"\
@@ -85,3 +97,6 @@ if [ -z "$t_id" ]; then
     # 辅种
     :
 fi
+}
+
+#-------------------------------------#

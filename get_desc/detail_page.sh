@@ -14,30 +14,33 @@
 #-------------------------------------#
 
 get_source_site() {
-    tracker_source_infos="$($tr_show "$torrent_Path"|grep -A5 'TRACKERS')"
+    local tracker_info="$($tr_show "$torrent_Path"|grep -A5 'TRACKERS')"
     # 获取种子原站点
-    if [ "`echo $tracker_source_infos|grep -i 'hdsky'`" ]; then
+    if [ "$(echo $tracker_info|grep -i 'hdsky')" ]; then
         source_site_URL='https://hdsky.me'
         cookie_source_site="$cookie_hds"
         echo "got source_site: hdsky" >> "$log_Path"
-    elif [ "`echo $tracker_source_infos|grep -i 'totheglory'`" ]; then
+    elif [ "$(echo $tracker_info|grep -i 'totheglory')" ]; then
         source_site_URL='https://totheglory.im'
         cookie_source_site="$cookie_ttg"
         echo "got source_site: ttg" >> "$log_Path"
-    elif [ "`echo $tracker_source_infos|grep -i 'hdchina'`" ]; then
+    elif [ "$(echo $tracker_info|grep -i 'hdchina')" ]; then
         source_site_URL='https://hdchina.org'
         cookie_source_site="$cookie_hdc"
         echo "got source_site: hdchina" >> "$log_Path"
-    elif [ "`echo $tracker_source_infos|grep -i 'tp.m-team.cc'`" ]; then
+    elif [ "$(echo $tracker_info|grep -i 'tp.m-team.cc')" ]; then
         source_site_URL='https://tp.m-team.cc'
         cookie_source_site="$cookie_mt"
         echo "got source_site :mteam" >> "$log_Path"
-    elif [ "`echo $tracker_source_infos|grep -i 'hdcmct.org'`" ]; then
+    elif [ "$(echo $tracker_info|grep -i 'hdcmct.org')" ]; then
         source_site_URL='https://hdcmct.org'
         cookie_source_site="$cookie_cmct"
         echo "got source_site: hdcmct" >> "$log_Path"
-    #elif [ "`echo $tracker_source_infos|grep -i 'new'`" ]; then
-    #    source_site_URL='https://new.tracker.com'
+        #elif [ "$(echo $tracker_info|grep -i 'new')" ]; then
+    #    source_site_URL='https://new.tracker.org'
+    else
+        unknown_site="$(echo "$tracker_info"|grep -Eo 'https?://[^/]*'| \
+            head -1|sed 's/tracker\.//')"
     fi
 }
 set_source_site_cookie() {
@@ -60,19 +63,28 @@ form_source_site_get_tID() {
 if [ "$source_site_URL" ]; then
     # 构造原种搜索链接，以获取原种ID
     if [ "$source_site_URL" = "https://totheglory.im" ]; then
-        local source_site_search_URL="${source_site_URL}/browse.php?c=M&search_field=${dot_name}"
+        local s_search_URL="${source_site_URL}/browse.php?c=M&search_field=${dot_name}"
     else
         # sed 用于过滤文件后缀
-        local source_site_search_URL="${source_site_URL}/torrents.php?search=${dot_name}"
+        local s_search_URL="${source_site_URL}/torrents.php?search=${dot_name}"
     fi
 
-    source_t_id="$(http -b --ignore-stdin GET "$source_site_search_URL" "$cookie_source_site"|grep -Eo 'id=[0-9]+.*hit=1'|head -1|grep -Eo '[0-9]{4,}')"
+    source_t_id="$(http --verify=no -b --ignore-stdin --timeout=10 GET \
+        "$s_search_URL" "$cookie_source_site"| \
+        grep -Eo 'id=[0-9]+.*hit=1'|head -1|grep -Eo '[0-9]{4,}')"
 
     #---deal with wrong year---#
     if [ ! "$source_t_id" ]; then
-        local source_site_search_URL="$(echo "$source_site_search_URL"|sed "s/[12][0789][0-9][0-9]//g")"
-        source_t_id="$(http -b --ignore-stdin GET "$source_site_search_URL" "$cookie_source_site"|grep -Eo 'id=[0-9]+.*hit=1'|head -1|grep -Eo '[0-9]{4,}')"
+        local source_site_search_URL="$(echo "$source_site_search_URL"| \
+            sed "s/[12][0789][0-9][0-9]//g")"
+        source_t_id="$(http --verify=no -b --ignore-stdin --timeout=10 GET \
+            "$s_search_URL" "$cookie_source_site"| \
+            grep -Eo 'id=[0-9]+.*hit=1'|head -1|grep -Eo '[0-9]{4,}')"
     fi
+else
+    # 用于简介
+    source_site_URL="$unknown_site"
+    unset unknown_site
 fi
 }
 
@@ -83,7 +95,9 @@ form_source_site_get_Desc() {
     if [ "$source_t_id" ]; then
         #---define temp file name---#
         source_full="${ROOT_PATH}/tmp/${org_tr_name}_full.txt"
-        http -b --ignore-stdin GET "${source_site_URL}/details.php?id=${source_t_id}" "$cookie_source_site" > "$source_full"
+        http -b --verify=no --ignore-stdin --timeout=10 GET \
+            "${source_site_URL}/details.php?id=${source_t_id}" \
+            "$cookie_source_site" > "$source_full"
     #---
     if [ -s "$source_full" ]; then
         # imdb 和豆瓣链接

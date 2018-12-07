@@ -15,8 +15,15 @@ editUrl="${post_site[nanyangpt]}/takeedit.php"
 downloadUrl="${post_site[nanyangpt]}/download.php?id="
 #-------------------------------------#
 # 需要的参数
+gen_nanyangpt_parameter() {
+
+if [ -s "$source_desc" ]; then
 nanyangpt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_nanyangpt/g")
 $(cat "$source_desc")"
+else
+nanyangpt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_nanyangpt/g")
+$failed_to_get_des"
+fi
 
 if [ "$documentary" = 'yes' ]; then
     # 纪录片
@@ -31,8 +38,9 @@ else
     fi
 fi
 
-# 副标题
-nanyangpt_small_descr="$chinese_title $chs_included"
+    # 副标题
+    nanyangpt_small_descr="$chinese_title $chs_included"
+}
 #-------------------------------------#
 # file -> 种子文件(*)
 # type -> 类型(*) ，name  -> 主标题(0day 不要点*)
@@ -54,7 +62,9 @@ nanyangpt_small_descr="$chinese_title $chs_included"
 # 411  其它
 
 #-------------------------------------#
-
+nanyangpt_post_func() {
+    gen_nanyangpt_parameter
+    #---post data---#
 if [ "$nanyangpt_type" = '401' ]; then
     # 电影 POST
     t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
@@ -114,4 +124,7 @@ else
     # 其他 POST
     :
 fi
+}
+
+#-------------------------------------#
 

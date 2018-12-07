@@ -14,7 +14,15 @@ postUrl="${post_site[whu]}/takeupload.php"
 editUrl="${post_site[whu]}/takeedit.php"
 downloadUrl="${post_site[whu]}/download.php?id="
 #-------------------------------------#
-whu_des="$(echo "$complex_des"|sed "s/&ratio_in_desc&/$ratio_whu/g")"
+gen_whu_parameter() {
+
+if [ -s "$source_desc" ]; then
+    whu_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_whu/g")
+$(cat "$source_desc")"
+else
+    whu_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_whu/g")
+$failed_to_get_des"
+fi
 
 #-------------------------------------#
 # 判断类型，纪录片、电影、剧集
@@ -22,58 +30,59 @@ if [ "$documentary" = 'yes' ]; then
     # 纪录片
     whu_type='404'
 else
-    if [ "$serials" = 'yes' ]; then
-        # 剧集
-        case "$region" in
-            *中国大陆*)
-                whu_type='402' ;;
-            *香港*|*台湾*|*澳门*)
-                whu_type='417' ;;
-            *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
-                whu_type='416' ;;
-            *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
-                whu_type='418' ;;
-            *)
-                whu_type='409' ;;
-        esac
-    else
-        # 电影
-        case "$region" in
-            *中国大陆*)
-                whu_type='401' ;;
-            *香港*|*台湾*|*澳门*)
-                whu_type='413' ;;
-            *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
-                whu_type='414' ;;
-            *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
-                whu_type='415' ;;
-            *)
-                whu_type='409' ;;
-        esac
-    fi
+  if [ "$serials" = 'yes' ]; then
+    # 剧集
+    case "$region" in
+      *中国大陆*)
+          whu_type='402' ;;
+      *香港*|*台湾*|*澳门*)
+          whu_type='417' ;;
+      *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
+          whu_type='416' ;;
+      *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+          whu_type='418' ;;
+      *)
+          whu_type='409' ;;
+    esac
+  else
+    # 电影
+    case "$region" in
+      *中国大陆*)
+          whu_type='401' ;;
+      *香港*|*台湾*|*澳门*)
+          whu_type='413' ;;
+      *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
+          whu_type='414' ;;
+      *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+          whu_type='415' ;;
+      *)
+          whu_type='409' ;;
+    esac
+  fi
 fi
 
 #-------------------------------------#
-# 设置分辨率
-if [ "$is_ipad" = 'yes' ]; then
-    # 移动视频
-    whu_stardand='9'
-else
-    if [ "$is_4k" = 'yes' ]; then
-        whu_stardand='10'
-    elif [ "$is_1080p" = 'yes' ]; then
-        whu_stardand='1'
-    elif [ "$is_1080i" = 'yes' ]; then
-        whu_stardand='2'
-    elif [ "$is_720p" = 'yes' ]; then
-        whu_stardand='3'
+    # 设置分辨率
+    if [ "$is_ipad" = 'yes' ]; then
+        # 移动视频
+        whu_stardand='9'
     else
-        whu_stardand='0'
+        if [ "$is_4k" = 'yes' ]; then
+            whu_stardand='10'
+        elif [ "$is_1080p" = 'yes' ]; then
+            whu_stardand='1'
+        elif [ "$is_1080i" = 'yes' ]; then
+            whu_stardand='2'
+        elif [ "$is_720p" = 'yes' ]; then
+            whu_stardand='3'
+        else
+            whu_stardand='0'
+        fi
     fi
-fi
 #-------------------------------------#
-# 副标题
-whu_small_descr="$chinese_title $chs_included"
+    # 副标题
+    whu_small_descr="$chinese_title $chs_included"
+}
 
 #-------------------------------------#
 # file -> 种子文件(*)，dl-url -> 网盘下载
@@ -125,7 +134,10 @@ whu_small_descr="$chinese_title $chs_included"
 # 6  有损音乐
 
 #-------------------------------------#
-t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
+whu_post_func() {
+    gen_whu_parameter
+    #---post data---#
+t_id=$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
     'name'="$noDot_name"\
     'small_descr'="$whu_small_descr"\
     'url'="$imdb_url"\
@@ -139,7 +151,7 @@ t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
 
 if [ -z "$t_id" ]; then
     # 辅种
-    t_id=$(http --verify=no --ignore-stdin -f -b POST "$postUrl"\
+    t_id=$(http --verify=no --ignore-stdin -f -b --timeout=10 POST "$postUrl"\
         name="$noDot_name"\
         small_descr="$whu_small_descr"\
         url="$imdb_url"\
@@ -151,3 +163,7 @@ if [ -z "$t_id" ]; then
         file@"${torrent_Path}"\
         "$cookie_whu"|grep 'id='|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
 fi
+}
+
+#-------------------------------------#
+
