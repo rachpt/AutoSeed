@@ -62,10 +62,10 @@ from_desc_get_param() {
         sed 's/&eng_name_douban&//')"
 
     # 删除 简介中的中英文名
-    sed -i '/&shc_name_douban&/d;/&eng_name_douban&/d' "$source_desc"
+    #sed -i '/&shc_name_douban&/d;/&eng_name_douban&/d' "$source_desc"
 
     imdb_url="$(grep -Eo 'tt[0-9]{7}' "$source_desc"|head -1)"
-    douban_url="$(grep -Eo 'https?://movie\.douban\.com/subject/[0-9]{8}/?' \
+    douban_url="$(grep -Eo 'https?://movie\.douban\.com/subject/[0-9]{7,8}/?' \
         "$source_desc"|head -1)"
 
     #----------操作 0day 名--------

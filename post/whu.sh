@@ -9,6 +9,8 @@
 cookie="$cookie_whu"
 passkey="$passkey_whu"
 anonymous="$anonymous_whu"
+ratio_set=$ratio_whu
+to_client="$client_whu"
 #---static---#
 postUrl="${post_site[whu]}/takeupload.php"
 editUrl="${post_site[whu]}/takeedit.php"
@@ -18,7 +20,7 @@ gen_whu_parameter() {
 
 if [ -s "$source_desc" ]; then
     whu_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_whu/g")
-$(cat "$source_desc")"
+$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
 else
     whu_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_whu/g")
 $failed_to_get_des"

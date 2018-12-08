@@ -3,13 +3,15 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-10-22
+# Date: 2018-12-08
 #
 #-------------------------------------#
 # 本 shell 脚本作用为转化原种 html 格式 iNFO 以及 screens页面至 bbcode。
 # 优先处理 font 标签，字体，颜色。
 # img 标签部分需要补全域名。
 #-------------------------------------#
+#---cmct---#
+sed -Ei '/下载信息/d;/郑重声明/d' "$source_desc"
 
 sed -i "s/id=\"[^\"]\"//g; s/alt=\"[^\"]\"//g" "$source_desc"
 
@@ -75,4 +77,7 @@ sed -i "s!\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\]\[url=http[s]*:/
 sed -i "s!\[url=http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\]\[url=http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\]\(http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\)\[/url\]\[/url\]!\1!g" "$source_desc"
 
 sed -i -r '/quote/{s/font color=["]([a-zA-Z]+)["]/color=\1/g;s/\[\/font\]/[\/size]/;s/\[\/font\]/[\/color]/}' "$source_desc"
+
+#---cmct---#
+sed -i "s/^代码[\r\n]*$/[quote]/;/截图信息/i [/quote]" "$source_desc"
 

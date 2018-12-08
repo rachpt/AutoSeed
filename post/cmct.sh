@@ -3,22 +3,24 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-05
+# Date: 2018-12-08
 #
 #-------------settings---------------#
 cookie="$cookie_cmct"
 passkey="$passkey_cmct"
 anonymous="$anonymous_cmct"
+ratio_set=$ratio_cmct
+to_client="$client_cmct"
 #---static---#
 postUrl="${post_site[cmct]}/takeupload.php"
 editUrl="${post_site[cmct]}/takeedit.php"
 downloadUrl="${post_site[cmct]}/download.php?id="
 #-------------------------------------#
-cmct_npupt_parameter() {
+gen_cmct_parameter() {
 
 if [ -s "$source_desc" ]; then
     cmct_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_cmct/g")
-$(cat "$source_desc")"
+$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
 else
     cmct_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_cmct/g")
 $failed_to_get_des"

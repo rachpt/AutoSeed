@@ -4,7 +4,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 目前适用于 从 HDSky / TTG / HDChina / CMCT / M-Team 等站点自动转载 电影 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT / BYRBT / 北洋园 PT 站。
 
-[![release](https://img.shields.io/badge/Version-2.4.1-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v2.4.1)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
+[![release](https://img.shields.io/badge/Version-3.0-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v3.0)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
 |  源站点（from）   |      支持站点（to）      | 时间（time） |
 | :---------------: | :-----------------------: | :----------: |
@@ -16,6 +16,9 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 |                   | https://hdcmct.org  | 2018-07-28 |
 |                   | https://tjupt.org  | 2018-08-28 |
 |             |              | 2018-10-23 |
+
+\* 源站点表示支持抓取其部分简介用于发布.
+
 ## 特点
 
  - 自动生成并提交简介，尽量与原种简介一致。
@@ -28,30 +31,30 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 ## 环境要求
 
-- GNU/Linux （在ubuntu 18.04 lts 测试通过）。
+- GNU/Linux （在ubuntu 18.04 lts、archLinux、centosi7 测试通过）。
 - 软件：
   - transmission-daemon，transmission-remote，transmission-show，安装`sudo apt-get install transmission-cli`；
-  - ~~html2bbcode，安装命令：`sudo pip3 install html2bbcode`~~(已经使用本地正则表达式实现，转换耗时小于0.6s)；
-  - httpie，安装命令`sudo apt-get install httpie`；
-  - 其他常用软件工具，curl，grep等(一般系统自带)。
+  - qbittorrent 4.1.4+, 如果选择使用该客户端做种(transmission-show 未必须项！)； 
+  - httpie 1.0+，安装命令`sudo apt-get install httpie`；
+  - 其他常用软件工具，sed，grep，awk等(详见 setting.sh，一般系统自带)；
   - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖自行查看安装。
 
 ## 使用方法
 
-1. clone 本 repo 至本地；
+1. clone 本 repo 至本地(请使用最新的版本)；
 2. 修改设置文件`setting.sh`(包括cookie、passkey，监控 torrent 文件路径等)；
 3. 添加 `main.sh` 脚本路径至 transmission 的 `script-torrent-done-filename`。具体可以参见 [这里](https://rachpt.github.io/2018/03/25/transmission-settings/) ；
-4. 如果 `transmission` 运行脚本诡异，可以将 `main.sh` 添加到  `crontab` 之类的程序周期运行（运行锁会解决和3的冲突问题），提前生成简介依赖该项。
+4. 使用 qbittorrent，则需要添加如 `/home/AutoSeed/main.sh "%N" "%D"` 所示代码至 完成时运行外部程序处；
+4. (非必须)将 `main.sh` 添加到  `crontab` 之类的程序周期运行（运行锁会解决各种冲突问题），以提前生成简介。
 
 
 *其他：*
 
 请使用 flexget 订阅下载，使用 [transmissionrpc](https://flexget.com/Plugins/transmission) 将源种传入 transmission。
-如果 `crontab` 无法运行，参考命令 `*/5 * * * * /home/rachpt/shell/AutoSeed/main.sh >/dev/null 2>&1`。
+如果 `crontab` 无法运行，参考命令 `*/5 * * * * /home/AutoSeed/main.sh >/dev/null 2>&1`。
 
-如果种子名中使用了部分中文符号，比如已知的 `’` （中文单引号）会导致 httpie 文件传输失败，2.1版修复了中文单引号 bug。
-
-python 并非必须，只需将 `setting.sh` 中的`Use_Local_Gen='yes'`改为其他值，即可使用基于 [web](https://rhilip.github.io/PT-help/ptgen) 的生成方法，只有原种简介不符合要求时才会主动生成。
+ubuntu 用户注意使用 bash 运行而非系统默认的 dash!
+python 并非必须，只需将 `setting.sh` 中的`Use_Local_Gen='yes'`改为其他值，默认使用基于 [web](https://rhilip.github.io/PT-help/ptgen) 的生成方法，只有web方法失败时才会主动使用本地python生成。
 
 
 一个运行 log：
@@ -97,6 +100,12 @@ t_id: [55997]
 ```
 
 ## 更新日志
+
+- 2018-12-08 --> 3.0 (开发版,几乎完成)
+  - 重构几乎全部代码，以支持更多的站点。
+  - 使用豆瓣豆瓣，尽量保留原始 iNFO 以及 screens，没有则生成。
+  - 添加对 qbittorrent 的支持，目前 clean、edit 模块还未重构。
+  - 主体稳定性正在测试...
 
 - 2018-10-23 --> 3.0 (开发版,未完成)
   - 重构部分代码，以支持更多的站点。

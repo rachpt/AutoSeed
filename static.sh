@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-05
+# Date: 2018-12-08
 #
 #--------------------------------------#
 source "$ROOT_PATH/test.sh"
@@ -22,6 +22,8 @@ tr_show="transmission-show"
 tr_edit="transmission-edit"
 #---path of python3---#
 python3='python3'
+#---
+user_agent='User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:63.0) Gecko/20100101 Firefox/63.0'
 #--------------------------------------#
 #---desc---#
 failed_to_get_des='[size=6][color=Magenta][em11] 获取简介失败！！！[/color][/size]'
@@ -77,15 +79,10 @@ declare -A post_site
 [[ $enable_cmct = yes ]] && { trackers[cmct]='tracker.hdcmct.org'
     post_site[cmct]='https://hdcmct.org'; }
 [[ $enable_tjupt = yes ]] && { trackers[tjupt]='pttrackertju.tjupt.org'
-    post_site='https://tjupt.org'; }
+    post_site[tjupt]='https://tjupt.org'; }
 #--------------------------------------#
-#
-if [ "$TR_Client" = 'qbittorrent' ]; then
-    source "$ROOT_PATH/qbittorrent.sh"
-elif [ "$TR_Client" = 'transmission' ]; then
-    source "$ROOT_PATH/transmission.sh"
-else
-    echo '###### Error!' >> "$debug_Log"
-fi
+# import functions
+source "$ROOT_PATH/qbittorrent.sh"
+source "$ROOT_PATH/transmission.sh"
 #
 #--------------------------------------#

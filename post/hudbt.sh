@@ -9,6 +9,8 @@
 cookie="$cookie_hudbt"
 passkey="$passkey_hudbt"
 anonymous="$anonymous_hudbt"
+ratio_set=$ratio_hudbt
+to_client="$client_hudbt"
 #---static---#
 postUrl="${post_site[hudbt]}/takeupload.php"
 editUrl="${post_site[hudbt]}/takeedit.php"
@@ -18,7 +20,7 @@ gen_hudbt_parameter() {
 
 if [ -s "$source_desc" ]; then
     hudbt_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_hudbt/g")
-$(cat "$source_desc")"
+$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
 else
     hudbt_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_hudbt/g")
 $failed_to_get_des"

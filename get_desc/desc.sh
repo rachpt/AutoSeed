@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-03
+# Date: 2018-12-08
 #
 #-------------------------------------#
 # 调函数，生成简介
@@ -11,9 +11,9 @@
 #-------------------------------------#
 # 最后发布前会再次重命名为简单的名字减少莫名其妙的bug。
 # dot_name即点分隔名，用作 0day 名，以及构成保存简介文件名。
-if [ "$(echo "$org_tr_name"|sed 's/[a-z0-9[:punct:]]//ig')" ]; then
+if [ "$(echo "$org_tr_name"|sed 's/[a-z0-9 ]*[[:punct:]]*//ig')" ]; then
     #---special for non-standard 0day-name---#
-    dot_name="$("$tr_show" "${flexget_path}/$tr_i"|grep -A10 'FILES'|grep -Ei '[\.0-9]+[ ]*(GB|MB)'|grep -Eio "[-\.\'a-z0-9\!@_ ]+"|tail -2|head -1|sed -r 's/^[\. ]+//;s/\.[a-z4 ]{2,5}$//i'|sed -r 's/\.sample//i;s/[ ]+/./g')"
+    dot_name="$("$tr_show" "$torrent_Path"|grep -A10 'FILES'|grep -Ei '[\.0-9]+[ ]*(GB|MB)'|grep -Eio "[-\.\'a-z0-9\!@_ ]+"|tail -2|head -1|sed -r 's/^[\. ]+//;s/\.[a-z4 ]{2,5}$//i'|sed -r 's/\.sample//i;s/[ ]+/./g')"
 else
     # remove suffix name
     dot_name="$(echo "$org_tr_name"|sed -Ee "s/[ ]+/./g;s/\.[a-z4]{2,3}$//i")"

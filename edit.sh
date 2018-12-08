@@ -2,8 +2,8 @@
 # FileName: edit.sh
 #
 # Author: rachpt@126.com
-# Version: 2.4v
-# Date: 2018-08-31
+# Version: 3.0v
+# Date: 2018-12-08
 #
 #------------------------------------#
 #---main.sh is running?---#

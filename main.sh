@@ -33,15 +33,15 @@ write_log_begin() {
 write_log_end() {
     echo "+++++++++++++++++++++++++++++++++"   >> "$log_Path"
     echo -e "[`date '+%Y-%m-%d %H:%M:%S'`]\c"  >> "$log_Path"
-    echo "已经发布：[$org_tr_name]"              >> "$log_Path"
+    echo "已经发布：[$org_tr_name]"            >> "$log_Path"
 }
 
 #---------------------------------------#
 torrent_completed_precent() {
     unset completion
-    if [ "$TR_Client" = 'qbittorrent' ]; then
+    if [ "$client" = 'qbittorrent' ]; then
         completion="$(qb_get_torrent_completion "$org_tr_name")"
-    elif [ "$TR_Client" = 'transmission' ]; then
+    elif [ "$client" = 'transmission' ]; then
         completion="$($tr_remote -l|grep "$org_tr_name"|head -1|awk '{print $2}'|sed 's/%//')"
     else
         echo 'Client Selete Error!' >> "$debug_Log"
@@ -64,19 +64,20 @@ generate_desc() {
         fi
         local one_TR_Name="$org_tr_name"
         local one_TR_Dir="$(grep -A2 "$org_tr_name" "$queue"|tail -1)"
+        local client="$(grep -A3 "$org_tr_name" "$queue"|tail -1)"
         torrent_Path="${flexget_path}/${org_tr_name}.torrent"
         #---generate desc before done---#
         if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
             [ ! "$test_func_probe" ] && torrent_completed_precent
             [ "$test_func_probe" ] && completion=100      # convenient for test
             [ "$completion" ] && [ $completion -ge 70 ] && {
-                unset completion source_site_URL
+                unset completion source_site_URL client
                 source "$ROOT_PATH/get_desc/desc.sh"
                 unset source_site_URL
             }
         fi
     done
-    unset tr_i org_tr_name one_TR_Name one_TR_Dir
+    unset tr_i org_tr_name one_TR_Name one_TR_Dir client
 }
 
 #-------------main loop func-------------#
@@ -106,7 +107,7 @@ main_loop() {
                 # delete uploaded torrent
                 [ ! "$test_func_probe" ] && \
                 rm -f "$torrent_Path"    && \
-                sed -i '1,2d' "$queue"   && \
+                sed -i '1,3d' "$queue"   && \
                 clean_commit_main='not finished'    
             fi
         fi
@@ -119,7 +120,7 @@ main_loop() {
 
 #--------------timeout func--------------#
 TimeOut() {
-    waitfor=460
+    waitfor=1000
     main_loop_command=$*
     $main_loop_command &
     main_loop_pid=$!
@@ -150,14 +151,16 @@ if [ "$#" -eq 2 ]; then
     # qbittorrent, 2 parameter
     Torrent_Name="$1"
     Tr_Path="$2"
+    client='qbittorrent'
 else
     # transmission, no parameter
     Torrent_Name="$TR_TORRENT_NAME"
     Tr_Path="$TR_TORRENT_DIR"
+    client='transmission'
 fi
-[ "$Torrent_Name" ] && echo "$Torrent_Name" >> "$queue"
-[ "$Tr_Path" ] && echo "$Tr_Path" >> "$queue"
-unset Torrent_Name Tr_Path
+[[ $Torrent_Name && $Tr_Path ]] && \
+    echo -e "${Torrent_Name}\n${Tr_Path}\n$client" >> "$queue"
+unset Torrent_Name Tr_Path client
 #---------------------------------------#
 [ "$Disable_AutoSeed" = "yes" ] && exit
 #---------------------------------------#
@@ -168,6 +171,7 @@ while true; do
     is_locked
     one_TR_Name="$(head -1 "$queue")"
     one_TR_Dir="$(head -2 "$queue"|tail -1)"
+    client="$(head -3 "$queue"|tail -1)" # check completion
     [[ ! "$one_TR_Name" || ! "$one_TR_Dir" ]] && break
 
     if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
@@ -179,7 +183,8 @@ while true; do
             TimeOut main_loop
         fi
     else
-        break # iterm in quene but not in fg_path will lead to an error!
+        sed -i '1,3d' "$queue" # record is not from flexget
+        #break # iterm in quene but not in fg_path will lead to an error!
     fi
 done
 #---------------------------------------#

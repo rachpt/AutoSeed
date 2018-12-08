@@ -9,6 +9,8 @@
 cookie="$cookie_nanyangpt"
 passkey="$passkey_nanyangpt"
 anonymous="$anonymous_nanyangpt"
+ratio_set=$ratio_nanyangpt
+to_client="$client_nanyangpt"
 #---static---#
 postUrl="${post_site[nanyangpt]}/takeupload.php"
 editUrl="${post_site[nanyangpt]}/takeedit.php"
@@ -19,7 +21,7 @@ gen_nanyangpt_parameter() {
 
 if [ -s "$source_desc" ]; then
 nanyangpt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_nanyangpt/g")
-$(cat "$source_desc")"
+$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
 else
 nanyangpt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_nanyangpt/g")
 $failed_to_get_des"

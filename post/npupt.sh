@@ -9,6 +9,8 @@
 cookie="$cookie_npupt"
 passkey="$passkey_npupt"
 anonymous="$anonymous_npupt"
+ratio_set=$ratio_npupt
+to_client="$client_npupt"
 #---static---#
 postUrl="${post_site[npupt]}/takeupload.php"
 editUrl="${post_site[npupt]}/takeedit.php"
@@ -19,7 +21,7 @@ gen_npupt_parameter() {
 
 if [ -s "$source_desc" ]; then
 npupt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_npupt/g")
-$(cat "$source_desc")"
+$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
 else
 npupt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_npupt/g")
 $failed_to_get_des"

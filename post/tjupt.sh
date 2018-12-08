@@ -9,6 +9,8 @@
 cookie="$cookie_tjupt"
 passkey="$passkey_tjupt"
 anonymous="$anonymous_tjupt"
+ratio_set=$ratio_tjupt
+to_client="$client_tjupt"
 #---static---#
 postUrl="${post_site[tjupt]}/takeupload.php"
 editUrl="${post_site[tjupt]}/takeedit.php"
@@ -18,13 +20,27 @@ gen_tjupt_parameter() {
 
 if [ -s "$source_desc" ]; then
 tjupt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_tjupt/g")
-$(cat "$source_desc")"
+$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
 else
 tjupt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_tjupt/g")
 $failed_to_get_des"
 fi
 
 #-------------------------------------#
+# 类型
+if [ "$documentary" = 'yes' ]; then
+    # 纪录片
+    tjupt_type='411'
+else
+    if [ "$serials" = 'yes' ]; then
+        # 剧集
+        tjupt_type='402'
+    else
+        # 电影
+        tjupt_type='401'
+    fi
+fi
+# 年份
 tjupt_year="$(echo "$dot_name"|grep -Eo '[12][089][0-9]{2}'|sed '/1080/d'|tail -1)"
 [ ! "$tjupt_year" ] $$ tjupt_year=2018  # 默认年份
 
