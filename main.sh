@@ -63,7 +63,7 @@ generate_desc() {
             mv "${flexget_path}/${tr_i}" "${flexget_path}/${org_tr_name}.torrent"
         fi
         local one_TR_Name="$org_tr_name"
-        local one_TR_Dir="$(grep -A2 "$org_tr_name" "$queue"|tail -1)"
+        local one_TR_Dir="$(grep -A2 "$org_tr_name" "$queue"|tail -1|sed 's!/$!!')"
         local client="$(grep -A3 "$org_tr_name" "$queue"|tail -1)"
         torrent_Path="${flexget_path}/${org_tr_name}.torrent"
         #---generate desc before done---#
@@ -120,7 +120,7 @@ main_loop() {
 
 #--------------timeout func--------------#
 TimeOut() {
-    waitfor=1000
+    waitfor=460
     main_loop_command=$*
     $main_loop_command &
     main_loop_pid=$!
@@ -170,7 +170,7 @@ generate_desc          # 提前生成简介
 while true; do
     is_locked
     one_TR_Name="$(head -1 "$queue")"
-    one_TR_Dir="$(head -2 "$queue"|tail -1)"
+    one_TR_Dir="$(head -2 "$queue"|tail -1|sed 's!/$!!')"
     client="$(head -3 "$queue"|tail -1)" # check completion
     [[ ! "$one_TR_Name" || ! "$one_TR_Dir" ]] && break
 

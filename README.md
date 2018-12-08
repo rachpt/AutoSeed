@@ -31,7 +31,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 ## 环境要求
 
-- GNU/Linux （在ubuntu 18.04 lts、archLinux、centosi7 测试通过）。
+- GNU/Linux （在ubuntu 18.04 lts、archLinux、centos7 测试通过）。
 - 软件：
   - transmission-daemon，transmission-remote，transmission-show，安装`sudo apt-get install transmission-cli`；
   - qbittorrent 4.1.4+, 如果选择使用该客户端做种(transmission-show 未必须项！)； 
