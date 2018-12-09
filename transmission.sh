@@ -54,9 +54,10 @@ tr_add_torrent_url() {
 tr_get_torrent_completion() {
     local id_t=$($tr_remote -l|grep "$org_tr_name"|head -1| \
         awk '{print $1}'|grep -Eo '[0-9]+')
-    completion=$($tr_remote -t $id_t|grep 'Percent Done:'|grep -Eo '[0-9]+')
-    one_TR_Dir="$($tr_remote -t $id_t|grep 'Location:'|grep -o '/.*$')"
-    unset id_t
+    [[ $id_t ]] && \ {
+    completion=$($tr_remote -t $id_t -i|grep 'Percent Done:'|grep -Eo '[0-9]+')
+    one_TR_Dir="$($tr_remote -t $id_t -i|grep 'Location:'|grep -o '/.*$')"
+    unset id_t; }
 }
 
 #---------------------------------------#
