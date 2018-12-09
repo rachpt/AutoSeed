@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-05
+# Date: 2018-12-09
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -30,6 +30,12 @@ generate_info_local() {
 
 # 首先判断是否有 nfo 文件，以及nfo是否下载完成
 read_info_file() {
+  if [ ! "$one_TR_Dir" ]; then
+      one_TR_Dir="$(find "$default_FILE_PATH" -name \
+          "$one_TR_Name" 2> /dev/null|head -1)"
+      one_TR_Dir="${one_TR_Dir%/*}"
+  fi
+
   if [ "$one_TR_Dir" ]; then
     local nfo_file_size=$("$tr_show" "$torrent_Path"| \
       grep -Eo '\.nfo \([0-9\. ]+[kKbB]+\)'|grep -Eo '[0-9]+\.?[0-9]*')

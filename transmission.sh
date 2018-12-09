@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-08
+# Date: 2018-12-09
 #
 #---------------------------------------#
 #
@@ -33,16 +33,30 @@ tr_set_ratio() {
 
 #------------add torrent--------------#
 tr_add_torrent_file() {
+    $tr_remote --no-torrent-done-script &> /dev/null
     $tr_remote --add "${ROOT_PATH}/tmp/${t_id}.torrent" -w "$one_TR_Dir"
+    $tr_remote --torrent-done-script "$ROOT_PATH/main.sh" &> /dev/null
     #---set seed ratio---#
     tr_set_ratio
 }
 
 #------------add torrent--------------#
 tr_add_torrent_url() {
+    $tr_remote --no-torrent-done-script &> /dev/null
     $tr_remote --add "$torrent2add" -w "$one_TR_Dir"
+    $tr_remote --torrent-done-script "$ROOT_PATH/main.sh" &> /dev/null
     #---set seed ratio---#
     tr_set_ratio
+}
+
+#---------------------------------------#
+# call in main.sh
+tr_get_torrent_completion() {
+    local id_t=$($tr_remote -l|grep "$org_tr_name"|head -1| \
+        awk '{print $1}'|grep -Eo '[0-9]+')
+    completion=$($tr_remote -t $id_t|grep 'Percent Done:'|grep -Eo '[0-9]+')
+    one_TR_Dir="$($tr_remote -t $id_t|grep 'Location:'|grep -o '/.*$')"
+    unset id_t
 }
 
 #---------------------------------------#

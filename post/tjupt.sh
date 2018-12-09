@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-05
+# Date: 2018-12-09
 #
 #-------------settings---------------#
 cookie="$cookie_tjupt"
@@ -20,7 +20,7 @@ gen_tjupt_parameter() {
 
 if [ -s "$source_desc" ]; then
 tjupt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_tjupt/g")
-$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
+$(cat "$source_desc2tjupt"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
 else
 tjupt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_tjupt/g")
 $failed_to_get_des"
@@ -31,6 +31,8 @@ fi
 if [ "$documentary" = 'yes' ]; then
     # 纪录片
     tjupt_type='411'
+elif [ "$is_ipad" = 'yes' ]; then
+    tjupt_type='412'
 else
     if [ "$serials" = 'yes' ]; then
         # 剧集

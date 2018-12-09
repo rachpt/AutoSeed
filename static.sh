@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-08
+# Date: 2018-12-09
 #
 #--------------------------------------#
 source "$ROOT_PATH/test.sh"
@@ -22,6 +22,8 @@ tr_show="transmission-show"
 tr_edit="transmission-edit"
 #---path of python3---#
 python3='python3'
+#---path of mediainfo---#
+mediainfo='mediainfo'
 #---
 user_agent='User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:63.0) Gecko/20100101 Firefox/63.0'
 #--------------------------------------#

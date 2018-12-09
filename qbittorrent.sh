@@ -42,23 +42,28 @@ qb_set_ratio() {
   local data="$(http --ignore-stdin --pretty=format GET "$qb_lists" \
     "$qb_Cookie"|sed -Ee '1,/"torrents": \{/d;/^[ ]*[},]+$/d;s/^[ ]+//;s/[ ]+[{]+//;s/[},]+//g'| \
     grep -B18 -A13 'name":'|sed -Ee \
-    '/".{40}"/{s/"//g};/"completed":/{s/"//g};/"magnet_uri":/{s/"//g};/"name":/{s/"//g};/"save_path":/{s/"//g};/"size":/{s/"//g};'|sed '/"/d')" 
+    '/".{40}"/{s/"//g};/"magnet_uri":/{s/"//g};/"name":/{s/"//g}'|sed '/"/d')" 
   # get current site
   for site in ${!post_site[*]}; do
     [ "$(echo "$postUrl"|grep "$post_site[$site]")" ] && \
-      local add_site_tracker="$tracker[$site]" && \
-      break # get out of for loop
+      add_site_tracker="$tracker[$site]" && break # get out of for loop
   done
 
   while true; do
     # qbit 没有和 tr 类似的排序特性
     # get torrent hash
-    local torrent_hash="$(echo "$data"|grep -B4 'name.*'"$one_TR_Name"|head -1| \
+    # match one!
+    local pos=$(echo "$data"|grep -n 'name.*'"$org_tr_name"|head -1|grep -Eo '^[0-9]+')
+    [ ! "$pos" ] && break
+    local torrent_hash="$(echo "$data"|head -n $(expr $pos - 2)|tail -1| \
         grep -Eo '[0-9a-zA-Z]{40}')"
-    [ ! "$torrent_hash" ] && break
+    # debug
+    [ ! "$torrent_hash" ] && echo 'failed to get tr hs' >> "$debug_Log"
 
-    local tracker_one="$(echo "$data"|grep -B1 'name.*'"$one_TR_Name"|tail -1| \
+    local tracker_one="$(echo "$data"|head -n $(expr $pos - 1)|tail -1| \
         grep 'magnet_uri')"
+    # debug
+    [ ! "$tracker_one" ] && echo 'failed to get qb tracker' >> "$debug_Log"
     if [ "$(echo "$tracker_one"|grep "$add_site_tracker")" ];then
       if [ "${#torrent_hash}" -eq 40 ]; then
         # set ratio and say thanks
@@ -78,7 +83,7 @@ qb_set_ratio() {
       data="$(echo "$data"|sed "0,/name.*$one_TR_Name/{//d}")"
     fi
   done
-  unset site add_site_tracker
+  unset site add_site_tracker data torrent_hash tracker_one
 }
   
 #---------------------------------------#
@@ -100,17 +105,24 @@ qb_add_torrent_file() {
 }
 
 #---------------------------------------#
+# call in main.sh
 qb_get_torrent_completion() {
   qbit_webui_cookie
   # need a parameter
   local data="$(http --ignore-stdin --pretty=format GET "$qb_lists" \
-    "$qb_Cookie"|sed -Ee '1,/"torrents": \{/d;/^[ ]*[},]+$/d;s/^[ ]+//;s/[ ]+[{]+//;s/[},]+//g'| \
-    grep -B18 -A13 'name":'|sed -Ee \
-    '/".{40}"/{s/"//g};/"completed":/{s/"//g};/"magnet_uri":/{s/"//g};/"name":/{s/"//g};/"save_path":/{s/"//g};/"size":/{s/"//g};'|sed '/"/d')" 
-  # match no more than one!
-  local compl_one="$(echo "$data"|grep -B2 'name.*'"$1"|head -1|grep -Eo '[0-9]{4,}')"
-  local size_one="$(echo "$data"|grep -A2'name.*'"$1"|tail -1|grep -Eo '[0-9]{4,}')"
+    "$qb_Cookie"|sed -E '1,/"torrents": \{/d;/^[ ]*[},]+$/d;s/^[ ]+//;s/[ ]+[{]+//;s/[},]+//g'| \
+    grep -B18 -A13 'name":'|sed -E \
+    '/"completed":/{s/"//g};/"name":/{s/"//g};/"save_path":/{s/"//g};/"size":/{s/"//g};'|sed '/"/d')" 
+  # match one!
+  local pos=$(echo "$data"|grep -n 'name.*'"$org_tr_name"|head -1|grep -Eo '^[0-9]+')
+  [[ $pos ]] && {
+  local compl_one="$(echo "$data"|head -n $(expr $pos - 1)|tail -1|grep -Eo '[0-9]{4,}')"
+  local size_one="$(echo "$data"|head -n $(expr $pos + 2)|tail -1|grep -Eo '[0-9]{4,}')"
+  one_TR_Dir="$(echo "$data"|head -n $(expr $pos + 1)|tail -1|grep -o '/.*$')";
+  }
   # return completed precent
-  awk -v a="$compl_one" -v b="$size_one" 'BEGIN{printf "%d\n",(a/b)*100}'
+  [[ $compl_one && $size_one ]] && \
+  completion=$(awk -v a="$compl_one" -v b="$size_one" 'BEGIN{printf "%d",(a/b)*100}')
+  unset data compl_one size_one pos
 }
 #---------------------------------------#

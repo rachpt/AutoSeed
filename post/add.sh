@@ -19,7 +19,7 @@ if [ "$one_TR_Dir" ]; then
         elif [ "$to_client" = 'transmission' ]; then
             tr_add_torrent_file
         else
-            echo 'Client Selete Error! [whu]' >> "$debug_Log"
+            echo 'Client Selete Error! [whu]'          >> "$debug_Log"
         fi
         rm -f "${ROOT_PATH}/tmp/${t_id}.torrent"
     else
@@ -28,11 +28,12 @@ if [ "$one_TR_Dir" ]; then
         elif [ "$to_client" = 'transmission' ]; then
             tr_add_torrent_url
         else
-            echo 'Client Selete Error!'       >> "$debug_Log"
+            echo -e "[$(date '+%Y-%m-%d %H:%M:%S')]\c" >> "$debug_Log"
+            echo  "Client Selete Error in add.sh!"     >> "$debug_Log"
         fi
     fi
-    echo "+++++++++++++[added]+++++++++++++"  >> "$log_Path"
+    echo "+++++++++++++[added]+++++++++++++"           >> "$log_Path"
 else
-    echo "没有找到本地文件！" >> "$log_Path"
+    echo "没有找到本地文件！"                          >> "$log_Path"
 fi
 #---------------------------------------#
