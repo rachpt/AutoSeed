@@ -33,8 +33,8 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 - GNU/Linux （在ubuntu 18.04 lts、archLinux、centos7 测试通过）。
 - 软件：
-  - transmission-daemon，transmission-remote，transmission-show，安装`sudo apt-get install transmission-cli`；
-  - qbittorrent 4.1.4+, 如果选择使用该客户端做种(transmission-show 未必须项！)； 
+  - transmission-daemon，transmission-remote，transmission-show,edit 安装`sudo apt-get install transmission-cli`；
+  - qbittorrent 4.1.4+, 如果选择使用该客户端做种(transmission-show,edit 为必须项！)； 
   - httpie 1.0+，安装命令`sudo apt-get install httpie`；
   - 其他常用软件工具，sed，grep，awk等(详见 setting.sh，一般系统自带)；
   - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖自行查看安装。
@@ -54,6 +54,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 如果 `crontab` 无法运行，参考命令 `*/5 * * * * /home/AutoSeed/main.sh >/dev/null 2>&1`。
 
 ubuntu 用户注意使用 bash 运行而非系统默认的 dash!
+
 python 并非必须，只需将 `setting.sh` 中的`Use_Local_Gen='yes'`改为其他值，默认使用基于 [web](https://rhilip.github.io/PT-help/ptgen) 的生成方法，只有web方法失败时才会主动使用本地python生成。
 
 
@@ -111,3 +112,7 @@ t_id: [55997]
   - 重构部分代码，以支持更多的站点。
   - 使用豆瓣豆瓣，尽量保留原始 iNFO 以及 screens，没有则生成。
   - 目前修改了'get_desc'，以及部分 'post'，其他正在修改中……
+
+## 实现流程
+
+![流程图](https://ws1.sinaimg.cn/large/675bda05ly1fy1k3xtkv4j20q90ph432.jpg)

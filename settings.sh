@@ -3,13 +3,14 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-06
+# Date: 2018-12-10
 #
 # Environmental requirements:
-# - transmission-[show,remote,daemon or gtk]
-# - httpie, head, awk, sed, find, egrep, curl
-# - cut, cat, mktemp, sort, tail, stat, python3
-# - base64, iconv
+# - transmission-[remote,daemon or gtk] or qbittorrent
+# - transmission-edit and transmission-show
+# - httpie, head, awk, sed, find, grep,
+# - cut, cat, sort, tail, stat, python3
+# - base64, iconv, mediainfo
 #
 #----------------[main]----------------#
 #---use 'yes' to disable all---#
@@ -22,12 +23,14 @@ Use_Local_Gen='yes'
 #
 #---torrent file path---#
 flexget_path="/home/rachpt/Downloads/tmp"
+#---transmission or qbittorrent---#
+fg_client='transmission'
+#
+# data folder.
+# for find nfo file and clean.
+default_FILE_PATH='/mnt/'
 #
 #----------------[clean]---------------#
-# Watch folder for clean.
-# If not set, will clean just finished one's folder.
-default_FILE_PATH='/mnt/ubuntu/mp4'
-#
 # Do not delete for some time after the modification,
 # unit seconds, default 2 days(172800 s).
 TimeINTERVAL=172800
@@ -45,8 +48,6 @@ enable_hudbt='yes'
 say_thanks_hudbt='yes'
 #
 client_hudbt='transmission'
-default_select_type_hudbt='415'
-default_standard_hudbt='3'
 anonymous_hudbt='no'
 #---ratio of uploaded torrent---#
 ratio_hudbt='8'
@@ -59,8 +60,6 @@ enable_whu='yes'
 say_thanks_whu='yes'
 client_whu='transmission'
 #
-default_select_type_whu='415'
-default_standard_whu='0'
 anonymous_whu='yes'
 #---ratio of uploaded torrent---#
 ratio_whu='10'
@@ -73,8 +72,6 @@ enable_npupt='yes'
 say_thanks_npupt='yes' # not work
 client_npupt='qbittorrent'
 #
-default_select_type_npupt='401'
-default_standard_npupt='7'
 anonymous_npupt='yes'
 #---ratio of uploaded torrent---#
 ratio_npupt='10'
@@ -87,7 +84,6 @@ enable_nanyangpt='yes'
 say_thanks_nanyangpt='yes'
 client_nanyangpt='qbittorrent'
 #
-default_select_type_nanyangpt='401'
 anonymous_nanyangpt='yes'
 #---ratio of uploaded torrent---#
 ratio_nanyangpt='10'
@@ -101,8 +97,6 @@ say_thanks_byrbt='yes'
 client_byrbt='qbittorrent'
 #---use 'yes' delete screens img---#
 just_poster_byrbt='yes'
-default_select_type_byrbt='408'
-default_second_type_byrbt='1'
 anonymous_byrbt='yes'
 #---ratio of uploaded torrent---#
 ratio_byrbt='16'
@@ -114,12 +108,7 @@ passkey_byrbt='12345678909876543212345654'
 enable_cmct='yes'
 say_thanks_cmct='yes'
 client_cmct='qbittorrent'
-#---delete screens img---#
-default_select_type_cmct='501'
-default_medium_sel_cmct='6'  # mkv 6, mp4 7.
-default_codec_sel_cmct='2' # h264
-default_standard_sel_cmct='4' # 720p 4,1080p 2
-default_source_sel_cmct='9' # 1 大陆, 2 港台, 3 其他, 10 日韩, 9 欧美.
+#
 anonymous_cmct='yes'
 #---ratio of uploaded torrent---#
 ratio_cmct='16'
@@ -131,11 +120,8 @@ passkey_cmct='12345678909876543212345654'
 enable_tjupt='yes'
 say_thanks_tjupt='yes'
 client_tjupt='qbittorrent'
-#
-default_select_type_tjupt='401' # 401 电影, 411 纪录片
-default_subsinfo_tjupt='6' # 其他 ## 字幕
-default_source_sel_tjupt='8' # 1 BD, 8 other.
-default_team_sel_tjupt='7' # 1 欧美, 7 其他, 2 大陆, 3 日韩, 5 港台.
+#---use 'yes' delete screens img---#
+just_poster_tjupt='yes'
 anonymous_tjupt='yes'
 #---ratio of uploaded torrent---#
 ratio_tjupt='8'
@@ -143,7 +129,7 @@ cookie_tjupt='Cookie:c_secure_uid=XXXXXX; c_secure_pass=xxxxxxxxxxxxxxxxxxxxxxxx
 #---your passkey---#
 passkey_tjupt='12345678909876543212345654'
 ########################################
-#------------[tran12yysmission]------------#
+#------------[transmission]------------#
 #---authoriz for transmission---#
 tr_HOST='127.0.0.1'
 tr_PORT='9091'
@@ -154,7 +140,7 @@ qb_HOST='http://127.0.0.1'
 qb_PORT='8080'
 qb_USER='username'
 qb_PASSWORD='passkey'
-qb_Cookie='cookie:SID=Otgja3eXg5BDjVbEm0zscljKq+ohXBUm'
+qb_Cookie='cookie:SID=xxx'
 #----------------[site]----------------#
 #---cookie for source site---#
 cookie_hds='Cookie:c_secure_uid=XXXXXX; c_secure_pass=xxxxxxxxxxxxxxxxxxxxxxxxxxxxx; c_secure_login=bm9wZQ=='

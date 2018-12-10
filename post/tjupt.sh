@@ -18,7 +18,7 @@ downloadUrl="${post_site[tjupt]}/download.php?id="
 #-------------------------------------#
 gen_tjupt_parameter() {
 
-if [ -s "$source_desc" ]; then
+if [ -s "$source_desc2tjupt" ]; then
 tjupt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_tjupt/g")
 $(cat "$source_desc2tjupt"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
 else

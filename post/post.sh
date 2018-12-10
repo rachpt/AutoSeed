@@ -29,7 +29,7 @@ judge_before_upload() {
     #---post---#
     if [ "$up_status" = "1" ]; then
         #---log---#
-        echo "+++++++++++[post data]+++++++++++" >> "$log_Path"
+        echo "-----------[post data]-----------" >> "$log_Path"
         echo -e "name=${dot_name}\
             \nsmall_descr=${chinese_title}\
             \nimdburl=${imdb_url}\
@@ -42,7 +42,7 @@ judge_before_upload() {
 add_t_id_2_client() {        
     #---if get t_id then add it to tr---#
     if [ -z "$t_id" ]; then
-        echo "++++++[failed to get tID]++++++++" >> "$log_Path"
+        echo "======[failed to get tID]========" >> "$log_Path"
     else
         echo t_id: [$t_id]                       >> "$log_Path"
         #---add torrent---#
@@ -57,7 +57,7 @@ unset_tempfiles() {
     rm -f "$source_desc" "$source_html" "$source_desc2tjupt"
     unset source_desc source_html source_desc2tjupt
     unset douban_poster_url source_site_URL source_t_id imdb_url
-    echo "++++++++++[deleted tmp]++++++++++"     >> "$log_Path"
+    echo "----------[deleted tmp]----------"     >> "$log_Path"
 }
 
 #-----import and call functions---------#

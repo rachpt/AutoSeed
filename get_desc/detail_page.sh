@@ -115,7 +115,7 @@ form_source_site_get_Desc() {
       local end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -2|tail -1) # 第二个
 
     elif [ "$source_site_URL" = "https://totheglory.im" ]; then
-      local start_line=$(sed -n '/.[cC]omparisons/=' "$source_full"|head -1)
+      local start_line=$(sed -n '/.[cC]omparisons/=;/.[sS]elected.[sS]creens/=' "$source_full"|head -1)
       local middle_line=$(sed -n '/.x264.[iI]nfo/=' "$source_full"|head -1)
       local end_line=$(sed -n "$middle_line,$(expr $middle_line + 10)p" \
           "$source_full"|sed -n '/<\/table>/='|head -1) # ttg

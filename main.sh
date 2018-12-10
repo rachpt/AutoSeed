@@ -26,7 +26,7 @@ is_locked() {
 
 #----------------log func---------------#
 write_log_begin() {
-    echo "+++++++++++++[start]+++++++++++++"   >> "$log_Path"
+    echo "-------------[start]-------------"   >> "$log_Path"
     echo -e "[$(date '+%Y-%m-%d %H:%M:%S')]\c" >> "$log_Path"
     echo "准备发布：[$org_tr_name]"            >> "$log_Path"
 }
@@ -52,69 +52,68 @@ torrent_completed_precent() {
 
 #---------------------------------------#
 generate_desc() {
-    IFS_OLD=$IFS; IFS=$'\n'
-    #---loop for torrent in flexget path ---#
-    for tr_i in $(find "$flexget_path" -iname '*.torrent*'|awk -F '/' '{print $NF}')
-    do
-        IFS=$IFS_OLD
-        # new_torrent_name 用于和 transmission 中的种子名进行比较，
-        # 以决定是否发布种子，作为方便，重命名 torrent 为该名
-        org_tr_name="$($tr_show "${flexget_path}/$tr_i"|grep 'Name'|head -1|sed -r 's/Name:[ ]+//')"
+  IFS_OLD=$IFS; IFS=$'\n'
+  #---loop for torrent in flexget path ---#
+  for tr_i in $(find "$flexget_path" -iname '*.torrent*'|awk -F '/' '{print $NF}')
+  do
+    IFS=$IFS_OLD
+    # new_torrent_name 用于和 transmission 中的种子名进行比较，
+    # 以决定是否发布种子，作为方便，重命名 torrent 为该名
+    org_tr_name="$($tr_show "${flexget_path}/$tr_i"|grep 'Name'|head -1|sed -r 's/Name:[ ]+//')"
 
-        if [ "$tr_i" != "${org_tr_name}.torrent" ]; then
-            mv "${flexget_path}/${tr_i}" "${flexget_path}/${org_tr_name}.torrent"
-        fi
-        one_TR_Name="$org_tr_name"
-        torrent_Path="${flexget_path}/${org_tr_name}.torrent"
-        #---generate desc before done---#
-        if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
-            [ ! "$test_func_probe" ] && torrent_completed_precent
-            [ "$test_func_probe" ] && completion=100      # convenient for test
-            [ "$completion" ] && [ $completion -ge 70 ] && {
-                unset completion source_site_URL
-                source "$ROOT_PATH/get_desc/desc.sh"
-                unset source_site_URL
-            }
-        fi
-    done
-    unset tr_i org_tr_name one_TR_Name one_TR_Dir
+    if [ "$tr_i" != "${org_tr_name}.torrent" ]; then
+        mv "${flexget_path}/${tr_i}" "${flexget_path}/${org_tr_name}.torrent"
+    fi
+    one_TR_Name="$org_tr_name"
+    torrent_Path="${flexget_path}/${org_tr_name}.torrent"
+    #---generate desc before done---#
+    if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
+        [ ! "$test_func_probe" ] && torrent_completed_precent
+        [ "$test_func_probe" ] && completion=100      # convenient for test
+        [ "$completion" ] && [ $completion -ge 70 ] && {
+            unset completion source_site_URL
+            source "$ROOT_PATH/get_desc/desc.sh"
+            unset source_site_URL; }
+    fi
+  done
+  unset tr_i org_tr_name one_TR_Name one_TR_Dir
 }
 
 #-------------main loop func-------------#
 main_loop() {
-    IFS_OLD=$IFS; IFS=$'\n'
-    #---loop for torrent in flexget path ---#
-    for tr_i in $(find "$flexget_path" -iname "*.torrent*"|awk -F '/' '{print $NF}')
-    do
-        IFS=$IFS_OLD
-        #----------------------------------------------
-        org_tr_name="$("$tr_show" "${flexget_path}/$tr_i"|grep 'Name'| \
-            head -1|sed -r 's/Name:[ ]+//')"
-        
-        #---.tr file path---#
-        torrent_Path="${flexget_path}/${org_tr_name}.torrent"
-        
-        #-----------------------------------------------
-        if [ "$org_tr_name" = "$one_TR_Name" ]; then
-            #---desc---#
-            if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
-                echo 'Failed to find desc file!' >> "$debug_Log"
-                break
-            else
-                write_log_begin         # write log
-                source "$ROOT_PATH/post/post.sh"
-                write_log_end           # write log
-                # delete uploaded torrent
-                [ ! "$test_func_probe" ] && \
-                rm -f "$torrent_Path"    && \
-                clean_commit_main='not finished'    
-            fi
-        fi
-    done
-    #---clean & remove old torrent---#
-    if [ "$clean_commit_main" = 'yes' ]; then
-        source "$ROOT_PATH/clean/clean.sh"
-    fi
+  IFS_OLD=$IFS; IFS=$'\n'
+  #---loop for torrent in flexget path ---#
+  for tr_i in $(find "$flexget_path" -iname "*.torrent*"|awk -F '/' '{print $NF}')
+  do
+      IFS=$IFS_OLD
+      #----------------------------------------------
+      org_tr_name="$("$tr_show" "${flexget_path}/$tr_i"|grep 'Name'| \
+          head -1|sed -r 's/Name:[ ]+//')"
+      
+      #---.tr file path---#
+      torrent_Path="${flexget_path}/${org_tr_name}.torrent"
+      
+      #-----------------------------------------------
+      if [ "$org_tr_name" = "$one_TR_Name" ]; then
+          #---desc---#
+          if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
+              echo 'Failed to find desc file!' >> "$debug_Log"
+              break
+          else
+              write_log_begin         # write log
+              source "$ROOT_PATH/post/post.sh"
+              write_log_end           # write log
+              # delete uploaded torrent
+              [ ! "$test_func_probe" ] && \
+              rm -f "$torrent_Path"    && \
+              clean_commit_main='not finished'    
+          fi
+      fi
+  done
+  #---clean & remove old torrent---#
+  if [ "$clean_commit_main" = 'yes' ]; then
+      source "$ROOT_PATH/clean/clean.sh"
+  fi
 }
 
 #--------------timeout func--------------#
@@ -133,14 +132,14 @@ TimeOut() {
     kill -9 $main_loop_sleep_pid > /dev/null 2>&1
 }
 hold_on() {
-    # 依据cpu负载设置一个延时，解决系统IO问题
-    local cpu_number="$(grep 'model name' /proc/cpuinfo|wc -l)"
-    local cpu_load="$(echo $(uptime |awk -F 'average:' '{print $2}'| \
-        awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100/$cpu_number| \
-        bc|awk -F '.' '{print $1}')"
-    sleep $(echo $(uptime |awk -F 'average:' '{print $2}'| \
-        awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100/$cpu_number*0.4*$Speed|bc)
-    unset Speed
+  # 依据cpu负载设置一个延时，解决系统IO问题
+  local cpu_number="$(grep 'model name' /proc/cpuinfo|wc -l)"
+  local cpu_load="$(echo $(uptime |awk -F 'average:' '{print $2}'| \
+      awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100/$cpu_number| \
+      bc|awk -F '.' '{print $1}')"
+  sleep $(echo $(uptime |awk -F 'average:' '{print $2}'| \
+      awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100/$cpu_number*0.4*$Speed|bc)
+  unset Speed
 }
 
 #---------------------------------------#
@@ -156,7 +155,7 @@ else
     Tr_Path="$TR_TORRENT_DIR"
 fi
 [[ $Torrent_Name && $Tr_Path ]] && \
-    echo -e "${Torrent_Name}\n${Tr_Path}\n$client" >> "$queue"
+    echo -e "${Torrent_Name}\n${Tr_Path}" >> "$queue"
 unset Torrent_Name Tr_Path
 #---------------------------------------#
 [ "$Disable_AutoSeed" = "yes" ] && exit
