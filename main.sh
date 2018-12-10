@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-09
+# Date: 2018-12-10
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -32,7 +32,7 @@ write_log_begin() {
 }
 write_log_end() {
     echo "+++++++++++++++++++++++++++++++++"   >> "$log_Path"
-    echo -e "[`date '+%Y-%m-%d %H:%M:%S'`]\c"  >> "$log_Path"
+    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')]\c" >> "$log_Path"
     echo "已经发布：[$org_tr_name]"            >> "$log_Path"
 }
 
@@ -57,9 +57,9 @@ generate_desc() {
   for tr_i in $(find "$flexget_path" -iname '*.torrent*'|awk -F '/' '{print $NF}')
   do
     IFS=$IFS_OLD
-    # new_torrent_name 用于和 transmission 中的种子名进行比较，
-    # 以决定是否发布种子，作为方便，重命名 torrent 为该名
-    org_tr_name="$($tr_show "${flexget_path}/$tr_i"|grep 'Name'|head -1|sed -r 's/Name:[ ]+//')"
+    # org_tr_name 用于和 transmission/qb 中的种子名进行比较，
+    org_tr_name="$($tr_show "${flexget_path}/$tr_i"|grep 'Name'|head -1| \
+        sed -r 's/Name:[ ]+//')"
 
     if [ "$tr_i" != "${org_tr_name}.torrent" ]; then
         mv "${flexget_path}/${tr_i}" "${flexget_path}/${org_tr_name}.torrent"
@@ -70,7 +70,7 @@ generate_desc() {
     if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
         [ ! "$test_func_probe" ] && torrent_completed_precent
         [ "$test_func_probe" ] && completion=100      # convenient for test
-        [ "$completion" ] && [ $completion -ge 70 ] && {
+        [[ $completion && $completion -ge 70 ]] && {
             unset completion source_site_URL
             source "$ROOT_PATH/get_desc/desc.sh"
             unset source_site_URL; }
@@ -97,7 +97,8 @@ main_loop() {
       if [ "$org_tr_name" = "$one_TR_Name" ]; then
           #---desc---#
           if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
-              echo 'Failed to find desc file!' >> "$debug_Log"
+              echo -e "[$(date '+%Y-%m-%d %H:%M:%S')]\c" >> "$debug_Log"
+              echo 'Failed to find desc file!'           >> "$debug_Log"
               break
           else
               write_log_begin         # write log
@@ -117,6 +118,7 @@ main_loop() {
 }
 
 #--------------timeout func--------------#
+# maybe will delete this func
 TimeOut() {
     waitfor=460
     main_loop_command=$*
@@ -160,17 +162,15 @@ unset Torrent_Name Tr_Path
 #---------------------------------------#
 [ "$Disable_AutoSeed" = "yes" ] && exit
 #---------------------------------------#
-echo main-11
-generate_desc          # 提前生成简介
-echo main-22
+is_locked            # 锁住进程，防止多开
+generate_desc        # 提前生成简介
 #---------------------------------------#
 #---start check---#
-is_locked && while true; do
+while true; do
     one_TR_Name="$(head -1 "$queue")"
     one_TR_Dir="$(head -2 "$queue"|tail -1|sed 's!/$!!')"
     client="$(head -3 "$queue"|tail -1)" # check completion
     [[ ! "$one_TR_Name" || ! "$one_TR_Dir" ]] && break
-    echo main-33
 
     if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
         hold_on
@@ -185,5 +185,4 @@ is_locked && while true; do
     [ ! "$test_func_probe" ] && \
     sed -i '1,2d' "$queue" # record is not from flexget
 done
-echo main-44
 #---------------------------------------#

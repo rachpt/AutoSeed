@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-08
+# Date: 2018-12-10
 #
 #-------------------------------------#
 # 调函数，生成简介
@@ -24,7 +24,10 @@ fi
 source_desc="${ROOT_PATH}/tmp/${org_tr_name}_desc.txt"
 # byrbt, html format
 [ "$enable_byrbt" = 'yes' ] && \
-    source_html="${ROOT_PATH}/tmp/${org_tr_name}_html.txt"
+  source_html="${ROOT_PATH}/tmp/${org_tr_name}_html.txt"
+# tjupt, deal with images
+[ "$enable_tjupt" = 'yes' ] && \
+  source_desc2tjupt="${ROOT_PATH}/tmp/${org_tr_name}_desc2tjupt.txt"
 
 #---to log and edit.sh---#
 if [ -z "$source_site_URL" ]; then

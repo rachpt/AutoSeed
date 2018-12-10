@@ -40,8 +40,7 @@ deal_with_images() {
     delete_screenshots_img "$source_html"
   # tjupt
   if [ "$enable_tjupt" = 'yes' ]; then
-    source_desc2tjupt="${ROOT_PATH}/tmp/${org_tr_name}_desc2tjupt.txt"
-    cp "$source_desc" "$source_desc2tjupt"
+    cp -f "$source_desc" "$source_desc2tjupt"
     [ "$just_poster_tjupt" = "yes" ] && delete_screenshots_img "$source_desc2tjupt"
   fi
   

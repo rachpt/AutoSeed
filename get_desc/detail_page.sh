@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-08
+# Date: 2018-12-10
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -115,7 +115,7 @@ form_source_site_get_Desc() {
       local end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -2|tail -1) # 第二个
 
     elif [ "$source_site_URL" = "https://totheglory.im" ]; then
-      local start_line=$(sed -n '/.[cC]omparisons/=;/.[sS]elected.[sS]creens/=' "$source_full"|head -1)
+      local start_line=$(sed -n '/\.[cC]omparisons/=;/\.[sS]elected\.[sS]creens/=;/\.[mM]ore\.[sS]creens/=;/\.[pP]lot/=' "$source_full"|head -1)
       local middle_line=$(sed -n '/.x264.[iI]nfo/=' "$source_full"|head -1)
       local end_line=$(sed -n "$middle_line,$(expr $middle_line + 10)p" \
           "$source_full"|sed -n '/<\/table>/='|head -1) # ttg
@@ -134,6 +134,7 @@ form_source_site_get_Desc() {
     if [[ $start_line && $end_line && $start_line -lt $end_line ]]; then
       sed -n "${start_line},${end_line}p" "$source_full" > "$source_desc"
     else
+      echo "[$(date '+%Y-%m-%d %H:%M:%S')]"                  >> "$debug_Log"
       echo -e "start line: $start_line\nend line: $end_line" >> "$debug_Log"
     fi
     unset start_line end_line middle_line
@@ -158,7 +159,7 @@ form_source_site_get_Desc() {
     [[ $forbid = yes ]] && echo -e "\n&禁止转载&\n"     >> "$source_desc"
     #----------------desc----------------
     else
-      echo 'failed to gen desc from source'             >> "$debug_Log"
+      echo -e 'failed to gen desc from source\n'        >> "$debug_Log"
     fi
     #----------------desc----------------
     
