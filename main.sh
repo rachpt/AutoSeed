@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-10
+# Date: 2018-12-11
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -14,13 +14,17 @@ source "$ROOT_PATH/get_desc/detail_page.sh"
 #----------------lock func--------------#
 remove_lock() {
     rm -f "$lock_File"
+    debug_func 'main_unlock'  #----debug---
 }
 is_locked() {
     if [ -f "$lock_File" ]; then
         exit
     else
-        touch "$lock_File"
-        trap remove_lock EXIT
+        set -o noclobber        # 禁止重定向覆盖
+        echo "$$" > "$lock_File"
+        set +o noclobber        # 允许重定向覆盖
+        debug_func 'main_lock'  #----debug---
+        trap remove_lock INT TERM EXIT
     fi
 }
 
@@ -44,7 +48,7 @@ torrent_completed_precent() {
     elif [ "$fg_client" = 'transmission' ]; then
         tr_get_torrent_completion
     else
-        echo -e "[$(date '+%Y-%m-%d %H:%M:%S')]\c" >> "$debug_Log"
+        echo -e "[$(date '+%m-%d %H:%M:%S')]\c"    >> "$debug_Log"
         echo  "Client Error in completion!"        >> "$debug_Log"
         echo  '+++++++'"$fg_client"'========'      >> "$debug_Log"
     fi
@@ -60,7 +64,7 @@ generate_desc() {
     # org_tr_name 用于和 transmission/qb 中的种子名进行比较，
     org_tr_name="$($tr_show "${flexget_path}/$tr_i"|grep 'Name'|head -1| \
         sed -r 's/Name:[ ]+//')"
-
+    debug_func 'main_1:gl'  #----debug---
     if [ "$tr_i" != "${org_tr_name}.torrent" ]; then
         mv "${flexget_path}/${tr_i}" "${flexget_path}/${org_tr_name}.torrent"
     fi
@@ -71,6 +75,7 @@ generate_desc() {
         [ ! "$test_func_probe" ] && torrent_completed_precent
         [ "$test_func_probe" ] && completion=100      # convenient for test
         [[ $completion && $completion -ge 70 ]] && {
+            debug_func 'main_2:gdesc'  #----debug---
             unset completion source_site_URL
             source "$ROOT_PATH/get_desc/desc.sh"
             unset source_site_URL; }
@@ -89,9 +94,14 @@ main_loop() {
       #----------------------------------------------
       org_tr_name="$("$tr_show" "${flexget_path}/$tr_i"|grep 'Name'| \
           head -1|sed -r 's/Name:[ ]+//')"
+
+      if [ "$tr_i" != "${org_tr_name}.torrent" ]; then
+          mv "${flexget_path}/${tr_i}" "${flexget_path}/${org_tr_name}.torrent"
+      fi
       
       #---.tr file path---#
       torrent_Path="${flexget_path}/${org_tr_name}.torrent"
+      debug_func 'main_3:ml'  #----debug---
       
       #-----------------------------------------------
       if [ "$org_tr_name" = "$one_TR_Name" ]; then
@@ -101,13 +111,14 @@ main_loop() {
               echo 'Failed to find desc file!'           >> "$debug_Log"
               break
           else
+              debug_func 'main_4:post'  #----debug---
               write_log_begin         # write log
               source "$ROOT_PATH/post/post.sh"
               write_log_end           # write log
               # delete uploaded torrent
               [ ! "$test_func_probe" ] && \
               rm -f "$torrent_Path"    && \
-              clean_commit_main='not finished'    
+              clean_commit_main='not_finished'    
           fi
       fi
   done
@@ -151,10 +162,13 @@ if [ "$#" -eq 2 ]; then
     # qbittorrent, 2 parameter
     Torrent_Name="$1"
     Tr_Path="$2"
+    debug_func 'main_0:qb_in'  #----debug---
 else
     # transmission, no parameter
     Torrent_Name="$TR_TORRENT_NAME"
     Tr_Path="$TR_TORRENT_DIR"
+    [[ $TR_TORRENT_NAME ]] && sleep 2 && \
+    debug_func 'main_0:tr_in'  #----debug---
 fi
 [[ $Torrent_Name && $Tr_Path ]] && \
     echo -e "${Torrent_Name}\n${Tr_Path}" >> "$queue"
@@ -162,6 +176,14 @@ unset Torrent_Name Tr_Path
 #---------------------------------------#
 [ "$Disable_AutoSeed" = "yes" ] && exit
 #---------------------------------------#
+pros=$(ps -ax|grep 'main.sh'|sed '/grep/d'|wc -l)
+if [[ $pros -gt 2 ]]; then
+    echo -e "[$(date '+%m-%d %H:%M:%S')]：\c" >> "$debug_Log"
+    echo '主程序正在运行，稍后重试！'         >> "$debug_Log"
+    exit
+fi
+unset pros
+
 is_locked            # 锁住进程，防止多开
 generate_desc        # 提前生成简介
 #---------------------------------------#
@@ -169,11 +191,12 @@ generate_desc        # 提前生成简介
 while true; do
     one_TR_Name="$(head -1 "$queue")"
     one_TR_Dir="$(head -2 "$queue"|tail -1|sed 's!/$!!')"
-    client="$(head -3 "$queue"|tail -1)" # check completion
     [[ ! "$one_TR_Name" || ! "$one_TR_Dir" ]] && break
+    debug_func 'main_5:qu'  #----debug---
 
     if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
         hold_on
+        debug_func 'main_6:q.p'  #----debug---
 
         if [ "$test_func_probe" ]; then
             main_loop
@@ -186,3 +209,4 @@ while true; do
     sed -i '1,2d' "$queue" # record is not from flexget
 done
 #---------------------------------------#
+debug_func 'main_exit'  #----debug---

@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-08
+# Date: 2018-12-11
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -89,28 +89,30 @@ generate_main_func() {
     from_douban_get_desc
 
     # bbcode
-    source_desc_tmp="${gen_desc_bbcode}
+source_desc_tmp="${gen_desc_bbcode}
 
-    [quote][font=Courier New]$(cat "$source_desc")[/font][/quote]
-    $(if [ $source_t_id ]; then
-        echo -e "\n[quote][b]本种来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}[/quote]"
-    else
-        echo -e "\n[quote][b]本种来自：[/b] ${source_site_URL}[/quote]"
-    fi )
+[quote][font=monospace]
+$(cat "$source_desc")
+[/font][/quote]
+$(if [ $source_t_id ]; then
+    echo -e "\n[quote][b]本种来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}[/quote]"
+else
+    echo -e "\n[quote][b]本种来自：[/b] ${source_site_URL}[/quote]"
+fi )
 &shc_name_douban&${chs_name_douban}
 &eng_name_douban&${eng_name_douban}
 "
 
     # byrbt 所需要的 html 简介
-    [[ $enable_byrbt = yes ]] && source_html_tmp="${gen_desc_html}<br /><br />
-    <fieldset><br /> $(cat "$source_html") <fieldset><br />
-    $(echo -e "\n<br /><br /><br /><fieldset><br />\n")
-    $(if [ $source_t_id ]; then
-        echo '<span style="font-size:20px;">本种来自： '${source_site_URL}/details.php?id=${source_t_id}'</span>'
-    else
-        echo '<span style="font-size:20px;">本种来自： '${source_site_URL}'</span>'
-    fi
-    echo -e "\n<br /></fieldset><br /><br />\n")"
+[[ $enable_byrbt = yes ]] && source_html_tmp="${gen_desc_html}<br /><br />
+<fieldset><br /> $(cat "$source_html") </fieldset><br />
+$(echo -e "\n<br /><br /><br /><fieldset><br />\n")
+$(if [ $source_t_id ]; then
+    echo '<span style="font-size:20px;">本种来自： '${source_site_URL}/details.php?id=${source_t_id}'</span>'
+else
+    echo '<span style="font-size:20px;">本种来自： '${source_site_URL}'</span>'
+fi
+echo -e "\n<br /></fieldset><br /><br />\n")"
 
     # 简介覆盖保存至文件 
     echo "$source_desc_tmp" > "$source_desc"

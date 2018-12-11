@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-10
+# Date: 2018-12-11
 #
 #-------------------------------------#
 # 本文件用于处理所有图片问题
@@ -17,6 +17,7 @@ upload_poster_api_byrbt='https://bt.byr.cn/ckfinder/core/connector/php/connector
 # 豆瓣海报上传至图床
 #-------------------------------------#
 delete_screenshots_img() {
+  debug_func 'screens_1:delet'  #----debug---
   local desc_delete_screens="$1"
   sed -i '/\[url=http.*\]\[img\]http.*\[\/img\]\[\/url\]/d' "$desc_delete_screens"
   # hdsky tjupt
@@ -35,8 +36,9 @@ delete_screenshots_img() {
 
 #-------------------------------------#
 deal_with_images() {
+  debug_func 'screens_2:in'  #----debug---
   # delete small images
-  [ "$enable_byrbt" = 'yes' ] && [ "$just_poster_byrbt" = "yes" ] && \
+  [[ $enable_byrbt = yes && $just_poster_byrbt = yes ]] && \
     delete_screenshots_img "$source_html"
   # tjupt
   if [ "$enable_tjupt" = 'yes' ]; then
@@ -47,41 +49,47 @@ deal_with_images() {
   # 遍历 html 简介中的非法图片
   local img_counter_reupload=0
   while true; do
+    debug_func 'screens_3:loop'  #----debug---
     if [ "$enable_byrbt" = 'yes' ]; then
       # 获取不包含 byrbt 域名的图片链接
-      local img_in_desc_url="$(grep -Eo "src=[\"\']http[^\'\"]+" \
-        "$source_html"|sed "/bt\.byr\.cn/d"|head -1|sed "s/src=[\"\']//g")"
+      local img_in_desc_url="$(grep -Eo "src=[\"\']http[^\'\"]+" "$source_html"| \
+          sed "/bt\.byr\.cn/d"|head -1|sed "s/src=[\"\']//g")"
+      debug_func 'screens_4b:url'  #----debug---
     elif [ "$enable_tjupt" = 'yes' ]; then
-      local img_in_desc_url="$(grep -Eio "[img]http.*[/img]" \
-         "$source_desc2tjupt"|sed "/i\.loli\.net/d"|head -1| \
-         sed -E "s!\[/?img\]!!ig")"
+      local img_in_desc_url="$(grep -Eio "[img]http.*[/img]" "$source_desc2tjupt"| \
+          sed "/i\.loli\.net/d"|head -1|sed -E "s!\[/?img\]!!ig")"
+      debug_func 'screens_5t:url'  #----debug---
     fi
+    debug_func 'screens_6'  #----debug---
     # 跳出循环条件
     if [ ! "$img_in_desc_url" ]; then
+        debug_func 'screens_out:1b'  #----debug---
         break # jump out
     elif [ $img_counter_reupload -gt 24 ]; then
+        debug_func 'screens_out:2t'  #----debug---
         break # jump out
     fi
     # 临时图片路径，使用时间作为文件名的一部分
-    local tmp_desc_img_file="$AUTO_ROOT_PATH/tmp/autoseed-pic-$(date \
-        +%s%N)$(echo "${img_in_desc_url##*/}"| \
+    local tmp_desc_img_file="$ROOT_PATH/tmp/autoseed-pic-$(date '+%s%N')$(echo "${img_in_desc_url##*/}"| \
         sed -r 's/.*(\.[jpgb][pnim]e?[gfp]).*/\1/i')"
-    http --verify=no --ignore-stdin -dco "$tmp_desc_img_file" \
-        "$img_in_desc_url" >/dev/null 2>&1
+    http --verify=no --ignore-stdin -dco "$tmp_desc_img_file" "$img_in_desc_url" 
+    debug_func 'screens_img:dl'  #----debug---
     # byrbt
     [ "$enable_byrbt" = 'yes' ] && byr_upload_img_url="$(http --verify=no \
       -f POST "$upload_poster_api_byrbt" upload@"$tmp_desc_img_file" \
       "$cookie_byrbt"|grep -Eo "http[-a-zA-Z0-9./:()]+images[-a-zA-Z0-9./:(_ )]+[^\',\"]*"| \
       sed "s/http:/https:/g")" && sed -i \
-      "s#$img_in_desc_url#$byr_upload_img_url#g" "$source_html" && \
-      unset byr_upload_img_url
+      "s!$img_in_desc_url!$byr_upload_img_url!g" "$source_html" && \
+      unset byr_upload_img_url && \
+      debug_func 'screens_7:byr'  #----debug---
     # tjupt
     [ "$enable_tjupt" = 'yes' ] && [ ! "$(echo "$img_in_desc_url"| \
       grep "i\.loli\.net")" ] && new_poster_url_sm="$(http --verify=no \
       --ignore-stdin -f POST "$upload_poster_api" smfile@"$tmp_desc_img_file"| \
       grep -Eo "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" && \
-      sed -i "s#$img_in_desc_url#$new_poster_url_sm#g" "$source_desc2tjupt" && \
-      unset new_poster_url_sm 
+      sed -i "s!$img_in_desc_url!$new_poster_url_sm!g" "$source_desc2tjupt" && \
+      unset new_poster_url_sm && \
+      debug_func 'screens_8:tjupt'  #----debug---
 
     rm -f "$tmp_desc_img_file"
     unset img_in_desc_url  tmp_desc_img_file
@@ -90,6 +98,7 @@ deal_with_images() {
   # tjupt images
   [ "$enable_tjupt" = 'yes' ] && sed -i \
     '/jpg\|png\|jpeg\|gif\|webp/ {/i\.loli\.net/!d}' "$source_desc2tjupt"
+  debug_func 'screens_9:exit'  #----debug---
 }
 
 #-------------------------------------#

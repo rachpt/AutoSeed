@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-05
+# Date: 2018-12-11
 #
 #---------------------------------------#
 # 将简介以及种子以post方式发布
@@ -41,7 +41,7 @@ judge_before_upload() {
 
 add_t_id_2_client() {        
     #---if get t_id then add it to tr---#
-    if [ -z "$t_id" ]; then
+    if [[ -z $t_id && $up_status -eq 1 ]]; then
         echo "======[failed to get tID]========" >> "$log_Path"
     else
         echo t_id: [$t_id]                       >> "$log_Path"

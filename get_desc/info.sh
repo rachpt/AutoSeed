@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-09
+# Date: 2018-12-11
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -16,6 +16,7 @@ generate_info_local() {
   # 本地简介大小为零
   if [ ! -s "$source_desc" ]; then
     # 种子文件绝对路径
+    debug_func 'info_0:media'  #----debug---
     local main_file_dir="${one_TR_Dir}/${one_TR_Name}"
     # 使用 mediainfo 生成种子中体积最大文件的 iNFO
     local info_generated="$($mediainfo "$(find "$main_file_dir" \
@@ -24,6 +25,7 @@ generate_info_local() {
     # 存档
     if [ "$info_generated" ]; then
       echo "$info_generated" > "$source_desc"
+      debug_func 'info_1:media'  #----debug---
     fi
   fi
 }
@@ -35,6 +37,7 @@ read_info_file() {
           "$one_TR_Name" 2> /dev/null|head -1)"
       one_TR_Dir="${one_TR_Dir%/*}"
   fi
+  debug_func 'info_2'  #----debug---
 
   if [ "$one_TR_Dir" ]; then
     local nfo_file_size=$("$tr_show" "$torrent_Path"| \
@@ -46,16 +49,22 @@ read_info_file() {
         local judge_download_nfo=$((nfo_file_downloaded/100))
         local judge_nfo_file=$(echo "$nfo_file_size * 10"|bc|awk -F '.' '{print $1}')
         if [ "$judge_download_nfo" -eq  "$judge_nfo_file" ]; then
-          cat "$nfo_file_path"|iconv -f gbk -t UTF-8 -c| \
-            sed "/^[ \r]*$/d;/圹/d;s/鶰//g;s/鷌//g;/安安/d" > "$source_desc"
+          local charset="$(file -i "$nfo_file_path"|sed 's/.*charset=//')" 
+          [[ ! $charset ]] && charset='iso-8859-1'
+          iconv -f "$charset" -t UTF-8 -c "$nfo_file_path"| \
+            sed -E "/^ú+$/d" > "$source_desc"
+          debug_func 'info_3:nfo'  #----debug---
         fi
+      unset charset 
       fi
     else
         generate_info_local
+        debug_func 'info_4:media'  #----debug---
     fi
     # byrbt bbcode to html
     [ "$enable_byrbt" = 'yes' ] && [ -s "$source_desc" ] && \
-        sed 's!$!&<br />!g' "$source_desc" > "$source_html" 
+        sed 's/ /&nbsp; /g;s!$!&<br />!g' "$source_desc" > "$source_html" 
+    debug_func 'info_5:exit'  #----debug---
   fi
 }
 

@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-09
+# Date: 2018-12-11
 #
 #---------------------------------------#
 #
@@ -19,6 +19,7 @@ tr_set_ratio() {
     do
 	    name_in_tr=$($tr_remote -t $Tr_ID -i|awk -F 'Name: ' '/Name/{print $2}')
       if [ "$one_TR_Name" = "$name_in_tr" ]; then
+          debug_func 'tr_0:rt'  #----debug---
           for tracker in ${!trackers[*]}; do
               [ "$($tr_remote -t $Tr_ID -i|grep "$trackers[$tracker]")" ] && \
               $tr_remote -t $Tr_ID -sr "$(eval echo '$'"ratio_$tracker")" && \
@@ -26,6 +27,7 @@ tr_set_ratio() {
               [[ "$(eval echo '$'"say_thanks_$tracker")" == yes ]] && \
   http --verify=no --ignore-stdin -f POST "${post_site[$tracker]}/thanks.php" \
                 id="$t_id" "$(eval echo '$'"cookie_$tracker")" && break 2
+              debug_func 'tr_1:rt'  #----debug---
           done
       fi
     done
@@ -38,6 +40,7 @@ tr_add_torrent_file() {
     $tr_remote --torrent-done-script "$ROOT_PATH/main.sh" &> /dev/null
     #---set seed ratio---#
     tr_set_ratio
+    debug_func 'tr_2:afile'  #----debug---
 }
 
 #------------add torrent--------------#
@@ -47,6 +50,7 @@ tr_add_torrent_url() {
     $tr_remote --torrent-done-script "$ROOT_PATH/main.sh" &> /dev/null
     #---set seed ratio---#
     tr_set_ratio
+    debug_func 'tr_3:aurl'  #----debug---
 }
 
 #---------------------------------------#
@@ -54,10 +58,12 @@ tr_add_torrent_url() {
 tr_get_torrent_completion() {
     local id_t=$($tr_remote -l|grep "$org_tr_name"|head -1| \
         awk '{print $1}'|grep -Eo '[0-9]+')
-    [[ $id_t ]] && \ {
+    [[ $id_t ]] &&  { 
+    debug_func 'tr_4:comp'  #----debug---
     completion=$($tr_remote -t $id_t -i|grep 'Percent Done:'|grep -Eo '[0-9]+')
     one_TR_Dir="$($tr_remote -t $id_t -i|grep 'Location:'|grep -o '/.*$')"
     unset id_t; }
+    debug_func 'tr_5:comp'  #----debug---
 }
 
 #---------------------------------------#

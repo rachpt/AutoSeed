@@ -120,6 +120,8 @@ form_source_site_get_Desc() {
       local end_line=$(sed -n "$middle_line,$(expr $middle_line + 10)p" \
           "$source_full"|sed -n '/<\/table>/='|head -1) # ttg
       local end_line=$(expr $middle_line + $end_line - 1) # ttg
+      [[ $end_line ]] || local end_line=$(sed -n 'x264 [info]' "$source_full"|tail -1)
+
 
     elif [ "$source_site_URL" = "https://tp.m-team.cc" ]; then
       local start_line=$(sed -n '/codetop/=' "$source_full"|head -1)
@@ -159,7 +161,7 @@ form_source_site_get_Desc() {
     [[ $forbid = yes ]] && echo -e "\n&禁止转载&\n"     >> "$source_desc"
     #----------------desc----------------
     else
-      echo -e 'failed to gen desc from source\n'        >> "$debug_Log"
+      echo -e "\nfailed to gen desc from source\n"      >> "$debug_Log"
     fi
     #----------------desc----------------
     
