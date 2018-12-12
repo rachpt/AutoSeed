@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-10
+# Date: 2018-12-12
 #
 #--------------------------------------#
 source "$ROOT_PATH/test.sh"
@@ -32,7 +32,7 @@ failed_to_get_des='[size=6][color=Magenta][em11] 获取简介失败！！！[/co
 descrCom_simple="[quote] [b]这是一个自动发布的种子[/b] [i] (又是一个 AUTO)[/i] [em2]
 [*]所有信息以种子文件名为准，标题、简介信息仅供参考，若发现有误请以［举报］或［留言］的形式通知工作人员审查编辑。
 [*]最长保种［${MAX_SEED_TIME}］天，保种分享率［&ratio_in_desc&］，断种恕不补种。
-[*]使用 Shell 脚本实现，具体见：[url=https://github.com/rachpt/AutoSeed]rachpt/AutoSeed[/url][em13]，欢迎star。
+[*]使用 Shell(bash) 脚本实现，开源在：[url=https://github.com/rachpt/AutoSeed]rachpt/AutoSeed[/url][em13]，欢迎star。
 [/quote]"
 #
 ( [ "$enable_hudbt" = 'yes' ] || [ "$enable_whu" = 'yes' ] ) && \
@@ -46,7 +46,7 @@ descrCom_complex="[quote]
 
 [span style='nline-block:block;background-color:greenyellow;padding:10px;border:dashed silver 1px;border-radius:3px;box-shadow: 2px 2px 5px gray;width:100px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2em auto;'][b]最长保种［${MAX_SEED_TIME}］天，保种分享率［&ratio_in_desc&］，断种恕不补种。[/b] [/span]
 
-[span style='inline-block:block;background-color:steelblue;padding:10px;border:dashed silver 1px;border-radius:3px;box-shadow: 2px 2px 5px gray;width:110px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2em auto;'][b]使用 Shell 脚本实现，具体见：[url=https://github.com/rachpt/AutoSeed]rachpt/AutoSeed[/url][em108]，欢迎star。[/b] [/span]
+[span style='inline-block:block;background-color:steelblue;padding:10px;border:dashed silver 1px;border-radius:3px;box-shadow: 2px 2px 5px gray;width:110px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2em auto;'][b]使用 Shell(bash) 脚本实现，开源在：[url=https://github.com/rachpt/AutoSeed]rachpt/AutoSeed[/url][em108]，欢迎star。[/b] [/span]
 [/quote]"
 #
 [ "$enable_byrbt" = 'yes' ] && \
@@ -59,7 +59,7 @@ descrCom_complex_html="<br />
 <br />
 <span style=\"nline-block:block;background-color:greenyellow;padding:10px;border:dashed silver 1px;border-radius:3px;box-shadow: 2px 2px 5px gray;width:100px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2em auto;\"><strong>最长保种［${MAX_SEED_TIME}］天，保种分享率［${ratio_byrbt}］，断种恕不补种。</strong> </span><br />
 <br />
-<span style=\"inline-block:block;background-color:steelblue;padding:10px;border:dashed silver 1px;border-radius:3px;box-shadow: 2px 2px 5px gray;width:110px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2em auto;\"><strong>使用 Shell 脚本实现，具体见：<a href=\"https://github.com/rachpt/AutoSeed\">rachpt/AutoSeed</a><img alt=\"[em108]\" src=\"https://bt.byr.cn/pic/smilies/108.gif\" />，欢迎star。</strong> </span><br />
+<span style=\"inline-block:block;background-color:steelblue;padding:10px;border:dashed silver 1px;border-radius:3px;box-shadow: 2px 2px 5px gray;width:110px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2em auto;\"><strong>使用 Shell(bash) 脚本实现，开源在：<a href=\"https://github.com/rachpt/AutoSeed\">rachpt/AutoSeed</a><img alt=\"[em108]\" src=\"https://bt.byr.cn/pic/smilies/108.gif\" />，欢迎star。</strong> </span><br />
 <br />
 <br />"
 #

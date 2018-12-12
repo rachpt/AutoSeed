@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-11
+# Date: 2018-12-12
 #
 #-------------------------------------#
 # 本文件用于处理所有图片问题
@@ -72,11 +72,11 @@ deal_with_images() {
     # 临时图片路径，使用时间作为文件名的一部分
     local tmp_desc_img_file="$ROOT_PATH/tmp/autoseed-pic-$(date '+%s%N')$(echo "${img_in_desc_url##*/}"| \
         sed -r 's/.*(\.[jpgb][pnim]e?[gfp]).*/\1/i')"
-    http --verify=no --ignore-stdin -dco "$tmp_desc_img_file" "$img_in_desc_url" 
+    http --verify=no --timeout=25 --ignore-stdin -dco "$tmp_desc_img_file" "$img_in_desc_url" 
     debug_func 'screens_img:dl'  #----debug---
     # byrbt
-    [ "$enable_byrbt" = 'yes' ] && byr_upload_img_url="$(http --verify=no \
-      -f POST "$upload_poster_api_byrbt" upload@"$tmp_desc_img_file" \
+    [ "$enable_byrbt" = 'yes' ] && byr_upload_img_url="$(http --verify=no --ignore-stdin \
+      --timeout=25 -f POST "$upload_poster_api_byrbt" upload@"$tmp_desc_img_file" \
       "$cookie_byrbt"|grep -Eo "http[-a-zA-Z0-9./:()]+images[-a-zA-Z0-9./:(_ )]+[^\',\"]*"| \
       sed "s/http:/https:/g")" && sed -i \
       "s!$img_in_desc_url!$byr_upload_img_url!g" "$source_html" && \
@@ -84,7 +84,7 @@ deal_with_images() {
       debug_func 'screens_7:byr'  #----debug---
     # tjupt
     [ "$enable_tjupt" = 'yes' ] && [ ! "$(echo "$img_in_desc_url"| \
-      grep "i\.loli\.net")" ] && new_poster_url_sm="$(http --verify=no \
+      grep "i\.loli\.net")" ] && new_poster_url_sm="$(http --verify=no --timeout=25 \
       --ignore-stdin -f POST "$upload_poster_api" smfile@"$tmp_desc_img_file"| \
       grep -Eo "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" && \
       sed -i "s!$img_in_desc_url!$new_poster_url_sm!g" "$source_desc2tjupt" && \

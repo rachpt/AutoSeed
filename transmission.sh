@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-11
+# Date: 2018-12-12
 #
 #---------------------------------------#
 #
@@ -21,7 +21,7 @@ tr_set_ratio() {
       if [ "$one_TR_Name" = "$name_in_tr" ]; then
           debug_func 'tr_0:rt'  #----debug---
           for tracker in ${!trackers[*]}; do
-              [ "$($tr_remote -t $Tr_ID -i|grep "$trackers[$tracker]")" ] && \
+              [ "$($tr_remote -t $Tr_ID -i|grep "${trackers[$tracker]}")" ] && \
               $tr_remote -t $Tr_ID -sr "$(eval echo '$'"ratio_$tracker")" && \
               [[ $Allow_Say_Thanks == yes ]] && \
               [[ "$(eval echo '$'"say_thanks_$tracker")" == yes ]] && \
@@ -60,7 +60,7 @@ tr_get_torrent_completion() {
         awk '{print $1}'|grep -Eo '[0-9]+')
     [[ $id_t ]] &&  { 
     debug_func 'tr_4:comp'  #----debug---
-    completion=$($tr_remote -t $id_t -i|grep 'Percent Done:'|grep -Eo '[0-9]+')
+    completion=$($tr_remote -t $id_t -i|grep 'Percent Done:'|grep -Eo '[0-9]+'|head -1)
     one_TR_Dir="$($tr_remote -t $id_t -i|grep 'Location:'|grep -o '/.*$')"
     unset id_t; }
     debug_func 'tr_5:comp'  #----debug---

@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-08
+# Date: 2018-12-12
 #
 #-------------------------------------#
 # 本 shell 脚本作用为转化原种 html 格式 iNFO 以及 screens页面至 bbcode。
@@ -53,24 +53,6 @@ sed -i "s#<#[#g;s#>#]#g" "$source_desc"
 
 #---double url---#
 sed -i "s!\[url=[^\]]\+/\]\[url=\(.*\)\[/url\]\[/url\]![url=\1[/url]!g" "$source_desc"
-
-#---deal with hdc poster---#
-if [ "$source_site_URL" = "https://hdchina.org111" ]; then
-    hdc_poster_counter=0
-    while true; do
-        hdc_poster_url="$(egrep -o "${source_site_URL}/attachments[^\[]+" "$source_desc"|head -n 1)"
-        if [ ! "$hdc_poster_url" ]; then
-            break # jump out
-        elif [ $hdc_poster_counter -gt 8 ]; then
-            break # jump out
-        fi
-
-        sed -i "s#$hdc_poster_url#$new_poster_url#g" "$source_desc"
-        hdc_poster_url=''
-        tmp_poster_file=''
-        hdc_poster_counter=`expr $hdc_poster_counter + 1`
-    done
-fi
 
 #---ttg imdb url---#
 sed -i "s!\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\]\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\]\(http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\)\[/url\]\[/url\]!\1!g" "$source_desc"

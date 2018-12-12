@@ -34,7 +34,7 @@ if [ "$one_TR_Dir" ]; then
   fi
   echo "-------------[added]-------------"           >> "$log_Path"
   # 更新豆瓣外部信息
-  http --verify=no --ignore-stdin GET \
+  http --verify=no --ignore-stdin --timeout=16 GET \
    "${postUrl%/*}/retriver.php?id=${t_id}&type=2&siteid=2" "$cookie" "$user_agent"
 else
   echo "没有找到本地文件！"                          >> "$log_Path"

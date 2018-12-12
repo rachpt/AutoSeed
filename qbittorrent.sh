@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-11
+# Date: 2018-12-12
 #
 #--------------------------------------#
 qb_login="${qb_HOST}:$qb_PORT/api/v2/auth/login"
@@ -42,17 +42,17 @@ qb_delete_torrent() {
 qb_set_ratio() {
   qbit_webui_cookie
   # from tr name find other info
-  debug_func 'qb_3:rt0'  #----debug---
+  debug_func 'qb_3:r-start'  #----debug---
   local data="$(http --ignore-stdin --pretty=format GET "$qb_lists" sort=added_on reverse=true \
     "$qb_Cookie"|sed -Ee '/^[ ]*[},]+$/d;s/^[ ]+//;s/[ ]+[{]+//;s/[},]+//g'| \
     grep -B18 -A19 'name":'|sed -Ee \
     '/"hash":/{s/"//g};/"name":/{s/"//g};/"tracker":/{s/"//g};'|sed '/"/d')" 
   # get current site
   for site in ${!post_site[*]}; do
-    [ "$(echo "$postUrl"|grep "$post_site[$site]")" ] && \
-      add_site_tracker="$trackers[$site]" && break # get out of for loop
-    debug_func 'qb_3:rt_'"$add_site_tracker"  #----debug---
+    [ "$(echo "$postUrl"|grep "${post_site[$site]}")" ] && \
+      add_site_tracker="${trackers[$site]}" && break # get out of for loop
   done
+  debug_func 'qb_3:rt_-'"$add_site_tracker"  #----debug---
 
   while true; do
     # qbit 没有和 tr 类似的排序特性
@@ -60,14 +60,16 @@ qb_set_ratio() {
     # match one!
     local pos=$(echo "$data"|sed -n "/name.*$org_tr_name/="|head -1)
     [ ! "$pos" ] && break
-    local torrent_hash="$(echo "$data"|head -n $(expr $pos - 2)|tail -1| \
-        grep -Eo '[^: ]{40}')"
+    debug_func 'qb_pos-'"$pos"  #----debug---
+    local torrent_hash="$(echo "$data"|head -n $(expr $pos - 1)|tail -1| \
+        sed 's/hash: //'|grep -Eo '[^: ]{40}')"
     # debug
     [ ! "$torrent_hash" ] && echo 'failed to get tr hs' >> "$debug_Log"
-    debug_func 'qb_4:rt'  #----debug---
+    debug_func 'qb_hash-'"$torrent_hash"  #----debug---
 
-    local tracker_one="$(echo "$data"|head -n $(expr $pos - 1)|tail -1| \
-        grep 'magnet_uri')"
+    local tracker_one="$(echo "$data"|head -n $(expr $pos + 1)|tail -1| \
+        grep 'tracker')"
+    debug_func 'qb_tracker-'"$tracker_one"  #----debug---
     # debug
     [ ! "$tracker_one" ] && echo 'failed to get qb tracker' >> "$debug_Log"
     if [ "$(echo "$tracker_one"|grep "$add_site_tracker")" ];then
@@ -87,7 +89,7 @@ qb_set_ratio() {
       fi
     else
       # update data, delete the first name matched
-      data="$(echo "$data"|sed "0,/name.*$one_TR_Name/{//d}")"
+      data="$(echo "$data"|sed "1,$pos d")"
     debug_func 'qb_6:rt'  #----debug---
     fi
   done

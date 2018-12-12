@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-10
+# Date: 2018-12-12
 #
 #-------------------------------------#
 # 调函数，生成简介
@@ -21,7 +21,7 @@ if [ "$(echo "$org_tr_name"|sed 's/[a-z0-9 ]*[[:punct:]]*//ig')" ]; then
 else
   # remove suffix name
   dot_name="$(echo "$org_tr_name"|sed -Ee "s/[ ]+/./g;s/\.[a-z4]{2,3}$//i")" && \
-  debug_func 'desc_1:dot'  #----debug---
+  debug_func 'desc_1:dot'    #----debug---
 fi
 
 source_desc="${ROOT_PATH}/tmp/${org_tr_name}_desc.txt"
@@ -34,10 +34,10 @@ source_desc="${ROOT_PATH}/tmp/${org_tr_name}_desc.txt"
 
 #---to log and edit.sh---#
 if [ -z "$source_site_URL" ]; then
-    debug_func 'desc_2:sco'  #----debug---
+    debug_func 'desc_2:sco'    #----debug---
     get_source_site            # get_desc/detail_page.sh
 else
-    debug_func 'desc_3:co'  #----debug---
+    debug_func 'desc_3:co'     #----debug---
     set_source_site_cookie     # get_desc/detail_page.sh
 fi
 
@@ -62,10 +62,16 @@ if [ ! -s "$source_desc" ]; then
         debug_func 'desc_7:screen'  #----debug---
         source "$ROOT_PATH/get_desc/screens.sh"
         deal_with_images       # get_desc/screens.sh
-    #----debug---
-    debug_func 'desc_8:out'  #----debug---
+    debug_func 'desc_8:out'    #----debug---
     fi
-
+else
+    # 保险起见，检查已经生成的简介
+    if [[ $enable_byrbt = yes && $(grep -Eo "src=[\"\']http[^\'\"]+" \
+      "$source_html"|sed "/bt\.byr\.cn/d") ]]; then
+        source "$ROOT_PATH/get_desc/screens.sh"
+        deal_with_images           # get_desc/screens.sh
+        debug_func 'desc_byr_pic'  #----debug---
+    fi
 fi
 #-------------------------------------#
 

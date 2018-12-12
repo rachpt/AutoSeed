@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-05
+# Date: 2018-12-12
 #
 #-------------------------------------#
 # 通过之前生成的 desc 简介文档，提取其中的各种参数。
@@ -20,7 +20,7 @@ from_desc_get_param() {
     unset_all_parameter
     # httpie 对文件名有要求，如包含特殊字符，可能 POST 失败，只改torrent文件名。
     local pl_name_tmp="autoseed.$(date +%s%N).torrent"
-    mv "${flexget_path}/${org_tr_name}.torrent" "${flexget_path}/${pl_name_tmp}"
+    mv "$torrent_Path" "${flexget_path}/${pl_name_tmp}"
     torrent_Path="${flexget_path}/${pl_name_tmp}"
     #---name for post---#
     noDot_name="$(echo "$dot_name"| \
