@@ -2,116 +2,109 @@
 # FileName: clean/clean.sh
 #
 # Author: rachpt@126.com
-# Version: 2.2v
-# Date: 2018-06-23
+# Version: 3.0v
+# Date: 2018-12-13
 #-----------------------------#
 #
 # Auto clean old files/folders in 
 # watch-dir which are not seeding
 # on transmission#.
 #
-#---------Settings------------#
+#---import settings---#
+if [ -z "$ROOT_PATH"]; then
+    ROOT_PATH="$(dirname "$(readlink -f "$0")")"
+    ROOT_PATH="${ROOT_PATH%/*}"
+    source "$ROOT_PATH/settings.sh"
+fi
+#-----------------------------#
+# import functions
+source  "$ROOT_PATH/clean/tr.sh"
+source  "$ROOT_PATH/clean/qb.sh"
+#-----------------------------#
+is_old_file() {
+  local file_modf=$(stat -c '%Y' "$FILE_PATH/$1")
+  local time_interval=$(expr $(date '+%s') - $file_modf)
+  if [ $time_interval -ge $TimeINTERVAL ]; then
+      echo 1  # yes
+  else
+      echo 0  # no
+  fi
+}
+#-----------------------------#
+comparer_file_and_delete() {
+  IFS_OLD=$IFS
+  IFS=$'\n'
+  for i in $(ls -1 "$FILE_PATH")
+  do
+    IFS=$IFS_OLD
+    local old_status=$(is_old_file "$i") 
+    if [ $old_status -eq 1 ]; then
+       # 删除不在qb tr中的文件
+       [ "$qb" = 'yes' ] && qb_is_seeding "$i"
+       [ "$tr" = 'yes' ] && tr_is_seeding "$i"
+    fi
+  done
+}
+#-----------------------------#
+disk_check() {
+    DISK_AVAIL=$(df -h $FILE_PATH|grep -v Mounted|awk '{print $4}'|cut -d 'G' -f 1)
+    DISK_OVER=$(awk 'BEGIN{print('$DISK_AVAIL'<'$DISK_AVAIL_MIN')}')
+}
+#-----------------------------#
+disk_is_over_use() {
+  disk_check
+  if [ "$DISK_OVER" = "1" ]; then
+    for i in $($tr_remote -l|grep '100%.*Done'|awk '{print $1}'|sed 's/*//')
+    do
+      [ "$i" -gt "0" ] && echo -n "$(date '+%m-%d %H:%M:%S') [Done] " >> "$log_Path"
+      $tr_remote -t $i --remove-and-delete >> "$log_Path" 2>&1
+      [ "$i" -gt "0" ] && sleep 10 && disk_check
+      [ "$DISK_OVER" = "0" ] && break
+    done
+  fi
+}
 
 #-----------------------------#
-DELTE_OLD_and_ERROE_TORRENT()
-{
-    for eachTorrentID in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep '[1]\?[0-9]\{1,2\}%'|awk '{print $1}'|sed "s/\*//g"`
-    do
-        #---error torrent---#
-        if [ "`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i|grep 'torrent not registered with this tracker'`" ]; then
-            "$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -r
-        fi
-        #---old torrent---#
-        seed_time=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i|grep 'Seeding Time'|grep 'days'|cut -d : -f 2|awk '{print $1}'`
-        
-        [ "$seed_time" ] && if [ $seed_time -ge $MAX_SEED_TIME ]; then
-            "$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -r
-        fi
-        #---finished torrent---#
-        if [ "`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i|grep 'State:'|grep 'Finished'`" ]; then
-            "$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -r
-        fi
-    done
+# 清理路径列队
+clean_dir() {
+  if [ ! -s "$ROOT_PATH/clean/dir" ]; then
+    [ "$one_TR_Dir" ] && echo "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
+    : # do nothing
+  else
+    cat "$ROOT_PATH/clean/dir"|while read line
+  do
+    [ "$one_TR_Dir" != "$line" ] && {
+        echo "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
+        break; }
+    : # do nothing
+  done
+  fi
+  unset line
 }
-#-----------------------------#
-IS_SEEDING()
-{
-    IFS=$IFS_OLD
-    delete_commit=0
-    if [ -n "$1" ]; then
-        for eachTorrentID in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep '%'| awk '{print $1}'`
-        do
-	        eachTorrent=`"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $eachTorrentID -i |grep 'Name'|head -n 1|awk '{print $2}'`
-            if [ "$1" = "$eachTorrent" ]; then
-		        delete_commit=1
-            fi
-        done
 
-        if [ $delete_commit -eq 0 ]; then
-            rm -rf "$FILE_PATH/$1"
-            echo "[`date '+%Y-%m-%d %H:%M:%S'`] deleted Torrent [$1]" >> $log_Path
-        fi
-    fi
+clean_frequence() {
+  local time_threshold=$(expr 60*60*12)  # 12 hours
+  local time_pass=$(expr $(date '+%s') - $(stat -c '%Y' "$ROOT_PATH/clean/dir"))
+  [ $time_pass -gt $time_threshold ] && calen_main
+  # 更新dir时间
+  touch -m "$ROOT_PATH/clean/dir"
 }
+
 #-----------------------------#
-IS_FILE_OLD()
-{
-    IFS=$IFS_OLD
-    fileDate=`stat "$FILE_PATH/$1" |grep Modify|awk '{print $2}'`
-    fileTime=`stat "$FILE_PATH/$1" |grep Modify|awk '{split($3,var,"."); print var[1]}'`
-    time_interval=`expr $(date +%s) - $(date -d "$fileDate $fileTime" +%s)`
-    if [ $time_interval -ge $TimeINTERVAL ]; then
-        echo 1
-    else
-        echo 0
-    fi
-}
-#-----------------------------#
-COMPARER_FILE_and_DELETE()
-{
-    IFS_OLD=$IFS
-    IFS=$'\n'
-    for i in `ls -1 $FILE_PATH`
-    do
-       old_status=`IS_FILE_OLD "$i"` 
-       if [ $old_status -eq 1 ]; then
-           IS_SEEDING "$i"
-       fi
-    done
-    IFS=$IFS_OLD
-}
-#-----------------------------#
-DISK_CHECK()
-{
-    DISK_AVAIL=`df -h $FILE_PATH | grep -v Mounted | awk '{print $4}' | cut -d 'G' -f 1`
-    DISK_OVER=`awk 'BEGIN{print('$DISK_AVAIL'<'$DISK_AVAIL_MIN')}'`
-}
-#-----------------------------#
-DISK_IS_OVER_USE()
-{
-    DISK_CHECK
-    if [ "$DISK_OVER" = "1" ]; then
-        for i in `"$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -l|grep 100% |grep Done| awk '{print $1}'|grep -v ID`
-        do
-            [ "$i" -gt "0" ] && echo -n "$(date '+%Y-%m-%d %H:%M:%S') [Done] " >> "$log_Path"
-            "$trans_remote" ${HOST}:${PORT} --auth ${USER}:${PASSWORD} -t $i --remove-and-delete >> "$log_Path" 2>&1
-            [ "$i" -gt "0" ] && sleep 10 && DISK_CHECK
-            [ "$DISK_OVER" = "0" ] && break
-        done
-    fi
+clean_main() {
+  qb='yes'
+  tr='yes'
+  [ "$qb" = 'yes' ] && qb_delete_old
+  [ "$tr" = 'yes' ] && tr_delete_old
+  cat "$ROOT_PATH/clean/dir"|while read one_line
+  do
+    FILE_PATH="$one_line"
+    comparer_file_and_delete
+    disk_is_over_use
+    echo "+++++++++++++[clean]+++++++++++++" >> "$log_Path"
+  done
 }
 
 #---------call func-----------#
-echo "+++++++++++++[clean]+++++++++++++" >> "$log_Path"
-
-if [ "$TR_TORRENT_DIR" ]; then
-        FILE_PATH="$TR_TORRENT_DIR"
-    else
-        FILE_PATH="$default_FILE_PATH"
-fi
-
-DELTE_OLD_and_ERROE_TORRENT
-COMPARER_FILE_and_DELETE
-DISK_IS_OVER_USE
-
-echo -e "++++++++++++++[end]++++++++++++++\n"   >> "$log_Path"
+clean_dir
+clean_frequence

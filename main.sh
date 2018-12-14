@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-12
+# Date: 2018-12-14
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -107,7 +107,7 @@ main_loop() {
               # delete uploaded torrent
               [ ! "$test_func_probe" ] && \
               rm -f "$torrent_Path"    && \
-              clean_commit_main='not_finished'    
+              clean_commit_main='have_not_test'    
           fi
       fi
   done
@@ -169,7 +169,7 @@ unset Torrent_Name Tr_Path
 # 禁止重复运行
 debug_func '进程['"$(ps -C 'main.sh' --no-headers|wc -l)"']个' #----debug---
 [[ "$(ps -C 'main.sh' --no-headers|wc -l)" -gt 2 ]] && time_out
-
+#
 is_locked            # 锁住进程，防止多开
 # 生成简介于发布循环不能异步运行，\
 # 否则有可能出现 .torrent 文件被改名\

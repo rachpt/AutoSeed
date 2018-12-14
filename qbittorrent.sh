@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-12
+# Date: 2018-12-14
 #
 #--------------------------------------#
 qb_login="${qb_HOST}:$qb_PORT/api/v2/auth/login"
@@ -11,6 +11,7 @@ qb_add="${qb_HOST}:$qb_PORT/api/v2/torrents/add"
 qb_delete="${qb_HOST}:$qb_PORT/api/v2/torrents/delete"
 qb_ratio="${qb_HOST}:$qb_PORT/api/v2/torrents/setShareLimits"
 qb_lists="${qb_HOST}:$qb_PORT/api/v2/torrents/info"
+qb_reans="${qb_HOST}:$qb_PORT/api/v2/torrents/reannounce"
 #--------------------------------------#
 qbit_webui_cookie() {
   if [ "$(http --ignore-stdin -b GET "${qb_HOST}:$qb_PORT" "$qb_Cookie"| \
@@ -30,6 +31,12 @@ qbit_webui_cookie() {
 }
 
 #--------------------------------------#
+qb_reannounce() {
+    qbit_webui_cookie
+    http --ignore-stdin -f POST "$qb_reans" hashes=all "$qb_Cookie"
+    sleep 1
+}
+#--------------------------------------#
 qb_delete_torrent() {
     qbit_webui_cookie
     # delete
@@ -41,10 +48,13 @@ qb_delete_torrent() {
 #---------------------------------------#
 qb_set_ratio() {
   qbit_webui_cookie
+  sleep 2
+  qb_reannounce
+  sleep 3
   # from tr name find other info
   debug_func 'qb_3:r-start'  #----debug---
   local data="$(http --ignore-stdin --pretty=format GET "$qb_lists" sort=added_on reverse=true \
-    "$qb_Cookie"|sed -Ee '/^[ ]*[},]+$/d;s/^[ ]+//;s/[ ]+[{]+//;s/[},]+//g'| \
+    "$qb_Cookie"|sed -E '/^[ ]*[},]+$/d;s/^[ ]+//;s/[ ]+[{]+//;s/[},]+//g'| \
     grep -B18 -A19 'name":'|sed -Ee \
     '/"hash":/{s/"//g};/"name":/{s/"//g};/"tracker":/{s/"//g};'|sed '/"/d')" 
   # get current site
@@ -52,30 +62,25 @@ qb_set_ratio() {
     [ "$(echo "$postUrl"|grep "${post_site[$site]}")" ] && \
       add_site_tracker="${trackers[$site]}" && break # get out of for loop
   done
-  debug_func 'qb_3:rt_-'"$add_site_tracker"  #----debug---
+  debug_func 'qb_3:rt-['"$add_site_tracker"']'  #----debug---
 
   while true; do
-    # qbit 没有和 tr 类似的排序特性
-    # get torrent hash
-    # match one!
+    # get torrent hash, match one!
     local pos=$(echo "$data"|sed -n "/name.*$org_tr_name/="|head -1)
+    debug_func 'qb_pos-['"$pos"']'  #----debug---
     [ ! "$pos" ] && break
-    debug_func 'qb_pos-'"$pos"  #----debug---
-    local torrent_hash="$(echo "$data"|head -n $(expr $pos - 1)|tail -1| \
-        sed 's/hash: //'|grep -Eo '[^: ]{40}')"
-    # debug
-    [ ! "$torrent_hash" ] && echo 'failed to get tr hs' >> "$debug_Log"
-    debug_func 'qb_hash-'"$torrent_hash"  #----debug---
+    local torrent_hash="$(echo "$data"|head -n "$(expr $pos - 1)"|tail -1| \
+        sed -E 's/hash:[ ]*//')"
+    debug_func 'qb_hash-['"$torrent_hash"']'  #----debug---
 
-    local tracker_one="$(echo "$data"|head -n $(expr $pos + 1)|tail -1| \
-        grep 'tracker')"
-    debug_func 'qb_tracker-'"$tracker_one"  #----debug---
-    # debug
-    [ ! "$tracker_one" ] && echo 'failed to get qb tracker' >> "$debug_Log"
+    local tracker_one="$(echo "$data"|head -n "$(expr $pos + 1)"|tail -1| \
+        sed -E 's/tracker:[ ]*//;s/passkey=.*//')"
+    debug_func 'qb_tracker-['"$tracker_one"']'  #----debug---
+
     if [ "$(echo "$tracker_one"|grep "$add_site_tracker")" ];then
       if [ "${#torrent_hash}" -eq 40 ]; then
         # set ratio and say thanks
-        debug_func 'qb_5:rt'  #----debug---
+        debug_func 'qb_rt:success'  #----debug---
         [[ $ratio_set ]] && \
         http --ignore-stdin -f POST "$qb_ratio" hashes="$torrent_hash" \
         ratioLimit=$ratio_set seedingTimeLimit="$(echo \
@@ -85,12 +90,12 @@ qb_set_ratio() {
         http --verify=no --ignore-stdin -f POST "${post_site[$site]}/thanks.php" \
         id="$t_id" "$(eval echo '$'"cookie_$tracker")" && break 
       else
-        echo 'qb failed to get torrent ID' >> "$debug_Log"
+        debug_func 'qb_torrent_hash wrong!'  #----debug---
       fi
     else
       # update data, delete the first name matched
-      data="$(echo "$data"|sed "1,$pos d")"
-    debug_func 'qb_6:rt'  #----debug---
+      data="$(echo "$data"|sed "1,${pos}d")"
+      debug_func 'qb_rt:rewrite'  #----debug---
     fi
   done
   unset site add_site_tracker data torrent_hash tracker_one
@@ -102,6 +107,7 @@ qb_add_torrent_url() {
   # add url
   http --ignore-stdin -f POST "$qb_add" urls="$torrent2add" root_folder=true \
       savepath="$one_TR_Dir" skip_checking=true "$qb_Cookie"
+  sleep 1
   qb_set_ratio
   debug_func 'qb_7:aurl'  #----debug---
 }
@@ -112,6 +118,7 @@ qb_add_torrent_file() {
   http --ignore-stdin -f POST "$qb_add" skip_checking=true root_folder=true \
       name@"${ROOT_PATH}/tmp/${t_id}.torrent" savepath="$one_TR_Dir" "$qb_Cookie"
   #  ----> ok
+  sleep 1
   qb_set_ratio
   debug_func 'qb_8:afile'  #----debug---
 }
@@ -120,6 +127,7 @@ qb_add_torrent_file() {
 # call in main.sh
 qb_get_torrent_completion() {
   qbit_webui_cookie
+  qb_reannounce
   # need a parameter
   local data="$(http --ignore-stdin --pretty=format GET "$qb_lists" sort=added_on reverse=true \
     "$qb_Cookie"|sed -E '/^[ ]*[},]+$/d;s/^[ ]+//;s/[ ]+[{]+//;s/[},]+//g'| \

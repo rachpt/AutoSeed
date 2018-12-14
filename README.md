@@ -34,7 +34,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 - GNU/Linux （在ubuntu 18.04 lts、archLinux、centos7 测试通过）。
 - 软件：
   - transmission-daemon，transmission-remote，transmission-show,edit 安装`sudo apt-get install transmission-cli`；
-  - qbittorrent 4.1.4+, 如果选择使用该客户端做种(transmission-show,edit 为必须项！)； 
+  - qBittorrent v4.1+, 如果选择使用该客户端做种(transmission-show,edit 为必须项！)； 
   - httpie 1.0+，安装命令`sudo apt-get install httpie`；
   - 其他常用软件工具，sed，grep，awk等(详见 setting.sh，一般系统自带)；
   - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖自行查看安装。
@@ -51,7 +51,8 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 *其他：*
 
 请使用 flexget 订阅下载，使用 [transmissionrpc](https://flexget.com/Plugins/transmission) 将源种传入 transmission。
-如果 `crontab` 无法运行，参考命令 `*/5 * * * * /home/AutoSeed/main.sh >/dev/null 2>&1`。
+
+ `crontab` 运行参考命令 `*/5 * * * * /home/AutoSeed/main.sh >/dev/null 2>&1`。
 
 ubuntu 用户注意使用 bash 运行而非系统默认的 dash!
 
