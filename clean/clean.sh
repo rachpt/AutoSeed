@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-13
+# Date: 2018-12-18
 #-----------------------------#
 #
 # Auto clean old files/folders in 
@@ -68,16 +68,18 @@ disk_is_over_use() {
 # 清理路径列队
 clean_dir() {
   if [ ! -s "$ROOT_PATH/clean/dir" ]; then
-    [ "$one_TR_Dir" ] && echo "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
+    # add to the first line
+    [ "$one_TR_Dir" ] && echo "$one_TR_Dir" > "$ROOT_PATH/clean/dir"
     : # do nothing
   else
     cat "$ROOT_PATH/clean/dir"|while read line
-  do
-    [ "$one_TR_Dir" != "$line" ] && {
+    do
+      [ "$one_TR_Dir" ] && [ "$one_TR_Dir" != "$line" ] && {
+        # add to the end
         echo "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
         break; }
-    : # do nothing
-  done
+      : # do nothing
+    done
   fi
   unset line
 }
@@ -107,4 +109,5 @@ clean_main() {
 
 #---------call func-----------#
 clean_dir
-clean_frequence
+# test
+#clean_frequence
