@@ -40,8 +40,15 @@ comparer_file_and_delete() {
     local old_status=$(is_old_file "$i") 
     if [ $old_status -eq 1 ]; then
        # 删除不在qb tr中的文件
+       delete_commit='yes'
        [ "$qb" = 'yes' ] && qb_is_seeding "$i"
        [ "$tr" = 'yes' ] && tr_is_seeding "$i"
+       [[ $qb != yes && $tr != yes ]] && delete_commit='no'
+       if [ "$i" ] && [ "$delete_commit" = 'yes' ]; then
+           debug_func 'tr:del:'"$i"  #----debug---
+           rm -rf "$FILE_PATH/$i"
+           echo "[$(date '+%m-%d %H:%M:%S')]deleted Torrent[$i]" >> "$log_Path"
+       fi
     fi
   done
 }
@@ -72,24 +79,26 @@ clean_dir() {
     [ "$one_TR_Dir" ] && echo "$one_TR_Dir" > "$ROOT_PATH/clean/dir"
     : # do nothing
   else
+    local add_to_dir=1
     cat "$ROOT_PATH/clean/dir"|while read line
     do
-      [ "$one_TR_Dir" ] && [ "$one_TR_Dir" != "$line" ] && {
-        # add to the end
-        echo "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
+       [ "$one_TR_Dir" == "$line" ] && {
+        add_to_dir=0 # give up add
         break; }
-      : # do nothing
     done
+    [[ $add_to_dir -eq 1 ]] && [ "$one_TR_Dir" ] && echo -e "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
   fi
-  unset line
+  unset line add_to_dir
 }
 
 clean_frequence() {
-  local time_threshold=$(expr 60*60*12)  # 12 hours
+  local time_threshold=$(expr 60 \* 60 \* 12)  # 12 hours
+  local time_threshold=12  # 12 hours
   local time_pass=$(expr $(date '+%s') - $(stat -c '%Y' "$ROOT_PATH/clean/dir"))
-  [ $time_pass -gt $time_threshold ] && calen_main
-  # 更新dir时间
-  touch -m "$ROOT_PATH/clean/dir"
+  [ $time_pass -gt $time_threshold ] && {
+    clean_main
+    # 更新dir时间
+    touch -m "$ROOT_PATH/clean/dir"; }
 }
 
 #-----------------------------#
@@ -98,6 +107,7 @@ clean_main() {
   tr='yes'
   [ "$qb" = 'yes' ] && qb_delete_old
   [ "$tr" = 'yes' ] && tr_delete_old
+  [ -s "$ROOT_PATH/clean/dir" ] && \
   cat "$ROOT_PATH/clean/dir"|while read one_line
   do
     FILE_PATH="$one_line"
@@ -109,5 +119,5 @@ clean_main() {
 
 #---------call func-----------#
 clean_dir
-# test
-#clean_frequence
+# need more test !!!
+clean_frequence

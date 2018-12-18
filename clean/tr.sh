@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-13
+# Date: 2018-12-18
 #
 #-----------------------------#
 tr_delete_old() {
@@ -51,21 +51,16 @@ tr_delete_old() {
 
 #-----------------------------#
 tr_is_seeding() {
-  local delete_commit='yes'
   if [ -n "$1" ]; then
     for ID in $($tr_remote -l|grep -Eo '^[ ]*[0-9]+'|sed 's/ //g')
     do
       local one_na=$($tr_remote -t $ID -i|grep 'Name'|head -1|awk '{print $2}')
       if [ "$1" = "$one_na" ]; then
-	      delete_commit='no'
-        break
+          delete_commit='no'
+          break
       fi
     done
     unset ID
-    if [ "$delete_commit" = 'yes' ]; then
-        rm -rf "$FILE_PATH/$1"
-        echo "[$(date '+%m-%d %H:%M:%S')]deleted Torrent [$1]" >> "$log_Path"
-    fi
   fi
 }
 #-----------------------------#
