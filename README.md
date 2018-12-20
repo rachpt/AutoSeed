@@ -2,7 +2,7 @@
 
 An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a python version [HERE](https://github.com/Rhilip/Pt-Autoseed).
 
-目前适用于 从 HDSky / TTG / HDChina / CMCT / M-Team 等站点自动转载 电影 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT / BYRBT / 北洋园 PT 站。
+目前适用于 从 HDSky / TTG / HDChina / CMCT / M-Team 等站点自动转载 电影、剧集、纪录片 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT / BYRBT / 北洋园 PT 站。
 
 [![release](https://img.shields.io/badge/Version-3.0-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v3.0)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
@@ -15,9 +15,9 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 | https://tp.m-team.cc | https://bt.byr.cn | 2018-06-17 |
 |                   | https://hdcmct.org  | 2018-07-28 |
 |                   | https://tjupt.org  | 2018-08-28 |
-|             |              | 2018-10-23 |
+|      不限\*       |                    | 2018-10-23 |
 
-\* 源站点表示支持抓取其部分简介用于发布.
+\* 源站点表示支持抓取其部分简介用于发布，没有则本地生成简介.
 
 ## 特点
 
@@ -26,7 +26,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
  - 支持自动 Dupe 以及禁转判断。
  - 开箱即用，不需要使用数据库等复杂操作。
  - 速度快，使用临时文件提前生成简介。
- - 自动判断并处理简介缺失海报情况。 
+ - 几乎全自动。 
 
 
 ## 环境要求
@@ -35,7 +35,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 - 软件：
   - transmission-daemon，transmission-remote，transmission-show,edit 安装`sudo apt-get install transmission-cli`；
   - qBittorrent v4.1+, 如果选择使用该客户端做种(transmission-show,edit 为必须项！)； 
-  - httpie 1.0+，安装命令`sudo apt-get install httpie`；
+  - httpie 0.9.8+，安装命令`sudo apt-get install httpie`；
   - 其他常用软件工具，sed，grep，awk等(详见 setting.sh，一般系统自带)；
   - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖自行查看安装。
 
@@ -103,6 +103,11 @@ t_id: [55997]
 
 ## 更新日志
 
+- 2018-12-19 --> 3.0 (release)
+  - 完善clean模块，部分功能使用多线程。
+  - 新的qbittorrent分享率设置实现。
+  - 代码稳定性增强。
+
 - 2018-12-08 --> 3.0 (开发版,几乎完成)
   - 重构几乎全部代码，以支持更多的站点。
   - 使用豆瓣豆瓣，尽量保留原始 iNFO 以及 screens，没有则生成。
@@ -116,4 +121,4 @@ t_id: [55997]
 
 ## 实现流程
 
-![流程图](https://ws1.sinaimg.cn/large/675bda05ly1fy1k3xtkv4j20q90ph432.jpg)
+![流程图](https://ws1.sinaimg.cn/large/675bda05ly1fyd32i63xvj20oy0sdted.jpg)

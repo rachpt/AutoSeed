@@ -3,12 +3,12 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-18
+# Date: 2018-12-19
 #-----------------------------#
 #
 # Auto clean old files/folders in 
 # watch-dir which are not seeding
-# on transmission#.
+# on transmission and qbittorrent.
 #
 #---import settings---#
 if [ -z "$ROOT_PATH"]; then
@@ -45,7 +45,7 @@ comparer_file_and_delete() {
        [ "$tr" = 'yes' ] && tr_is_seeding "$i"
        [[ $qb != yes && $tr != yes ]] && delete_commit='no'
        if [ "$i" ] && [ "$delete_commit" = 'yes' ]; then
-           debug_func 'tr:del:'"$i"  #----debug---
+           debug_func "tr:del:[$i]"  #----debug---
            rm -rf "$FILE_PATH/$i"
            echo "[$(date '+%m-%d %H:%M:%S')]deleted Torrent[$i]" >> "$log_Path"
        fi
@@ -86,14 +86,13 @@ clean_dir() {
         add_to_dir=0 # give up add
         break; }
     done
-    [[ $add_to_dir -eq 1 ]] && [ "$one_TR_Dir" ] && echo -e "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
+    [[ $add_to_dir -eq 1 && $one_TR_Dir ]] && echo -e "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
   fi
   unset line add_to_dir
 }
 
 clean_frequence() {
   local time_threshold=$(expr 60 \* 60 \* 12)  # 12 hours
-  local time_threshold=12  # 12 hours
   local time_pass=$(expr $(date '+%s') - $(stat -c '%Y' "$ROOT_PATH/clean/dir"))
   [ $time_pass -gt $time_threshold ] && {
     clean_main
@@ -119,5 +118,6 @@ clean_main() {
 
 #---------call func-----------#
 clean_dir
-# need more test !!!
+# maybe need more test !!!
 clean_frequence
+
