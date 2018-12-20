@@ -6,6 +6,7 @@
 # Date: 2018-12-08
 #
 #------------------------------------#
+this_mode_is_not_use_now(){
 #---main.sh is running?---#
 pidof -x main.sh
 if [ $? -eq 0 ]; then
@@ -97,3 +98,5 @@ done
 #------------------------------------#
 #---clean---#
 rm -f "$source_desc" "$source_html"
+}
+echo '此模块暂时不使用!'

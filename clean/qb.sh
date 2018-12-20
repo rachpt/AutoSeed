@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-18
+# Date: 2018-12-19
 #
 #---------------------------------------#
 qb_delete_old() {
@@ -20,7 +20,7 @@ qb_delete_old() {
       grep -B1 "state.*pausedUP"|grep hash|sed 's/hash:[ ]*//;s/,//')" 
   [[ $dat ]] && echo "$data"|while read one
   do
-      debug_func 'qb:del:'"$one"  #----debug---
+      debug_func "qb:del:[$one]"  #----debug---
       local torrent_hash="$one"
       qb_delete_torrent
   done
