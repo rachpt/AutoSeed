@@ -63,7 +63,7 @@ read_info_file() {
     fi
     # byrbt bbcode to html
     [ "$enable_byrbt" = 'yes' ] && [ -s "$source_desc" ] && \
-        sed 's/ /&nbsp; /g;s!$!&<br />!g' "$source_desc" > "$source_html" 
+        sed 's/ /\&nbsp; /g;s!$!&<br />!g' "$source_desc" > "$source_html" 
     debug_func 'info_5:exit'  #----debug---
   fi
 }
