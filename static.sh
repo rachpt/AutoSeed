@@ -3,9 +3,10 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-19
+# Date: 2018-12-30
 #
 #--------------------------------------#
+export LANGUAGE=en_US
 source "$ROOT_PATH/test.sh"
 #--log path (do not change)---#
 log_Path="$ROOT_PATH/tmp/log"
