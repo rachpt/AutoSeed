@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-19
+# Date: 2018-12-30
 #-----------------------------#
 #
 # Auto clean old files/folders in 
@@ -79,14 +79,17 @@ clean_dir() {
     [ "$one_TR_Dir" ] && echo "$one_TR_Dir" > "$ROOT_PATH/clean/dir"
     : # do nothing
   else
+    OLD_IFS="$IFS"
+    IFS=$'\n'
     local add_to_dir=1
-    cat "$ROOT_PATH/clean/dir"|while read line
+    for line in $(cat "$ROOT_PATH/clean/dir")
     do
+       IFS="$OLD_IFS"
        [ "$one_TR_Dir" == "$line" ] && {
         add_to_dir=0 # give up add
         break; }
     done
-    [[ $add_to_dir -eq 1 && $one_TR_Dir ]] && echo -e "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
+    [[ $add_to_dir -eq 1 && $one_TR_Dir ]] && echo "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
   fi
   unset line add_to_dir
 }

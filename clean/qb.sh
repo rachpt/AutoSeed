@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-19
+# Date: 2018-12-30
 #
 #---------------------------------------#
 qb_delete_old() {
@@ -18,7 +18,7 @@ qb_delete_old() {
   local data="$(http --ignore-stdin --pretty=format GET "$qb_lists" "$qb_Cookie"| \
       sed -E 's/^ +//g;/[{}]/d;/"hash":/{s/"//g};/"state":/{s/"//g};/"/d'| \
       grep -B1 "state.*pausedUP"|grep hash|sed 's/hash:[ ]*//;s/,//')" 
-  [[ $dat ]] && echo "$data"|while read one
+  [[ $data ]] && echo "$data"|while read one
   do
       debug_func "qb:del:[$one]"  #----debug---
       local torrent_hash="$one"
