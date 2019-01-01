@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-05
+# Date: 2019-01-01
 #
 #-------------settings---------------#
 cookie="$cookie_byrbt"
@@ -31,8 +31,40 @@ fi
 # 判断类型，纪录片、电影、剧集
 if [ "$documentary" = 'yes' ]; then
     byrbt_type='410'
-else
-  if [ "$serials" = 'yes' ]; then
+    byrbt_second_type='10'
+    # 是否完结
+    if [[ $is_package == yes ]]; then
+        byrbt_rend='合集'
+    elif [[ $season =~ .*[eE].* ]]; then
+        byrbt_rend='连载'
+    else
+        byrbt_rend='单集'
+    fi
+    # 季度信息
+    byrbt_season="$season"
+    # 分辨率
+    if [[ $is_1080p == yes ]]; then
+        byrbt_filetype='1080p'
+    elif [[ $is_1080i == yes ]]; then
+        byrbt_filetype='1080i'
+    elif [[ $is_720p == yes ]]; then
+        byrbt_filetype='720p'
+    else
+        byrbt_filetype='其他'
+    fi
+    # 片源
+    if [[ $is_bd == yes ]]; then
+        byrbt_source='Blu-ray'
+    elif [[ $is_hdtv == yes ]]; then
+        byrbt_source='TV'
+    elif [[ $is_webdl == yes ]]; then
+        byrbt_source='Web-DL'
+    else
+        byrbt_source=''
+    fi
+    # 格式
+    byrbt_format="$file_type"
+elif [ "$serials" = 'yes' ]; then
     # 剧集
     byrbt_type='401'
     # 二级分类
@@ -55,7 +87,7 @@ else
     esac
     byrbt_tv_season="$season"
     byrbt_tv_filetype="$file_type"
-  else 
+else
     # 默认电影类
     byrbt_type='408'
     # 二级分类
@@ -71,7 +103,6 @@ else
       *)
           byrbt_second_type='1' ;;
     esac
-  fi
 fi
 }
 #-------------------------------------#
@@ -159,7 +190,29 @@ elif [ "$byrbt_type" = '401' ]; then
     fi
 elif [ "$byrbt_type" = '410' ]; then
     # 纪录片 POST
-    :
+    t_id=$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
+        'type'="$byrbt_type"\
+        'second_type'="$byrbt_second_type"\
+        'record_whetherend'="$byrbt_rend"\
+        'cname'="$chinese_title"\
+        'record_ename'="$foreign_title"\
+        'record_season'="$byrbt_season"\
+        'record_filetype'="$byrbt_filetype"\
+        'record_source'="$byrbt_source"\
+        'record_format'="$byrbt_format"\
+        'type'="$byrbt_type"\
+        'small_descr'="$chs_included"\
+        'url'="$imdb_url"\
+        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo 'none')"\
+        'descr'="$byrbt_des"\
+        'uplver'="$anonymous_byrbt"\
+        file@"${torrent_Path}"\
+        "$cookie_byrbt"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
+
+    if [ -z "$t_id" ]; then
+        # 辅种
+        :
+    fi
 else
     # 其他 POST
     :
