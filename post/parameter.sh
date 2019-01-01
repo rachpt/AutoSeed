@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-17
+# Date: 2019-01-01
 #
 #-------------------------------------#
 # 通过之前生成的 desc 简介文档，提取其中的各种参数。
@@ -34,7 +34,7 @@ from_desc_get_param() {
     if [ "$(grep -E '^.集　　数　.*$' "$source_desc")" ]; then
         serials='yes'
         # 剧集季度
-        season="$(echo "$dot_name"|sed -r 's/(.*)\.([-sEp0-9]+)\..*/\1/i'| \
+        season="$(echo "$dot_name"|sed -r 's/.*\.(s[0-9]{1,2}(e[0-9]{1,3})?|ep?[0-9]{1,3}-?(ep?[0-9]{1,3})?)\..*/\1/i'| \
             sed 's/[a-z]/\u&/g')"
     else
         normal='yes'
@@ -117,7 +117,11 @@ from_desc_get_param() {
             is_package='yes'
             ;;
         *)
-            is_package='no'
+            if [[ $season =~ [sS][0-9]+(-[sS][0-9]+)? ]]; then
+                is_package='yes'
+            else
+                is_package='no'
+            fi
             ;;
     esac
 
