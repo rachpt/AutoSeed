@@ -171,7 +171,7 @@ unset Torrent_Name Tr_Path
 [ "$Disable_AutoSeed" = "yes" ] && exit
 #---------------------------------------#
 # 禁止重复运行
-debug_func '进程['"$(ps -C 'main.sh' --no-headers|wc -l)"']个' #----debug---
+debug_func "进程[$(ps -C 'main.sh' --no-headers|wc -l)]个" #----debug---
 [[ "$(ps -C 'main.sh' --no-headers|wc -l)" -gt 2 ]] && time_out
 #
 is_locked            # 锁住进程，防止多开

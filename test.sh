@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-11
+# Date: 2018-12-13
 #
 #--------------------------------------#
 # 说明：该文件用于逐个测试站点情况，
@@ -18,28 +18,28 @@
 test_func() {
     test_func_probe=1
     #---[hudbt]---#
-    enable_hudbt='yes'
+    enable_hudbt='no'
     #---[whu]---#
     enable_whu='no'
     #---[npupt]---#
-    enable_npupt='yes'
+    enable_npupt='no'
     #---[nanyangpt]---#
-    enable_nanyangpt='yes'
+    enable_nanyangpt='no'
     #---[byrbt]---#
     enable_byrbt='yes'
     #---[cmct]---#
-    enable_cmct='yes'
+    enable_cmct='no'
     #---[tjupt]---#
-    enable_tjupt='yes'
+    enable_tjupt='no'
     #
 }
 #--------------------------------------#
-#test_func  #--
+#test_func  #--Uncomment to debug!---#
 #
 # debug function
 debug_func() {
     # set true to debug, false to close
     if false; then
-        echo "[$(date '+%m-%d %H:%M:%S')]：$1" >> "$debug_Log"
+        echo "[$(date '+%m-%d %H:%M:%S')]：$*" >> "$debug_Log"
     fi
 }
