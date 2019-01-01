@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-19
+# Date: 2018-12-31
 #
 #--------------------------------------#
 qb_login="${qb_HOST}:$qb_PORT/api/v2/auth/login"
@@ -46,62 +46,6 @@ qb_delete_torrent() {
     debug_func 'qb:deleted'  #----debug---
 }
 
-#---------------------------------------#
-# it's not use now
-qb_set_ratio() {
-  sleep 8
-  qbit_webui_cookie
-  # from tr name find other info
-  debug_func 'qb_3:r-start'  #----debug---
-  local data="$(http --ignore-stdin --pretty=format -f POST "$qb_lists" sort=added_on reverse=true \
-    "$qb_Cookie"|sed -E '/^[ ]*[},]+$/d;s/^[ ]+//;s/[ ]+[{]+//;s/[},]+//g'| \
-    grep -B18 -A19 'name":'|sed -Ee \
-    '/"hash":/{s/"//g};/"name":/{s/"//g};/"tracker":/{s/"//g};'|sed '/"/d')" 
-  # get current site
-  echo "$data" > "$ROOT_PATH/tmp/`date '+%H-%M-%S'`.txt"
-  for site in ${!post_site[*]}; do
-    [ "$(echo "$postUrl"|grep "${post_site[$site]}")" ] && \
-      add_site_tracker="${trackers[$site]}" && break # get out of for loop
-  done
-  debug_func "qb_3:rt-[$add_site_tracker]"   #----debug---
-
-  while true; do
-    # get torrent hash, match one!
-    local pos=$(echo "$data"|sed -n "/name.*$org_tr_name/="|head -1)
-    debug_func "qb_pos-[$pos]"   #----debug---
-    [ ! "$pos" ] && break
-    local torrent_hash="$(echo "$data"|head -n "$(expr $pos - 1)"|tail -1| \
-        sed -E 's/hash:[ ]*//')"
-    debug_func 'qb_hash-['"$torrent_hash"']'  #----debug---
-
-    local tracker_one="$(echo "$data"|head -n "$(expr $pos + 1)"|tail -1| \
-        sed -E 's/tracker:[ ]*//;s/passkey=.*//')"
-    debug_func 'qb_tracker-['"$tracker_one"']'  #----debug---
-
-    if [ "$(echo "$tracker_one"|grep "$add_site_tracker")" ];then
-      if [ "${#torrent_hash}" -eq 40 ]; then
-        # set ratio and say thanks
-        debug_func 'qb_rt:success'  #----debug---
-        [[ $ratio_set ]] && \
-        http --ignore-stdin -f POST "$qb_ratio" hashes="$torrent_hash" \
-        ratioLimit=$ratio_set seedingTimeLimit="$(echo \
-        ${MAX_SEED_TIME}*60*60|bc)" "$qb_Cookie" && \
-        [[ $Allow_Say_Thanks == yes ]] && \
-        [[ "$(eval echo '$'"say_thanks_$site")" == yes ]] && \
-        http --verify=no --ignore-stdin -f POST "${post_site[$site]}/thanks.php" \
-        id="$t_id" "$(eval echo '$'"cookie_$tracker")" && break 
-      else
-        debug_func 'qb_torrent_hash wrong!'  #----debug---
-      fi
-    else
-      # update data, delete the first name matched
-      data="$(echo "$data"|sed "1,${pos}d")"
-      debug_func 'qb_rt:rewrite'  #----debug---
-    fi
-  done
-  unset site add_site_tracker data torrent_hash tracker_one
-}
- 
 #---------------------------------------#
 qb_set_ratio_queue() {
   for site in ${!post_site[*]}; do
