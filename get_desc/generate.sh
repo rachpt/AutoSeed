@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-11
+# Date: 2019-01-02
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -45,10 +45,10 @@ get_douban_url_by_keywords() {
 #-------------------------------------#
 from_douban_get_desc() {
     # 获取搜索链接
-    if [ "$imdb_url" ]; then
-        search_url="http://www.imdb.com/title/$imdb_url"
-    elif [ "$douban_url" ]; then
+    if [ "$douban_url" ]; then
         search_url="$douban_url"
+    elif [ "$imdb_url" ]; then
+        search_url="http://www.imdb.com/title/$imdb_url"
     else
         get_douban_url_by_keywords
     fi

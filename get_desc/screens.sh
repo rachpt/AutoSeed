@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-12
+# Date: 2019-01-02
 #
 #-------------------------------------#
 # 本文件用于处理所有图片问题
@@ -22,6 +22,7 @@ delete_screenshots_img() {
   sed -i '/\[url=http.*\]\[img\]http.*\[\/img\]\[\/url\]/d' "$desc_delete_screens"
   # hdsky tjupt
   sed -i '/20141003100205b81803ac0903724ad88de90649c5a36e\.jpg/d' "$desc_delete_screens"
+  sed -i '/http:\/\/www.stonestudio2015.com/d' "$desc_delete_screens"
   sed -i "/<a.*><img.*>.*<\/a>/d" "$desc_delete_screens" # small img
   sed -i "/截图赏析/d; /alt=\"screens.jpg\"/d; /www.stonestudio2015.com\/stonestudio\/created.png/d; /hds_logo.png/d" "$desc_delete_screens" # hds
   sed -i "/.More.Screens/d;/.Comparisons/d;/Source.*WiKi/d;/WiKi.*Source/d" "$desc_delete_screens" # ttg
@@ -42,7 +43,7 @@ deal_with_images() {
     delete_screenshots_img "$source_html"
   # tjupt
   if [ "$enable_tjupt" = 'yes' ]; then
-    cp -f "$source_desc" "$source_desc2tjupt"
+    \cp -f "$source_desc" "$source_desc2tjupt"
     [ "$just_poster_tjupt" = "yes" ] && delete_screenshots_img "$source_desc2tjupt"
   fi
   
@@ -72,11 +73,12 @@ deal_with_images() {
     # 临时图片路径，使用时间作为文件名的一部分
     local tmp_desc_img_file="$ROOT_PATH/tmp/autoseed-pic-$(date '+%s%N')$(echo "${img_in_desc_url##*/}"| \
         sed -r 's/.*(\.[jpgb][pnim]e?[gfp]).*/\1/i')"
-    http --verify=no --timeout=25 --ignore-stdin -dco "$tmp_desc_img_file" "$img_in_desc_url" 
+    http --verify=no --timeout=25 --ignore-stdin -dco "$tmp_desc_img_file" "$img_in_desc_url" "$user_agent"
     debug_func 'screens_img:dl'  #----debug---
+    sleep 1 # 图片下载完成
     # byrbt
     [ "$enable_byrbt" = 'yes' ] && byr_upload_img_url="$(http --verify=no --ignore-stdin \
-      --timeout=25 -f POST "$upload_poster_api_byrbt" upload@"$tmp_desc_img_file" \
+      --timeout=25 -f POST "$upload_poster_api_byrbt" upload@"$tmp_desc_img_file" "$user_agent" \
       "$cookie_byrbt"|grep -Eo "http[-a-zA-Z0-9./:()]+images[-a-zA-Z0-9./:(_ )]+[^\',\"]*"| \
       sed "s/http:/https:/g")" && sed -i \
       "s!$img_in_desc_url!$byr_upload_img_url!g" "$source_html" && \

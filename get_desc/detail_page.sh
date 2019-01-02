@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-10
+# Date: 2019-01-02
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -97,9 +97,10 @@ form_source_site_get_Desc() {
     source_full="${ROOT_PATH}/tmp/${org_tr_name}_full.txt"
     http -b --verify=no --ignore-stdin --timeout=25 GET \
         "${source_site_URL}/details.php?id=${source_t_id}" \
-        "$cookie_source_site" "$user_agent"> "$source_full"
-  #---desc-full--
+        "$cookie_source_site" "$user_agent" > "$source_full"
+  #---desc-full--start
   if [ -s "$source_full" ]; then
+    unset imdb_url douban_url # 防止上次结果影响到下一次
     # imdb 和豆瓣链接,用于生成简介
     imdb_url="$(grep -Eo 'tt[0-9]{7}' "$source_full"|head -1)"
     douban_url="$(grep -Eo 'https?://(movie\.)?douban\.com/subject/[0-9]{7,8}/?' "$source_full"|head -1)"
@@ -136,11 +137,10 @@ form_source_site_get_Desc() {
     if [[ $start_line && $end_line && $start_line -lt $end_line ]]; then
       sed -n "${start_line},${end_line}p" "$source_full" > "$source_desc"
     else
-      echo "[$(date '+%Y-%m-%d %H:%M:%S')]"                  >> "$debug_Log"
-      echo -e "start line: $start_line\nend line: $end_line" >> "$debug_Log"
+      debug_func "get_desc:start-l:[$start_line]end-l:[$end_line]"  #----debug---
     fi
     unset start_line end_line middle_line
-    #----------------desc----------------
+    #----------------desc----------------start
     if [ -s "$source_desc" ]; then
     #---filter html code---#
     sed -i "s/.*id='kdescr'>//g;s/onclick=\"Previewurl([^)]*)[;]*\"//g;s/onload=\"Scale([^)]*)[;]*\"//g;s/onmouseover=\"[^\"]*;\"//g" "$source_desc"
@@ -154,23 +154,21 @@ form_source_site_get_Desc() {
     sed -Ei "/^x264.*<\/table>/ s!</table>.*!</table>\n!ig" "$source_desc"
  
     #---copy as a duplication for byrbt---#
-    [ "$enable_byrbt" = 'yes' ] && cp -f "$source_desc" "$source_html"
+    [ "$enable_byrbt" = 'yes' ] && \cp -f "$source_desc" "$source_html"
 
     #---html2bbcode---#
     source "$ROOT_PATH/get_desc/html2bbcode.sh"
-    [[ $forbid = yes ]] && echo -e "\n&禁止转载&\n"     >> "$source_desc"
+    [[ $forbid = yes ]] && echo -e "\n&禁止转载&\n" >> "$source_desc"
     #----------------desc----------------
     else
-      echo -e "\nfailed to gen desc from source\n"      >> "$debug_Log"
+      debug_func 'get_desc:failed to get source page!'  #----debug---
     fi
-    #----------------desc----------------
+    #----------------desc----------------end
     
-    #sleep 99999999999
-    unset forbid
     rm -f "$source_full"
-    unset source_full
+    unset source_full forbid
   fi
-  #---desc-full--
+  #---desc-full--end
   fi
 }
 
