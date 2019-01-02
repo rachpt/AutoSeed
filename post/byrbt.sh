@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-01
+# Date: 2019-01-02
 #
 #-------------settings---------------#
 cookie="$cookie_byrbt"
@@ -64,6 +64,13 @@ if [ "$documentary" = 'yes' ]; then
     fi
     # 格式
     byrbt_format="$file_type"
+    # 英文名
+    [[ $(echo $foreign_title|grep -Ei '[a-z]+') ]] && \
+      byrbt_engname="$foreign_title" || \
+      byrbt_engname="$(echo "$noDot_name"|sed -E \
+      's/(720|1080)[pi].*//i;s/(blu-?ray|hdtv|web-?dl).*//i;s/ [0-9]{4} $//;s/ +$//')"
+    # 制作小组，取英文名-后面部分
+    byrbt_group="$(echo "$dot_name"|sed -E 's/.*-([a-z0-9]+$)/\1/i')"
 elif [ "$serials" = 'yes' ]; then
     # 剧集
     byrbt_type='401'
@@ -195,11 +202,12 @@ elif [ "$byrbt_type" = '410' ]; then
         'second_type'="$byrbt_second_type"\
         'record_whetherend'="$byrbt_rend"\
         'cname'="$chinese_title"\
-        'record_ename'="$foreign_title"\
+        'record_ename'="$byrbt_engname"\
         'record_season'="$byrbt_season"\
         'record_filetype'="$byrbt_filetype"\
         'record_source'="$byrbt_source"\
         'record_format'="$byrbt_format"\
+        'record_group'="$byrbt_group"\
         'type'="$byrbt_type"\
         'small_descr'="$chs_included"\
         'url'="$imdb_url"\
