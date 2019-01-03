@@ -14,6 +14,7 @@
 #-------------------------------------#
 
 get_source_site() {
+    unset source_site_URL cookie_source_site unknown_site source_t_id
     local tracker_info="$($tr_show "$torrent_Path"|grep -A5 'TRACKERS')"
     # 获取种子原站点
     if [ "$(echo $tracker_info|grep -i 'hdsky')" ]; then
@@ -81,6 +82,7 @@ if [ "$source_site_URL" ]; then
             "$s_search_URL" "$cookie_source_site" "$user_agent"| \
             grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
     fi
+    debug_func "get_desc:s-t_id[$source_t_id]"  #----debug---
 else
     # 用于简介
     source_site_URL="$unknown_site"

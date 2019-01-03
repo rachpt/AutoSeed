@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-12
+# Date: 2019-01-03
 #
 #-------------------------------------#
 # 调函数，生成简介
@@ -11,17 +11,20 @@
 #-------------------------------------#
 # 最后发布前会再次重命名为简单的名字减少莫名其妙的bug。
 # dot_name即点分隔名，用作 0day 名，以及构成保存简介文件名。
-if [ "$(echo "$org_tr_name"|sed 's/[a-z0-9 ]*[[:punct:]]*//ig')" ]; then
+dot_name="$(echo "$org_tr_name"|sed 's/[^ -z]//g')"    # 删除所有汉字
+debug_func "desc:dot-name0[$dot_name]"     #----debug---
+# name 包含10个以上英文字符，则使用其作为0day名，否则使用部分主文件名
+if [[ $(echo "$dot_name"|sed 's/[\. 0-9]//g'|awk '{print length($0)}') -lt 10 ]]; then
   #---special for non-standard 0day-name---#
   dot_name="$("$tr_show" "$torrent_Path"|grep -A10 'FILES'| \
     grep -Ei '[\.0-9]+[ ]*(GB|MB)'|grep -Eio "[-\.\'a-z0-9\!@_ ]+"|tail -2| \
     head -1|sed -r 's/^[\. ]+//;s/\.[a-z4 ]{2,5}$//i'| \
     sed -r 's/\.sample//i;s/[ ]+/./g')" && \
-    debug_func 'desc_0:dot'  #----debug---
+    debug_func "desc:dot-name2[$dot_name]"  #----debug---
 else
   # remove suffix name
-  dot_name="$(echo "$org_tr_name"|sed -Ee "s/[ ]+/./g;s/\.[a-z4]{2,3}$//i")" && \
-  debug_func 'desc_1:dot'    #----debug---
+  dot_name="$(echo "$dot_name"|sed -E 's/[ ]+/./g;s/\.{2,}/./g;s/\.[a-z4]{2,4}$//i;;s/^\.//')"
+  debug_func "desc:dot-name1[$dot_name]"    #----debug---
 fi
 
 source_desc="${ROOT_PATH}/tmp/${org_tr_name}_desc.txt"

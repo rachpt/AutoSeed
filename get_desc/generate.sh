@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-02
+# Date: 2019-01-03
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -13,26 +13,35 @@
 
 # 通过 豆瓣 API 搜索资源豆瓣ID，用于后续简介获取
 get_douban_url_by_keywords() {
-  # 普通电影
-  if [ "$(echo "$dot_name"|grep -Eo '[12][0198][0-9]{2}')" ]; then
-    local search_name="$(echo "$dot_name"|grep -Eo '.*[12][0198][0-9]{2}')"
-  # 剧集单集
-  elif [ "$(echo "$dot_name"|sed -r 's/.*\.(S[0-9]+)?([-]?Ep?[0-9]+)?\..*/\1/i')" ]; then
-    local search_name="$(echo "$dot_name"|sed -r 's/(.*)\.(S[0-9]+)?([-]?Ep?[0-9]+)?\..*/\1/i')"
-  # 剧集单集,可能误判
-  elif [ "$(echo "$dot_name"|sed -r 's/.*\.([-sEp0-9]+)\..*/\1/i')" ]; then
-    local search_name="$(echo "$dot_name"|sed -r 's/(.*)\.([-sEp0-9]+)\..*/\1/i')"
-  # 剧集合集
-  elif [ "$(echo "$dot_name"|sed -r 's/(.*)\.Complete\..*/\1/i')" ]; then
-    local search_name="$(echo "$dot_name"|sed -r 's/(.*)\.Complete\..*/\1/i')"
-  else
-    local search_name="$(echo "$dot_name"| \
-     sed -r 's/(.*)\.BluRay\..*/\1/i;s/(.*)\.hdtv\..*/\1/i;s/(.*)\.web-?dl\..*/\1/i;')"
-  fi
-
-  local get_douban_url="$(http -b --verify=no --pretty=format --ignore-stdin \
-   --timeout=15 GET "https://api.douban.com/v2/movie/search?q=${search_name}" \
+  local get_douban_url
+  search_doubanurl() {
+  local name season year
+  # 剧集季数
+  season="$(echo "$1"|sed -E 's/.*[ \./]s([012]?[1-9])(ep?[0-9]+)?[ \.].*/.Season.\1./i;s/[ \.]0([1-9])[ \.]/.\1/')"
+  # 年份
+  year="$(echo "$1"|grep -Eo '[12][098][0-9]{2}')"
+  # 分辨率
+  name="$(echo "$1"|sed -E 's/(1080[pi]|720p|4k|2160p).*//i')"
+  # 介质
+  name="$(echo "$name"|sed -E 's/(hdtv|blu-?ray|web-?dl|bdrip|dvdrip|webrip).*//i')"
+  # 删除季数
+  name="$(echo "$name"|sed -E 's/[ \./]s([012]?[1-9])(ep?[0-9]+)?[ \.].*//i')"
+  # 删除合集
+  name="$(echo "$name"|sed -E 's/[ \.]Complete[\. ].*//i')"
+  # 搜索
+  get_douban_url="$(http -b --verify=no --pretty=format --ignore-stdin \
+   --timeout=25 GET "https://api.douban.com/v2/movie/search?q=${name}${season}.${year}" \
    "$user_agent"|grep -E '(movie.)?douban.com/subject/'|head -1|awk -F '"' '{print $4}')"
+  # 去掉可能不准确的年份
+  [[ ! $get_douban_url ]] && \
+   get_douban_url="$(http -b --verify=no --pretty=format --ignore-stdin \
+   --timeout=25 GET "https://api.douban.com/v2/movie/search?q=${name}${season}" \
+   "$user_agent"|grep -E '(movie.)?douban.com/subject/'|head -1|awk -F '"' '{print $4}')"
+  debug_func "generate:[$name]"  #----debug---
+  }
+
+  search_doubanurl "$org_tr_name"
+  [[ ! $get_douban_url ]] && sleep 2 && search_doubanurl "$dot_name"
   # 写入日志
   if [ "$get_douban_url" ]; then
       search_url="$get_douban_url"
@@ -40,6 +49,7 @@ get_douban_url_by_keywords() {
   else
       echo '未搜索到豆瓣链接！！！'                   >> "$log_Path"
   fi
+  unset -f search_doubanurl
 }
 
 #-------------------------------------#
@@ -92,7 +102,7 @@ generate_main_func() {
 source_desc_tmp="${gen_desc_bbcode}
 
 [quote][font=monospace]
-$(cat "$source_desc")
+$([[ -s $source_desc ]] && cat "$source_desc" || echo 'Failed to get mediainfo!')
 [/font][/quote]
 $(if [ $source_t_id ]; then
     echo -e "\n[quote][b]本种来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}[/quote]"
@@ -105,7 +115,7 @@ fi )
 
     # byrbt 所需要的 html 简介
 [[ $enable_byrbt = yes ]] && source_html_tmp="${gen_desc_html}<br /><br />
-<fieldset><br /> $(cat "$source_html") </fieldset><br />
+<fieldset><br /> $([[ -s $source_desc ]] && cat "$source_html" || echo 'Failed to get mediainfo!') </fieldset><br />
 $(echo -e "\n<br /><br /><br /><fieldset><br />\n")
 $(if [ $source_t_id ]; then
     echo '<span style="font-size:20px;">本种来自： '${source_site_URL}/details.php?id=${source_t_id}'</span>'
