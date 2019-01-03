@@ -3,15 +3,11 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-02
+# Date: 2019-01-03
 #
 #-------------------------------------#
 # 本文件用于处理所有图片问题
 #-------------------------------------#
-#
-# 图片上传 API
-upload_poster_api='https://sm.ms/api/upload'
-upload_poster_api_byrbt='https://bt.byr.cn/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images'
 #
 #-------------------------------------#
 # 豆瓣海报上传至图床
@@ -78,10 +74,9 @@ deal_with_images() {
     sleep 1 # 图片下载完成
     # byrbt
     [ "$enable_byrbt" = 'yes' ] && byr_upload_img_url="$(http --verify=no --ignore-stdin \
-      --timeout=25 -f POST "$upload_poster_api_byrbt" upload@"$tmp_desc_img_file" "$user_agent" \
-      "$cookie_byrbt"|grep -Eo "http[-a-zA-Z0-9./:()]+images[-a-zA-Z0-9./:(_ )]+[^\',\"]*"| \
-      sed "s/http:/https:/g")" && sed -i \
-      "s!$img_in_desc_url!$byr_upload_img_url!g" "$source_html" && \
+      --timeout=25 -bf POST "$upload_poster_api_byrbt" upload@"$tmp_desc_img_file" "$user_agent" \
+      "$cookie_byrbt"|grep -Eio "https?://[^\'\"]+"|sed "s/http:/https:/g")" && \
+      sed -i "s!$img_in_desc_url!$byr_upload_img_url!g" "$source_html" && \
       unset byr_upload_img_url && \
       debug_func 'screens_7:byr'  #----debug---
     # tjupt

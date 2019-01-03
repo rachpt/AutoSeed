@@ -37,23 +37,24 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
   - qBittorrent v4.1+, 如果选择使用该客户端做种(transmission-show,edit 为必须项！)； 
   - httpie 0.9.8+，用于和web服务器通讯；
   - mediainfo，用于本地生成info信息;
+  - ffmpeg，用于本地生成缩略图(配合mediainfo);
   - 其他常用软件工具，sed，grep，awk等(详见 setting.sh，一般系统自带)；
   - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖(requests,bs4,html2bbcode)。
 
 - ubuntu 系安装
   ```sh
-  sudo apt install transmission-daemon transmission-cli qbittorrent(or nox) httpie mediainfo python3
+  sudo apt install transmission-daemon transmission-cli qbittorrent(or nox) httpie mediainfo python3 ffmpeg
   sudo pip3 install requests bs4 html2bbcode
   ``` 
 - arch 系安装
   ```sh
-  sudo pacman -Sy transmsiion-cli qbittorrent(or nox) httpie mediainfo python python-pip
+  sudo pacman -Sy transmsiion-cli qbittorrent(or nox) httpie mediainfo python python-pip ffmpeg
   sudp pacman -Sy python-requests python-beautifulsoup4 
   sudo pip3 install html2bbcode # 不要通过 pip 安装上面两个库
   ```
 - centos 安装
   ```sh
-  sudo yum -y install transmission-cli transmission-common transmission-daemon qbittorrent(or nox) httpie mediainfo python python-pip
+  sudo yum -y install transmission-cli transmission-common transmission-daemon qbittorrent(or nox) httpie mediainfo python python-pip ffmpeg
   sudo pip3 install install requests bs4 html2bbcode
   ```
 

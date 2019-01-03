@@ -51,21 +51,24 @@ if [ ! -s "$source_desc" ]; then
     form_source_site_get_Desc  # get_desc/detail_page.sh
     # generate info? 
     if [ ! -s "$source_desc" ]; then
+        [[ $completion -eq 100 ]] && {
         # import functions
         debug_func 'desc_5:info'  #----debug---
         source "$ROOT_PATH/get_desc/info.sh"
-        read_info_file         # get_desc/info.sh
+        read_info_file; }         # get_desc/info.sh
     fi
-    # import functions to generate desc
-    debug_func 'desc_6:gen'  #----debug---
-    source "$ROOT_PATH/get_desc/generate.sh"
-    generate_main_func         # get_desc/generate.sh
-    #---screens---#
-    if [[ $enable_byrbt = yes || $enable_tjupt = yes ]]; then
-        debug_func 'desc_7:screen'  #----debug---
-        source "$ROOT_PATH/get_desc/screens.sh"
-        deal_with_images       # get_desc/screens.sh
-    debug_func 'desc_8:out'    #----debug---
+    if [ -s "$source_desc" ]; then
+        # import functions to generate desc
+        debug_func 'desc_6:gen'  #----debug---
+        source "$ROOT_PATH/get_desc/generate.sh"
+        generate_main_func         # get_desc/generate.sh
+        #---screens---#
+        if [[ $enable_byrbt = yes || $enable_tjupt = yes ]]; then
+            debug_func 'desc_7:screen'  #----debug---
+            source "$ROOT_PATH/get_desc/screens.sh"
+            deal_with_images       # get_desc/screens.sh
+        debug_func 'desc_8:out'    #----debug---
+        fi
     fi
 else
     # 保险起见，检查已经生成的简介

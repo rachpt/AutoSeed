@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-18
+# Date: 2019-01-03
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -69,14 +69,13 @@ generate_desc() {
     one_TR_Name="$org_tr_name"
     #---generate desc before done---#
     if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
+        unset completion
         [ ! "$test_func_probe" ] && torrent_completed_precent
         [ "$test_func_probe" ] && completion=100       # convenient for test
         debug_func "mainr:completed-[$completion]"     #----debug---
         [ "$completion" ] && [ "$completion" -ge '70' ] && {
             debug_func 'main:gen_desc'                 #----debug---
-            unset completion source_site_URL
-            source "$ROOT_PATH/get_desc/desc.sh"
-            unset source_site_URL; }
+            source "$ROOT_PATH/get_desc/desc.sh" ; }
     fi
   done
   unset tr_i org_tr_name one_TR_Name one_TR_Dir

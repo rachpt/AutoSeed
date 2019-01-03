@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-02
+# Date: 2019-01-03
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -11,22 +11,62 @@
 # 自动判断 是否有 nfo 文件，以及 nfo 文件是否下载完成。
 #-------------------------------------#
 
+# 使用 ffmpeg 获取视频缩略图
+gen_screenshots() {
+  local start step frames file screen_file size ratio
+  screen_file="${ROOT_PATH}/tmp/autoseed-$(date '+%s%N').jpg"
+  file="$max_size_file"
+  size=600  # 缩略图宽 600 pix
+  # 跳过视频开始前 1000 帧
+  start="$(echo "1000 / $($mediainfo "$file" --Output="Video;%FrameRate%")"|bc)"
+  frames="$($mediainfo "$file" --Output="Video;%FrameCount%")" # 总帧数
+  step="$(echo "($frames - 2000)/10"|bc)"  # 末尾同样去掉 1000 帧
+  ratio="$($mediainfo --Output="Video;%DisplayAspectRatio%" "$file")"
+  $ffmpeg -ss "$start" -i "$file" -frames 1 -vf "framestep=$step,scale=$size:$(echo "$size / $ratio"|bc),tile=2x5:nb_frames=0:padding=5:margin=5:color=blue" "$screen_file" -y
+  # 图片上传
+  unset sm_url byr_url
+  sm_url="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
+    "$upload_poster_api" smfile@"$screen_file"|grep -Eo "\"url\":\"[^\"]+\""| \
+    awk -F "\"" '{print $4}'|sed 's/\\//g')"
+  [[ $enable_byrbt == yes ]] && byr_url="$(http --verify=no --ignore-stdin \
+    --timeout=25 -bf POST "$upload_poster_api_byrbt" upload@"$screen_file" "$user_agent" \
+    "$cookie_byrbt"|grep -Eio "https?://[^\'\"]+"|sed "s/http:/https:/g")"
+  sleep 0.5 && \rm -f "$screen_file"
+}
+
+#-------------------------------------#
 # 读取主文件以获得info，提前生成简介将失效
 generate_info_local() {
+  # 种子文件绝对路径
+  local main_file_dir="${one_TR_Dir}/${one_TR_Name}"
+  debug_func "info:file-dir[$main_file_dir]"  #----debug---
+  # 使用 mediainfo 生成种子中体积最大文件的 iNFO
+  max_size_file="$(\find "$main_file_dir" -type f -exec stat -c "%s %n" {} \;| \
+      sort -nr|head -1|sed -E 's/^[0-9 ]+//')"
+  debug_func "info:max-file[$max_size_file]"  #----debug---
   # 本地简介大小为零
   if [ ! -s "$source_desc" ]; then
-    # 种子文件绝对路径
-    debug_func 'info:mediainfo-start'  #----debug---
-    local main_file_dir="${one_TR_Dir}/${one_TR_Name}"
-    # 使用 mediainfo 生成种子中体积最大文件的 iNFO
-    local info_generated="$($mediainfo "$(find "$main_file_dir" \
-      -type f -exec stat -c "%s %n" {} \;|sort -nr|head -1|sed -E 's/^[0-9 ]+//')"| \
+    local info_generated="$($mediainfo "$max_size_file"| \
       sed '/Unique/d;/Encoding settings/d;/Complete name/d;/Writing library/d;/Writing application/d')"
-    # 存档
-    if [ "$info_generated" ]; then
-      echo "$info_generated" > "$source_desc"
-      debug_func "info:mediainfo-gened"  #----debug---
-    fi
+  else
+    local info_generated="$(\cat $source_desc)"
+  fi
+  # 缩略图
+  gen_screenshots
+  # 存档
+  if [[ $info_generated || $sm_url ]]; then
+    echo -e "$info_generated\n\n[b]以下是[url=https://github.com/rachpt/AutoSeed]AutoSeed[/url]自动完成的截图，不喜勿看。[/b]\n[img]$sm_url[/url]" > "$source_desc"
+    debug_func "info:screens-gened[$sm_url]"  #----debug---
+    # byrbt bbcode to html
+    [[ $enable_byrbt == yes && $byr_url ]] && {
+    echo -e "$info_generated<br /><br /><stong>以下是<url=https://github.com/rachpt/AutoSeed>AutoSeed</url>自动完成的截图，不喜勿看。</strong><br />"|sed 's/ /\&nbsp; /g;s!$!&<br />!g' > "$source_html" 
+    echo "<img src=\"$sm_url\" /> <br />" >> "$source_html" # 追加至末尾
+    debug_func "info:screens-byrbt[$byr_url]"  #----debug---
+    }
+  else
+    # byrbt bbcode to html
+    [ "$enable_byrbt" = 'yes' ] && [ -s "$source_desc" ] && \
+      sed 's/ /\&nbsp; /g;s!$!&<br />!g' "$source_desc" > "$source_html" 
   fi
 }
 
@@ -42,7 +82,7 @@ read_info_file() {
 
   if [ "$one_TR_Dir" ]; then
     local nfo_file_size=$("$tr_show" "$torrent_Path"| \
-      grep -Eo '\.nfo \([0-9\. ]+[kKbB]+\)'|grep -Eo '[0-9]+\.?[0-9]*')
+      grep -Eio '\.nfo \([0-9\. ]+[kb]+\)'|grep -Eo '[0-9]+\.?[0-9]*')
     if [[ $nfo_file_size ]]; then
       local nfo_file_path="$(find "${one_TR_Dir}/${one_TR_Name}" -iname '*.nfo'|head -1)"
       local nfo_file_downloaded=$(stat --format=%s "$nfo_file_path")
@@ -59,15 +99,13 @@ read_info_file() {
         unset charset 
       fi
     else
-      generate_info_local
-      debug_func 'info:use-mediainfo'  #----debug---
+      debug_func 'info:use-main-file!'  #----debug---
     fi
-    # byrbt bbcode to html
-    [ "$enable_byrbt" = 'yes' ] && [ -s "$source_desc" ] && \
-      sed 's/ /\&nbsp; /g;s!$!&<br />!g' "$source_desc" > "$source_html" 
+    # gen from main file and gen screens
+    generate_info_local
   fi
   debug_func 'info:exit'  #----debug---
+  unset sm_url byr_url info_generated
 }
 
 #-------------------------------------#
-

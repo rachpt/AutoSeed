@@ -26,6 +26,7 @@ get_douban_url_by_keywords() {
   name="$(echo "$name"|sed -E 's/(hdtv|blu-?ray|web-?dl|bdrip|dvdrip|webrip).*//i')"
   # 删除季数
   name="$(echo "$name"|sed -E 's/[ \./]s([012]?[1-9])(ep?[0-9]+)?[ \.].*//i')"
+  name="$(echo "$name"|sed -E 's/[ \./]ep?[0-9]{1,2}(-e?p?[0-9]{1,2})?[ \.].*//i')"
   # 删除合集
   name="$(echo "$name"|sed -E 's/[ \.]Complete[\. ].*//i')"
   # 搜索
