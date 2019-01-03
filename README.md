@@ -33,24 +33,43 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 - GNU/Linux （在ubuntu 18.04 lts、archLinux、centos7 测试通过）。
 - 软件：
-  - transmission-daemon，transmission-remote，transmission-show,edit 安装`sudo apt-get install transmission-cli`；
+  - transmission-daemon，transmission-remote，transmission-show，transmission-edit；
   - qBittorrent v4.1+, 如果选择使用该客户端做种(transmission-show,edit 为必须项！)； 
-  - httpie 0.9.8+，安装命令`sudo apt-get install httpie`；
+  - httpie 0.9.8+，用于和web服务器通讯；
+  - mediainfo，用于本地生成info信息;
   - 其他常用软件工具，sed，grep，awk等(详见 setting.sh，一般系统自带)；
-  - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖自行查看安装。
+  - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖(requests,bs4,html2bbcode)。
+
+- ubuntu 系安装
+  ```sh
+  sudo apt install transmission-daemon transmission-cli qbittorrent(or nox) httpie mediainfo python3
+  sudo pip3 install requests bs4 html2bbcode
+  ``` 
+- arch 系安装
+  ```sh
+  sudo pacman -Sy transmsiion-cli qbittorrent(or nox) httpie mediainfo python python-pip
+  sudp pacman -Sy python-requests python-beautifulsoup4 
+  sudo pip3 install html2bbcode # 不要通过 pip 安装上面两个库
+  ```
+- centos 安装
+  ```sh
+  sudo yum -y install transmission-cli transmission-common transmission-daemon qbittorrent(or nox) httpie mediainfo python python-pip
+  sudo pip3 install install requests bs4 html2bbcode
+  ```
 
 ## 使用方法
 
-1. clone 本 repo 至本地(请使用最新的版本)；
+1. clone 本 repo (或者下载 zip) 至本地，请使用最新的版本；
 2. 修改设置文件`setting.sh`(包括cookie、passkey，监控 torrent 文件路径等)；
 3. 添加 `main.sh` 脚本路径至 transmission 的 `script-torrent-done-filename`。具体可以参见 [这里](https://rachpt.github.io/2018/03/25/transmission-settings/) ；
 4. 使用 qbittorrent，则需要添加如 `/home/AutoSeed/main.sh "%N" "%D"` 所示代码至 完成时运行外部程序处；
-4. (非必须)将 `main.sh` 添加到  `crontab` 之类的程序周期运行（运行锁会解决各种冲突问题），以提前生成简介。
+4. (推荐)将 `main.sh` 添加到  `crontab` 之类的程序周期运行（运行锁会解决各种冲突问题），以提前生成简介；
+5. 调试请看 test.sh 中的说明。
 
 
 *其他：*
 
-请使用 flexget 订阅下载，使用 [transmissionrpc](https://flexget.com/Plugins/transmission) 将源种传入 transmission。
+请使用 flexget 订阅下载，transmission 使用 [transmissionrpc](https://flexget.com/Plugins/transmission) 将源种传入，qbittorrent 参考使用方法4 。
 
  `crontab` 运行参考命令 `*/5 * * * * /home/AutoSeed/main.sh >/dev/null 2>&1`。
 
