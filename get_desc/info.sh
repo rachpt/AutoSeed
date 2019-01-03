@@ -54,12 +54,13 @@ generate_info_local() {
   # 缩略图
   gen_screenshots
   # 存档
-  if [[ $info_generated || $sm_url ]]; then
-    echo -e "$info_generated\n\n[b]以下是[url=https://github.com/rachpt/AutoSeed]AutoSeed[/url]自动完成的截图，不喜勿看。[/b]\n[img]$sm_url[/url]" > "$source_desc"
+  if [[ $byr_url || $sm_url ]]; then
+    echo -e "$info_generated\n\n[b]以下是[url=https://github.com/rachpt/AutoSeed]AutoSeed[/url]自动完成的截图，不喜勿看。[/b]\n"${max_size_file##*/}"\n[img]$sm_url[/img]" > "$source_desc"
     debug_func "info:screens-gened[$sm_url]"  #----debug---
     # byrbt bbcode to html
     [[ $enable_byrbt == yes && $byr_url ]] && {
-    echo -e "$info_generated<br /><br /><stong>以下是<url=https://github.com/rachpt/AutoSeed>AutoSeed</url>自动完成的截图，不喜勿看。</strong><br />"|sed 's/ /\&nbsp; /g;s!$!&<br />!g' > "$source_html" 
+    echo "$info_generated"|sed 's/ /\&nbsp; /g;s!$!&<br />!g' > "$source_html" 
+    echo "<br /><br /><stong>以下是<a href=\"https://github.com/rachpt/AutoSeed\">AutoSeed</a>自动完成的截图，不喜勿看。</strong><br />${max_size_file##*/}<br />" >> "$source_html" # 追加至末尾
     echo "<img src=\"$sm_url\" /> <br />" >> "$source_html" # 追加至末尾
     debug_func "info:screens-byrbt[$byr_url]"  #----debug---
     }
