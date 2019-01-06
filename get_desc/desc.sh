@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-03
+# Date: 2019-01-06
 #
 #-------------------------------------#
 # 调函数，生成简介
@@ -59,6 +59,10 @@ if [ ! -s "$source_desc" ]; then
     fi
     if [ -s "$source_desc" ]; then
         # import functions to generate desc
+        debug_func 'desc:match'  #----debug---
+        source "$ROOT_PATH/get_desc/match.sh"
+        match_douban_imdb "$dot_name"
+        match_douban_imdb "$org_tr_name"
         debug_func 'desc_6:gen'  #----debug---
         source "$ROOT_PATH/get_desc/generate.sh"
         generate_main_func         # get_desc/generate.sh
