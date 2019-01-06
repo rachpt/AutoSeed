@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-02
+# Date: 2019-01-06
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -40,8 +40,10 @@ get_source_site() {
         #elif [ "$(echo $tracker_info|grep -i 'new')" ]; then
     #    source_site_URL='https://new.tracker.org'
     else
-        unknown_site="$(echo "$tracker_info"|grep -Eo 'https?://[^/]*'| \
-            head -1|sed 's/tracker\.//')"
+      unknown_site="$(echo "$tracker_info"|grep -Eo 'https?://[^/]*'| \
+          head -1|sed 's/tracker\.//')"
+      # 来自 byr
+      [[ $unknown_site =~ https?://byr\.cn ]] && unknown_site='https://bt.byr.cn'
     fi
 }
 set_source_site_cookie() {
