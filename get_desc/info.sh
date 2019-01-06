@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-03
+# Date: 2019-01-06
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -13,20 +13,22 @@
 
 # 使用 ffmpeg 获取视频缩略图
 gen_screenshots() {
-  local start step frames file screen_file size ratio
+  local start step frames file screen_file size ratio row column
   screen_file="${ROOT_PATH}/tmp/autoseed-$(date '+%s%N').jpg"
   file="$max_size_file"
-  size=600  # 缩略图宽 600 pix
-  # 跳过视频开始前 1000 帧
-  start="$(echo "1000 / $($mediainfo "$file" --Output="Video;%FrameRate%")"|bc)"
+  size=500  # 单个缩略图宽 500 pix
+  row=4     # 行数
+  column=3  # 列数
+  # 跳过视频开始前 1500 帧，约60秒
+  start="$(echo "1500 / $($mediainfo "$file" --Output="Video;%FrameRate%")"|bc)"
   frames="$($mediainfo "$file" --Output="Video;%FrameCount%")" # 总帧数
-  step="$(echo "($frames - 2000)/10"|bc)"  # 末尾同样去掉 1000 帧
+  step="$(echo "($frames - 3000)/($row * $column)"|bc)"  # 末尾同样去掉 1500 帧，等分
   ratio="$($mediainfo --Output="Video;%DisplayAspectRatio%" "$file")"
-  $ffmpeg -ss "$start" -i "$file" -frames 1 -vf "framestep=$step,scale=$size:$(echo "$size / $ratio"|bc),tile=2x5:nb_frames=0:padding=5:margin=5:color=blue" "$screen_file" -y
+  $ffmpeg -ss "$start" -i "$file" -frames 1 -vf "framestep=$step,scale=$size:-1,tile=${column}x${row}:nb_frames=0:padding=5:margin=5:color=random" "$screen_file" -y
   # 图片上传
   unset sm_url byr_url
   sm_url="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
-    "$upload_poster_api" smfile@"$screen_file"|grep -Eo "\"url\":\"[^\"]+\""| \
+    "$upload_poster_api" smfile@"$screen_file"  "$user_agent"|grep -Eo "\"url\":\"[^\"]+\""| \
     awk -F "\"" '{print $4}'|sed 's/\\//g')"
   [[ $enable_byrbt == yes ]] && byr_url="$(http --verify=no --ignore-stdin \
     --timeout=25 -bf POST "$upload_poster_api_byrbt" upload@"$screen_file" "$user_agent" \
@@ -61,7 +63,7 @@ generate_info_local() {
     [[ $enable_byrbt == yes && $byr_url ]] && {
     echo "$info_generated"|sed 's/ /\&nbsp; /g;s!$!&<br />!g' > "$source_html" 
     echo "<br /><br /><stong>以下是<a href=\"https://github.com/rachpt/AutoSeed\">AutoSeed</a>自动完成的截图，不喜勿看。</strong><br />${max_size_file##*/}<br />" >> "$source_html" # 追加至末尾
-    echo "<img src=\"$sm_url\" /> <br />" >> "$source_html" # 追加至末尾
+    echo "<img src=\"$sm_url\" style=\"width: 900px;\" /> <br />" >> "$source_html" # 追加至末尾
     debug_func "info:screens-byrbt[$byr_url]"  #----debug---
     }
   else
