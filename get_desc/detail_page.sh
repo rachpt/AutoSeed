@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-06
+# Date: 2019-01-07
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -107,7 +107,8 @@ form_source_site_get_Desc() {
     unset imdb_url douban_url # 防止上次结果影响到下一次
     # imdb 和豆瓣链接,用于生成简介
     imdb_url="$(grep -Eo 'tt[0-9]{7}' "$source_full"|head -1)"
-    douban_url="$(grep -Eo 'https?://(movie\.)?douban\.com/subject/[0-9]{7,8}/?' "$source_full"|head -1)"
+    douban_url="$(grep -Eo 'https?://(movie\.)?douban\.com/subject/[0-9]{7,8}' "$source_full"|head -1)"
+    [[ $douban_url ]] && douban_url="https://movie.douban.com/subject/${douban_url##*/}"
     [ "$(grep -E '禁止转载|禁转资源|谢绝转发|独占资源|禁转资源|No forward anywhere' "$source_full")" ] && local forbid='yes'
 
     # 匹配官方组 简介中的 info 以及 screens 所在行号

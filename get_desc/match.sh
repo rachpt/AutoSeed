@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-06
+# Date: 2019-01-07
 #
 #-------------------------------------#
 # 本文件匹配指定文件中的imdb或者豆瓣链接，用于生成简介，
@@ -32,8 +32,9 @@ match_douban_imdb() {
         [[ $_url =~ .*imdb.* ]] && \
         imdb_url="$(echo "$_url"|grep -E 'tt[0-9]{7}')" && break
         [[ $_url =~ .*douban.* ]] && douban_url="$(echo "$_url"| \
-        grep -Eo 'https?://(movie\.)?douban\.com/subject/[0-9]{7,8}/?')" && break
+        grep -Eo '(https?://)?(movie\.)?douban\.com/subject/[0-9]{7,8}')" && break
       } 
+      [[ $douban_url ]] && douban_url="https://movie.douban.com/subject/${douban_url##*/}"
     done
   else
     debug_func 'match:no-match-lists!'  #----debug---
