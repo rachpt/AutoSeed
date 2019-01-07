@@ -32,9 +32,9 @@ match_douban_imdb() {
         [[ $_url =~ .*imdb.* ]] && \
         imdb_url="$(echo "$_url"|grep -E 'tt[0-9]{7}')" && break
         [[ $_url =~ .*douban.* ]] && douban_url="$(echo "$_url"| \
-        grep -Eo '(https?://)?(movie\.)?douban\.com/subject/[0-9]{7,8}')" && break
+        grep -Eo '(https?://)?(movie\.)?douban\.com/subject/[0-9]{7,8}')" && \
+        douban_url="https://movie.douban.com/subject/${douban_url##*/}" && break
       } 
-      [[ $douban_url ]] && douban_url="https://movie.douban.com/subject/${douban_url##*/}"
     done
   else
     debug_func 'match:no-match-lists!'  #----debug---
