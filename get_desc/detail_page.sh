@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-07
+# Date: 2019-01-09
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -42,10 +42,33 @@ get_source_site() {
     else
       unknown_site="$(echo "$tracker_info"|grep -Eo 'https?://[^/]*'| \
           head -1|sed 's/tracker\.//')"
-      # 来自 byr
-      [[ $unknown_site =~ https?://byr\.cn ]] && unknown_site='https://bt.byr.cn'
     fi
 }
+
+#-------------------------------------#
+no_source_2_source() {
+   # 来自 byr
+   if [[ $source_site_URL =~ https?://byr\.cn ]]; then
+       source_site_URL='https://bt.byr.cn'
+       enable_byrbt='no'
+   # 来自 cmct
+   elif [[ $source_site_URL =~ https?://hdcmct\.org ]]; then
+       enable_cmct='no'
+   # 来自 nanyangpt
+   elif [[ $source_site_URL =~ https?://nanyangpt\.com ]]; then
+       enable_nanyangpt='no'
+   # 来自 npupt
+   elif [[ $source_site_URL =~ https?://.*npupt\.com ]]; then
+       source_site_URL='https://npupt.com'
+       enable_npupt='no'
+   # 来自 tjupt
+   elif [[ $source_site_URL =~ https?://.*tjupt\.org ]]; then
+       source_site_URL='https://tjupt.org'
+       enable_tjupt='no'
+   fi
+}
+
+#-------------------------------------#
 set_source_site_cookie() {
     #i 供二次编辑简介使用
     if [ "$source_site_URL" = "https://hdsky.me" ]; then
@@ -90,6 +113,7 @@ else
     source_site_URL="$unknown_site"
     unset unknown_site
 fi
+no_source_2_source # 减少不必要的过程
 }
 
 #-------------------------------------#
