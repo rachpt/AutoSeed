@@ -62,7 +62,6 @@ judge_torrent_func() {
 #
 #----------------------------------------#
 my_dupe_rules() {
-  local lists
   local i _name _one_name _d lists _url _site _line
   lists="$ROOT_PATH/tmp/dupe-rules.txt"
   # 过滤后的数据
@@ -104,7 +103,8 @@ my_dupe_rules() {
          [[ $(echo "$_line"|awk -F '+' '{print $7}') =~ 1|yes ]] && enable_tjupt='yes'
          [[ $(echo "$_line"|awk -F '+' '{print $7}') =~ 0|no ]] && enable_tjupt='no'
         }
-        break
+        source "$ROOT_PATH/static.sh"  # update trackers post_site
+        break  # jump out
       } 
     done
   else
