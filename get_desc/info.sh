@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-06
+# Date: 2019-01-10
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -13,18 +13,26 @@
 
 # 使用 ffmpeg 获取视频缩略图
 gen_screenshots() {
-  local start step frames file screen_file size ratio row column
+  local step total file screen_file size ratio row column
   screen_file="${ROOT_PATH}/tmp/autoseed-$(date '+%s%N').jpg"
   file="$max_size_file"
   size=500  # 单个缩略图宽 500 pix
   row=4     # 行数
   column=3  # 列数
-  # 跳过视频开始前 1500 帧，约60秒
-  start="$(echo "1500 / $($mediainfo "$file" --Output="Video;%FrameRate%")"|bc)"
-  frames="$($mediainfo "$file" --Output="Video;%FrameCount%")" # 总帧数
-  step="$(echo "($frames - 3000)/($row * $column)"|bc)"  # 末尾同样去掉 1500 帧，等分
-  ratio="$($mediainfo --Output="Video;%DisplayAspectRatio%" "$file")"
-  $ffmpeg -ss "$start" -i "$file" -frames 1 -vf "framestep=$step,scale=$size:-1,tile=${column}x${row}:nb_frames=0:padding=5:margin=5:color=random" "$screen_file" -y
+  ratio="$($mediainfo "$file" --Output="Video;%FrameRate%")"
+  total="$($mediainfo "$file" --Output="Video;%FrameCount%")"
+  # 首末去掉 1500 帧，等分
+  step=$(echo "($total - 3000)/(($row * $column) * $ratio)"|bc)
+  for ((i=0;i<(row * column);i++)); do
+    # 多线程
+    ( $ffmpeg -ss "$(echo "(1500/$ratio)+($step * $i)"|bc)" -i "$file" -vframes 1 \
+      -vf "scale=$size:-1" "$AutoSeed/tmp/thumbnail-${i}.jpg" -y 2>/dev/null ) &
+  done
+  wait # 等待所有 截图完成
+  $ffmpeg -i "$AutoSeed/tmp/thumbnail-${i}.jpg" -filter_complex \
+    "tile=3x4:nb_frames=0:padding=5:margin=5:color=random" "$screen_file" -y 2>/dev/null
+  cd "${ROOT_PATH}/tmp" && \rm -f ./thumbnail-[0-9]*.jpg # 通配符，不能使用引号
+
   # 图片上传
   unset sm_url byr_url
   sm_url="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
