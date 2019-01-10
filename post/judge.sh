@@ -3,58 +3,113 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-05
+# Date: 2019-01-10
 #
 #----------------------------------------#
 judge_torrent_func() {
-  local base_name_search="$(echo "$dot_name"|grep -Eo '.*[12][098][0-9]{2}')"
-  if [ "$(echo "$dot_name"|grep -i 'ipad'|grep -i 'BluRay')" ]; then
-    local url="${postUrl%/*}/torrents.php?search=${base_name_search}+iPad+BluRay"
-  elif [ "$(echo "$dot_name"|grep -i 'ipad')" ]; then
-    local url="${postUrl%/*}/torrents.php?search=${base_name_search}+iPad"
-  elif [ "$(echo "$dot_name"|grep -i '720p')" ]; then
-    local url="${postUrl%/*}/torrents.php?search=${base_name_search}+720p"
-  elif [ "$(echo "$dot_name"|grep -i '1080p')" ]; then
-    local url="${postUrl%/*}/torrents.php?search=${base_name_search}+1080p"
-  fi
-  local search_result="$(http --ignore-stdin GET "$url" "$cookie")"
-  if [ "$(echo "$search_result"|grep '搜索结果')" ]; then
-    if [ "$(echo "$search_result"|grep -E '没有种子。请用准确的关键字重试|没有种子|找到0条结果')" ]; then
-        up_status=1  # upload
+  local base url result is_pad quality year _source pre_url
+  local count_720p count_1080p count_720p_pad count_1080p_pad
+
+  year="$(echo "$dot_name"|grep -Eo '[12][098][0-9]{2}')"
+
+  quality="$(echo "$dot_name"|grep -Eio '1080[pi]|720p|4k|2160p')"
+
+  is_pad="$(echo "$dot_name"|grep -Eio 'ipad|chdpad|ihd|mpad')"
+
+  _source="$(echo "$dot_name"|grep -Eio 'hdtv|blu-?ray|web-?dl|bdrip|dvdrip|webrip')"
+
+  base="$(echo "$dot_name"|grep -Eo '.*[12][098][0-9]{2}')"
+  base="$(echo "$base"|sed -E 's/(1080[pi]|720p|4k|2160p).*//i')"
+  base="$(echo "$base"|sed -E 's/(hdtv|blu-?ray|web-?dl|bdrip|dvdrip|webrip).*//i')"
+  
+  pre_url="${postUrl%/*}/torrents.php?search="
+  url="${pre_url}${base}+${quality}+${is_pad}+${_source}+${year}"
+
+  result="$(http -b --verify=no --ignore-stdin GET "$url" "$cookie" "$user_agent")"
+
+  if [ "$(echo "$result"|grep -E '搜索结果|Search results for')" ]; then
+    if [ "$(echo "$result"|grep -E '没有种子。请用准确的关键字重试|没有种子|找到0条结果')" ]; then
+        up_status='yes'  # upload
     else
-      count_item_720p=$(echo "$search_result"|grep -i '720p'|grep -i 'x264'|grep 'torrentname'|wc -l)
-      count_item_1080p=$(echo "$search_result"|grep -i '1080p'|grep -i 'x264'|grep 'torrentname'|wc -l)
-      count_ipad_720p=$(echo "$search_result"|grep -i 'ipad'|grep -i '720p'|grep 'torrentname'|wc -l)
-      count_ipad_1080p=$(echo "$search_result"|grep -i 'ipad'|grep -i '1080p'|grep 'torrentname'|wc -l)
-      #---deal with none---#
-      [ ! "$count_ipad_720p" ] && count_ipad_720p=0
-      [ ! "$count_ipad_1080p" ] && count_ipad_1080p=0
-      [ ! "$count_item_1080p" ] && count_item_1080p=0
-      [ ! "$count_item_720p" ] && count_item_720p=0
+      count_720p=$(echo "$result"|grep 'torrentname'|grep -i '720p'|grep -i 'x264'|wc -l)
+      count_1080p=$(echo "$result"|grep 'torrentname'|grep -i '1080p'|grep -i 'x264'|wc -l)
+      count_720p_pad=$(echo "$result"|grep 'torrentname'|grep -i 'ipad'|grep -i '720p'|wc -l)
+      count_1080p_pad=$(echo "$result"|grep 'torrentname'|grep -i 'ipad'|grep -i '1080p'|wc -l)
+
+      debug_func "dupe:[720$count_720p][720-pad$count_720p_pad][1080$count_1080p][1080-pad$count_1080p_pad]"  #----debug---
       #---nanyangpt dupe judge---#
       if [ "$postUrl" = "${post_site[nanyangpt]}/takeupload.php" ]; then
-          if [ $(expr $count_item_720p - $count_ipad_720p) -le 1 ]; then
-              up_status=1  # upload
-          elif [ $(expr $count_item_1080p - $count_ipad_1080p) -le 1 ]; then
-              up_status=1  # upload
+          if (( count_720p - count_720p_pad > 1 )); then
+              up_status='yes'  # upload
+          elif (( count_1080p - count_1080p_pad > 1 )); then
+              up_status='yes'  # upload
           else
-              up_status=0  # give up upload
+              up_status='no'   # give up upload
               echo "Dupe! [${postUrl%/*}]" >> "$log_Path"
           fi
       #---normal dupe judge---#
       else
-	        if [ ! "$(echo "$search_result"|grep 'torrent-title'|grep -i "$(echo "$dot_name" |grep -Eo '.*[12][098][0-9]{2}.*0p')")" ]; then
-              up_status=1  # upload
-          else
-              up_status=0  # give up upload
-              echo "Dupe! [${postUrl%/*}]" >> "$log_Path"
-          fi
-      fi
-    fi
+       if [ ! "$(echo "$result"|grep -E 'torrent-title|torrentname'|grep -i "$(echo "$dot_name" |grep -Eo '.*[12][098][0-9]{2}.*0p')")" ]; then
+           up_status='yes'  # upload
+       else
+           up_status='no'   # give up upload
+           echo "Dupe! [${postUrl%/*}]" >> "$log_Path"
+       fi
+      fi  # nanyang
+    fi    # no result
   fi
-
-  unset search_result base_name_search url
 }
 #
+#----------------------------------------#
+my_dupe_rules() {
+  local lists
+  local i _name _one_name _d lists _url _site _line
+  lists="$ROOT_PATH/tmp/dupe-rules.txt"
+  # 过滤后的数据
+  _d="$(cat "$lists"|sed -E 's/[#＃].*//g;s/[ 　]+//g;/^$/d;s/[A-Z]/\l&/g')"
+  if [[ -f $lists && $(echo "$_d"|wc -l) -ge 1 ]]; then
+    for ((i=1;i<=$(echo "$_d"|wc -l);i++)); do
+      _name="$(echo "$dot_name"|sed 'y/。，？；：‘“、（）｀～！＠＃％＊ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ/.,?;:\"\",()`~!@#%*abcdefghijklmnopqrstuvwxyz/')"
+      _name="$(echo "$_name"|sed 's/[\. 　]//g;s/[A-Z]/\l&/g')"
+      _line="$(echo "$_d"|sed -n "${i}{s/[\. 　]//g;p;q}")"
+      _one_name="$(echo "$_line"|awk -F '+' '{print $NF}'|sed  "s/[\. 　]//g")"
+      _one_name="$(echo "$_one_name"|sed 'y/。，？；：‘“、（）｀～！＠＃％＊ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ/.,?;:\"\",()`~!@#%*abcdefghijklmnopqrstuvwxyz/')"
+      [[ $_name =~ .*$_one_name.* ]] && {
+        _site="$(echo "$_line"|awk -F '+' '{print NF}')" 
+        ((_site>2)) && {
+         [[ $(echo "$_line"|awk -F '+' '{print $1}') =~ 1|yes ]] && enable_hudbt='yes'
+         [[ $(echo "$_line"|awk -F '+' '{print $1}') =~ 0|no ]] && enable_hudbt='no'
+        }
+        ((_site>3)) && {
+         [[ $(echo "$_line"|awk -F '+' '{print $2}') =~ 1|yes ]] && enable_whu='yes'
+         [[ $(echo "$_line"|awk -F '+' '{print $2}') =~ 0|no ]] && enable_whu='no'
+        }
+        ((_site>4)) && {
+         [[ $(echo "$_line"|awk -F '+' '{print $3}') =~ 1|yes ]] && enable_npupt='yes'
+         [[ $(echo "$_line"|awk -F '+' '{print $3}') =~ 0|no ]] && enable_npupt='no'
+        }
+        ((_site>5)) && {
+         [[ $(echo "$_line"|awk -F '+' '{print $4}') =~ 1|yes ]] && enable_nanyangpt='yes'
+         [[ $(echo "$_line"|awk -F '+' '{print $4}') =~ 0|no ]] && enable_nanyangpt='no'
+        }
+        ((_site>7)) && {
+         [[ $(echo "$_line"|awk -F '+' '{print $5}') =~ 1|yes ]] && enable_byrbt='yes'
+         [[ $(echo "$_line"|awk -F '+' '{print $5}') =~ 0|no ]] && enable_byrbt='no'
+        }
+        ((_site>7)) && {
+         [[ $(echo "$_line"|awk -F '+' '{print $6}') =~ 1|yes ]] && enable_cmct='yes'
+         [[ $(echo "$_line"|awk -F '+' '{print $6}') =~ 0|no ]] && enable_cmct='no'
+        }
+        ((_site>8)) && {
+         [[ $(echo "$_line"|awk -F '+' '{print $7}') =~ 1|yes ]] && enable_tjupt='yes'
+         [[ $(echo "$_line"|awk -F '+' '{print $7}') =~ 0|no ]] && enable_tjupt='no'
+        }
+        break
+      } 
+    done
+  else
+    debug_func ':dupe:no-rules!'  #----debug---
+  fi
+}
 #----------------------------------------#
 

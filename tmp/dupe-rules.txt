@@ -1,0 +1,10 @@
+# 说明： '井' 号后面部分没有效果，空格空行不影响结果，大小写不敏感。
+# 奇数行为电影电视剧名，豆瓣中文英文名， '.'和 空格 不影响结果。
+# 注意分隔符(+)个数，可以少，但是不能多!
+# 0 或者 no 表示不发布，1 或则 yes 表示发布。
+
+# 示例：
+# hudbt + whu + npupt + nanyangpt + byrbt + cmct + tjupt + 资源名字(部分或全部，支持匹配）
+
+# 1 + 1 + 0 + 0 + 0 + 0 + 0 + Cinderella.Chef.E              # 萌妻食神
+# yes + yes + no + no + no + no + no + Douro.Mainland.E      # 斗罗大陆
