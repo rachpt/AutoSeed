@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-05
+# Date: 2019-01-10
 #
 #-------------settings---------------#
 cookie="$cookie_whu"
@@ -27,12 +27,14 @@ $failed_to_get_des"
 fi
 
 #-------------------------------------#
-# 判断类型，纪录片、电影、剧集
-if [ "$documentary" = 'yes' ]; then
+# 判断类型，纪录片、电影、剧集、动漫
+if [[ $documentary = yes ]]; then
     # 纪录片
     whu_type='404'
-else
-  if [ "$serials" = 'yes' ]; then
+elif [[ $animation = yes ]]; then
+    # 国创动漫
+    whu_type='427' #连载
+elif [[ $serials = yes ]]; then
     # 剧集
     case "$region" in
       *中国大陆*)
@@ -46,7 +48,7 @@ else
       *)
           whu_type='409' ;;
     esac
-  else
+else
     # 电影
     case "$region" in
       *中国大陆*)
@@ -60,7 +62,6 @@ else
       *)
           whu_type='409' ;;
     esac
-  fi
 fi
 
 #-------------------------------------#

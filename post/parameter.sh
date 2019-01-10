@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-03
+# Date: 2019-01-10
 #
 #-------------------------------------#
 # 通过之前生成的 desc 简介文档，提取其中的各种参数。
@@ -14,7 +14,7 @@ unset_all_parameter() {
     unset noDot_name region serials season normal documentary genre language
     unset chs_included chinese_title foreign_title imdb_url douban_url is_ipad
     unset is_bd is_hdtv is_webdl is_4k is_1080p is_720p is_other file_type
-    unset is_package is_264 is_265 is_dts is_ac3 is_aac is_flac
+    unset is_package is_264 is_265 is_dts is_ac3 is_aac is_flac animation
 }
 from_desc_get_param() {
     unset_all_parameter
@@ -42,12 +42,16 @@ from_desc_get_param() {
     else
         normal='yes'
     fi
+    genre="$(grep -E '^.类　　别　.*$' "$source_desc"| \
+          sed -r 's/.类　　别　//;s/ //g')"
     # 是否为纪录片
-    if [ "$(grep -E '^.类　　别　.*$' "$source_desc"|grep -o '纪录片')" ]; then
+    if [[ $genre =~ .*纪录片.* ]]; then
+        # 纪录片
         documentary='yes'
+    elif [[ $genre =~ .*动画.* ]]; then
+        # 国创动漫
+        animation='yes'
     else
-        genre="$(grep -E '^.类　　别　.*$' "$source_desc"| \
-            sed -r 's/.类　　别　//;s/ //g')"
         normal='yes'
     fi
     # 语言

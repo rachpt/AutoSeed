@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-05
+# Date: 2019-01-10
 #
 #-------------settings---------------#
 cookie="$cookie_hudbt"
@@ -27,41 +27,43 @@ $failed_to_get_des"
 fi
 
 #-------------------------------------#
-# 判断类型，纪录片、电影、剧集
-if [ "$documentary" = 'yes' ]; then
+# 判断类型，纪录片、电影、剧集、动漫
+if [[ $documentary = yes ]]; then
     hudbt_type='404'
-elif [ "$is_ipad" = 'yes' ]; then
+elif [[ $animation = yes ]]; then
+    # 国创动漫
+    hudbt_type='427' #连载
+elif [[ $is_ipad = yes ]]; then
+    # 移动视频
     hudbt_type='430'
+elif [[ $serials = yes ]]; then
+  # 剧集分类
+  case "$region" in
+    *中国大陆*)
+        hudbt_type='402' ;;
+    *香港*|*台湾*|*澳门*)
+        hudbt_type='417' ;;
+    *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
+        hudbt_type='416' ;;
+    *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+        hudbt_type='418' ;;
+    *)
+        hudbt_type='409' ;;
+  esac
 else
-  if [ "$serials" = 'yes' ]; then
-    # 剧集分类
-    case "$region" in
-      *中国大陆*)
-          hudbt_type='402' ;;
-      *香港*|*台湾*|*澳门*)
-          hudbt_type='417' ;;
-      *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
-          hudbt_type='416' ;;
-      *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
-          hudbt_type='418' ;;
-      *)
-          hudbt_type='409' ;;
-    esac
-  else
-    # 电影类别
-    case "$region" in
-      *中国大陆*)
-          hudbt_type='401' ;;
-      *香港*|*台湾*|*澳门*)
-          hudbt_type='413' ;;
-      *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
-          hudbt_type='414' ;;
-      *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
-          hudbt_type='415' ;;
-      *)
-          hudbt_type='409' ;;
-    esac
-  fi
+  # 电影类别
+  case "$region" in
+    *中国大陆*)
+        hudbt_type='401' ;;
+    *香港*|*台湾*|*澳门*)
+        hudbt_type='413' ;;
+    *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
+        hudbt_type='414' ;;
+    *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+        hudbt_type='415' ;;
+    *)
+        hudbt_type='409' ;;
+  esac
 fi
 
 #-------------------------------------#
