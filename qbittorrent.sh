@@ -97,7 +97,7 @@ qb_set_ratio_loop() {
         http --ignore-stdin -f POST "$qb_ratio" hashes="$hash" \
          ratioLimit=$rtio seedingTimeLimit="$(echo \
          ${MAX_SEED_TIME} \* 60 \* 60|bc)" "$qb_Cookie" && sleep 1 && \
-         debug_func "qb:sussess_set_rt[$trker]"      #----debug---
+         debug_func "qb:sussess_set_rt[$trker]"        #----debug---
       sed -i '1,3d' "$qb_rt_queue"                     # delete record
       ((qb_lp_counter++))                              # C 形式的增1
     done
@@ -107,24 +107,24 @@ qb_set_ratio_loop() {
 qb_add_torrent_url() {
   qbit_webui_cookie
   # add url
+  debug_func 'qb:add-from-url'  #----debug---
+  sleep 2
   http --ignore-stdin -f POST "$qb_add" urls="$torrent2add" root_folder=true \
-      savepath="$one_TR_Dir" skip_checking=true "$qb_Cookie"
-  sleep 1
+      savepath="$one_TR_Dir" skip_checking=true "$qb_Cookie" && sleep 2
   qb_set_ratio_queue
   #qb_set_ratio
-  debug_func 'qb:addurl'  #----debug---
 }
 #---------------------------------------#
 qb_add_torrent_file() {
   qbit_webui_cookie
   # add file
+  debug_func 'qb:add-from-file'  #----debug---
   http --ignore-stdin -f POST "$qb_add" skip_checking=true root_folder=true \
       name@"${ROOT_PATH}/tmp/${t_id}.torrent" savepath="$one_TR_Dir" "$qb_Cookie"
   #  ----> ok
   sleep 1
   qb_set_ratio_queue
   #qb_set_ratio
-  debug_func 'qb:addfile'  #----debug---
 }
 
 #---------------------------------------#

@@ -35,21 +35,22 @@ tr_set_ratio() {
 #------------add torrent--------------#
 tr_add_torrent_file() {
     $tr_remote --no-torrent-done-script &> /dev/null
+    sleep 2
+    debug_func 'tr:add-from-file'  #----debug---
     $tr_remote --add "${ROOT_PATH}/tmp/${t_id}.torrent" -w "$one_TR_Dir"
     $tr_remote --torrent-done-script "$ROOT_PATH/main.sh" &> /dev/null
     #---set seed ratio---#
     tr_set_ratio
-    debug_func 'tr:addfile'  #----debug---
 }
 
 #------------add torrent--------------#
 tr_add_torrent_url() {
+    debug_func 'tr:add-from-url'  #----debug---
     $tr_remote --no-torrent-done-script &> /dev/null
     $tr_remote --add "$torrent2add" -w "$one_TR_Dir"
     $tr_remote --torrent-done-script "$ROOT_PATH/main.sh" &> /dev/null
     #---set seed ratio---#
     tr_set_ratio
-    debug_func 'tr:addurl'  #----debug---
 }
 
 #---------------------------------------#

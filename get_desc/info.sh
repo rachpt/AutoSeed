@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-11
+# Date: 2019-01-12
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -29,9 +29,9 @@ gen_screenshots() {
     -vf "scale=$size:-1" "${ROOT_PATH}/tmp/thumbnail-$(printf "%03d" $i).jpg" -y 2>/dev/null ) &
   done
   wait # 等待所有 截图完成
-  cd "${ROOT_PATH}/tmp" && $ffmpeg -i ./thumbnail-%03d.jpg -filter_complex \
+  $ffmpeg -i "${ROOT_PATH}/tmp/thumbnail-%03d.jpg" -filter_complex \
     "tile=3x4:nb_frames=0:padding=5:margin=5:color=random" "$screen_file" -y 2>/dev/null
-  \rm -f ./thumbnail-[0-9]*.jpg # 通配符，不能使用引号
+  \rm -f "${ROOT_PATH}/tmp"/thumbnail-[0-9]*.jpg # 通配符，不能使用引号
 
   # 图片上传
   unset sm_url byr_url

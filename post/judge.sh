@@ -3,12 +3,12 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-10
+# Date: 2019-01-12
 #
 #----------------------------------------#
 judge_torrent_func() {
   local base url result is_pad quality year _source pre_url
-  local count_720p count_1080p count_720p_pad count_1080p_pad
+  local count_720p count_1080p count_720p_pad count_1080p_pad this_t
 
   year="$(echo "$dot_name"|grep -Eo '[12][098][0-9]{2}')"
 
@@ -35,7 +35,8 @@ judge_torrent_func() {
       count_1080p=$(echo "$result"|grep 'torrentname'|grep -i '1080p'|grep -i 'x264'|wc -l)
       count_720p_pad=$(echo "$result"|grep 'torrentname'|grep -i 'ipad'|grep -i '720p'|wc -l)
       count_1080p_pad=$(echo "$result"|grep 'torrentname'|grep -i 'ipad'|grep -i '1080p'|wc -l)
-
+      this_t="$(echo "$result"|grep -io "$dot_name")"
+      [[ $this_t ]] && up_status='yes' || {
       debug_func "dupe:[720$count_720p][720-pad$count_720p_pad][1080$count_1080p][1080-pad$count_1080p_pad]"  #----debug---
       #---nanyangpt dupe judge---#
       if [ "$postUrl" = "${post_site[nanyangpt]}/takeupload.php" ]; then
@@ -56,60 +57,10 @@ judge_torrent_func() {
            echo "Dupe! [${postUrl%/*}]" >> "$log_Path"
        fi
       fi  # nanyang
+      }   # 辅种
     fi    # no result
   fi
 }
 #
-#----------------------------------------#
-my_dupe_rules() {
-  local i _name _one_name _d lists _url _site _line
-  lists="$ROOT_PATH/tmp/dupe-rules.txt"
-  # 过滤后的数据
-  _d="$(cat "$lists"|sed -E 's/[#＃].*//g;s/[ 　]+//g;/^$/d;s/[A-Z]/\l&/g')"
-  if [[ -f $lists && $(echo "$_d"|wc -l) -ge 1 ]]; then
-    for ((i=1;i<=$(echo "$_d"|wc -l);i++)); do
-      _name="$(echo "$dot_name"|sed 'y/。，？；：‘“、（）｀～！＠＃％＊ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ/.,?;:\"\",()`~!@#%*abcdefghijklmnopqrstuvwxyz/')"
-      _name="$(echo "$_name"|sed 's/[\. 　]//g;s/[A-Z]/\l&/g')"
-      _line="$(echo "$_d"|sed -n "${i}{s/[\. 　]//g;p;q}")"
-      _one_name="$(echo "$_line"|awk -F '+' '{print $NF}'|sed  "s/[\. 　]//g")"
-      _one_name="$(echo "$_one_name"|sed 'y/。，？；：‘“、（）｀～！＠＃％＊ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ/.,?;:\"\",()`~!@#%*abcdefghijklmnopqrstuvwxyz/')"
-      [[ $_name =~ .*$_one_name.* ]] && {
-        _site="$(echo "$_line"|awk -F '+' '{print NF}')" 
-        ((_site>2)) && {
-         [[ $(echo "$_line"|awk -F '+' '{print $1}') =~ 1|yes ]] && enable_hudbt='yes'
-         [[ $(echo "$_line"|awk -F '+' '{print $1}') =~ 0|no ]] && enable_hudbt='no'
-        }
-        ((_site>3)) && {
-         [[ $(echo "$_line"|awk -F '+' '{print $2}') =~ 1|yes ]] && enable_whu='yes'
-         [[ $(echo "$_line"|awk -F '+' '{print $2}') =~ 0|no ]] && enable_whu='no'
-        }
-        ((_site>4)) && {
-         [[ $(echo "$_line"|awk -F '+' '{print $3}') =~ 1|yes ]] && enable_npupt='yes'
-         [[ $(echo "$_line"|awk -F '+' '{print $3}') =~ 0|no ]] && enable_npupt='no'
-        }
-        ((_site>5)) && {
-         [[ $(echo "$_line"|awk -F '+' '{print $4}') =~ 1|yes ]] && enable_nanyangpt='yes'
-         [[ $(echo "$_line"|awk -F '+' '{print $4}') =~ 0|no ]] && enable_nanyangpt='no'
-        }
-        ((_site>7)) && {
-         [[ $(echo "$_line"|awk -F '+' '{print $5}') =~ 1|yes ]] && enable_byrbt='yes'
-         [[ $(echo "$_line"|awk -F '+' '{print $5}') =~ 0|no ]] && enable_byrbt='no'
-        }
-        ((_site>7)) && {
-         [[ $(echo "$_line"|awk -F '+' '{print $6}') =~ 1|yes ]] && enable_cmct='yes'
-         [[ $(echo "$_line"|awk -F '+' '{print $6}') =~ 0|no ]] && enable_cmct='no'
-        }
-        ((_site>8)) && {
-         [[ $(echo "$_line"|awk -F '+' '{print $7}') =~ 1|yes ]] && enable_tjupt='yes'
-         [[ $(echo "$_line"|awk -F '+' '{print $7}') =~ 0|no ]] && enable_tjupt='no'
-        }
-        source "$ROOT_PATH/static.sh"  # update trackers post_site
-        break  # jump out
-      } 
-    done
-  else
-    debug_func ':dupe:no-rules!'  #----debug---
-  fi
-}
 #----------------------------------------#
 

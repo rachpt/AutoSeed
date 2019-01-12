@@ -17,7 +17,7 @@ source "$ROOT_PATH/get_desc/detail_page.sh"
 #----------------lock func--------------#
 remove_lock() {
     rm -f "$lock_File" "$qb_rt_queue"
-    debug_func 'main:unlock'      #----debug---
+    #debug_func 'main:unlock'      #----debug---
 }
 is_locked() {
     if [ -f "$lock_File" ]; then
@@ -26,7 +26,7 @@ is_locked() {
         set -o noclobber          # 禁止重定向覆盖
         echo "$$" > "$lock_File"
         set +o noclobber          # 允许重定向覆盖
-        debug_func 'main:locked'  #----debug---
+        #debug_func 'main:locked'  #----debug---
         trap remove_lock INT TERM EXIT
     fi
 }
@@ -170,7 +170,7 @@ unset Torrent_Name Tr_Path
 [ "$Disable_AutoSeed" = "yes" ] && exit
 #---------------------------------------#
 # 禁止重复运行
-debug_func "进程[$(ps -C 'main.sh' --no-headers|wc -l)]个" #----debug---
+#debug_func "进程[$(ps -C 'main.sh' --no-headers|wc -l)]个" #----debug---
 [[ "$(ps -C 'main.sh' --no-headers|wc -l)" -gt 2 ]] && time_out
 #
 is_locked            # 锁住进程，防止多开

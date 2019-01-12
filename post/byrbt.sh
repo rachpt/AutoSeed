@@ -170,7 +170,7 @@ if [ "$byrbt_type" = '408' ]; then
 
     if [ -z "$t_id" ]; then
         # 辅种
-        :
+        reseed_torrent
     fi
 elif [ "$byrbt_type" = '401' ]; then
     # 剧集 POST
@@ -193,7 +193,7 @@ elif [ "$byrbt_type" = '401' ]; then
         "$cookie_byrbt" | grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
     if [ -z "$t_id" ]; then
         # 辅种
-        :
+        reseed_torrent
     fi
 elif [ "$byrbt_type" = '410' ]; then
     # 纪录片 POST
@@ -219,7 +219,7 @@ elif [ "$byrbt_type" = '410' ]; then
 
     if [ -z "$t_id" ]; then
         # 辅种
-        :
+        reseed_torrent
     fi
 else
     # 其他 POST

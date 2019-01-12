@@ -83,7 +83,7 @@ if [ "$nanyangpt_type" = '401' ]; then
 
     if [ -z "$t_id" ]; then
         # 辅种
-        :
+        reseed_torrent
     fi
 elif [ "$nanyangpt_type" = '402' ]; then
     # 剧集 POST
@@ -101,7 +101,7 @@ elif [ "$nanyangpt_type" = '402' ]; then
 
     if [ -z "$t_id" ]; then
         # 辅种
-        :
+        reseed_torrent
     fi
 
 elif [ "$nanyangpt_type" = '406' ]; then
@@ -120,7 +120,7 @@ elif [ "$nanyangpt_type" = '406' ]; then
 
     if [ -z "$t_id" ]; then
         # 辅种
-        :
+        reseed_torrent
     fi
 else
     # 其他 POST

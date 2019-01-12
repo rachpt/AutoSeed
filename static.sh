@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-03
+# Date: 2019-01-11
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -78,20 +78,35 @@ descrCom_complex_html="<br />
 declare -A trackers
 declare -A post_site
 #
-[[ $enable_hudbt = yes ]] && { trackers[hudbt]='hudbt.hust.edu.cn'
-    post_site[hudbt]='https://hudbt.hust.edu.cn'; }
-[[ $enable_whu = yes ]] && { trackers[whu]='tracker.whupt.net'
-    post_site[whu]='https://whu.pt'; }
-[[ $enable_npupt = yes ]] && { trackers[npupt]='npupt.com'
-    post_site[npupt]='https://npupt.com'; }
-[[ $enable_nanyangpt = yes ]] && { trackers[nanyangpt]='tracker.nanyangpt.com'
-    post_site[nanyangpt]='https://nanyangpt.com'; }
-[[ $enable_byrbt = yes ]] && { trackers[byrbt]='tracker.byr.cn'
-    post_site[byrbt]='https://bt.byr.cn'; }
-[[ $enable_cmct = yes ]] && { trackers[cmct]='tracker.hdcmct.org'
-    post_site[cmct]='https://hdcmct.org'; }
-[[ $enable_tjupt = yes ]] && { trackers[tjupt]='.tjupt.org'
-    post_site[tjupt]='https://tjupt.org'; }
+#[[ $enable_hudbt = yes ]] && { trackers[hudbt]='hudbt.hust.edu.cn'
+    #post_site[hudbt]='https://hudbt.hust.edu.cn'; }
+#[[ $enable_whu = yes ]] && { trackers[whu]='tracker.whupt.net'
+    #post_site[whu]='https://whu.pt'; }
+#[[ $enable_npupt = yes ]] && { trackers[npupt]='npupt.com'
+    #post_site[npupt]='https://npupt.com'; }
+#[[ $enable_nanyangpt = yes ]] && { trackers[nanyangpt]='tracker.nanyangpt.com'
+    #post_site[nanyangpt]='https://nanyangpt.com'; }
+#[[ $enable_byrbt = yes ]] && { trackers[byrbt]='tracker.byr.cn'
+    #post_site[byrbt]='https://bt.byr.cn'; }
+#[[ $enable_cmct = yes ]] && { trackers[cmct]='tracker.hdcmct.org'
+    #post_site[cmct]='https://hdcmct.org'; }
+#[[ $enable_tjupt = yes ]] && { trackers[tjupt]='.tjupt.org'
+    #post_site[tjupt]='https://tjupt.org'; }
+#
+trackers[hudbt]='hudbt.hust.edu.cn'
+post_site[hudbt]='https://hudbt.hust.edu.cn'
+trackers[whu]='tracker.whupt.net'
+post_site[whu]='https://whu.pt'
+trackers[npupt]='npupt.com'
+post_site[npupt]='https://npupt.com'
+trackers[nanyangpt]='tracker.nanyangpt.com'
+post_site[nanyangpt]='https://nanyangpt.com'
+trackers[byrbt]='tracker.byr.cn'
+post_site[byrbt]='https://bt.byr.cn'
+trackers[cmct]='tracker.hdcmct.org'
+post_site[cmct]='https://hdcmct.org'
+trackers[tjupt]='.tjupt.org'
+post_site[tjupt]='https://tjupt.org'
 #--------------------------------------#
 # import functions
 source "$ROOT_PATH/qbittorrent.sh"

@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-06
+# Date: 2019-01-11
 #
 #-------------------------------------#
 # 调函数，生成简介
@@ -47,6 +47,9 @@ fi
 debug_func 'desc_4'  #----debug---
 #---if not exist desc file---#
 if [ ! -s "$source_desc" ]; then
+    # 自定义发布规则
+    source "$ROOT_PATH/get_desc/customize.sh"
+    my_dupe_rules
     # 尝试搜索原种简介，以获取 iNFO 以及 screens
     form_source_site_get_Desc  # get_desc/detail_page.sh
     # generate info? 

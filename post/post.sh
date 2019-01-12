@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-10
+# Date: 2019-01-11
 #
 #---------------------------------------#
 # 将简介以及种子以post方式发布
@@ -12,6 +12,7 @@
 source "$ROOT_PATH/get_desc/desc.sh"    # get source site
 source "$ROOT_PATH/post/parameter.sh"
 source "$ROOT_PATH/post/judge.sh"
+source "$ROOT_PATH/get_desc/customize.sh"
 #---------------------------------------#
 judge_before_upload() {
     up_status='yes'    # judge code
@@ -26,7 +27,6 @@ judge_before_upload() {
         echo "禁转禁发资源"                      >> "$log_Path"
     fi
 
-    my_dupe_rules     # 导入自定义规则
     unset t_id        # set t_id to none
     #---post---#
     if [[ $up_status = yes ]]; then
@@ -54,6 +54,27 @@ add_t_id_2_client() {
     unset t_id
 }
 #---------------------------------------#
+# 用于辅种
+reseed_torrent() {
+  local result name
+  # 分辨率
+  name="$(echo "$dot_name"|sed -E 's/(1080[pi]|720p|4k|2160p).*//i')"
+  # 介质
+  name="$(echo "$name"|sed -E 's/(hdtv|blu-?ray|web-?dl|bdrip|dvdrip|webrip).*//i')"
+  # 删除季数
+  name="$(echo "$name"|sed -E 's/[ \./]s([012]?[1-9])(ep?[0-9]+)?[ \.].*//i')"
+  name="$(echo "$name"|sed -E 's/[ \./]ep?[0-9]{1,2}(-e?p?[0-9]{1,2})?[ \.].*//i')"
+  # 删除合集
+  name="$(echo "$name"|sed -E 's/[ \.]Complete[\. ].*//i')"
+  result="$(http --verify=no --ignore-stdin -b --timeout=25 GET "${postUrl%/*}/torrents.php?search=${name}&incldead=1" "$cookie" "$user_agent")"
+  t_id=$(echo "$result"|grep "$dot_name"|grep -Eoi '[^a-z]details\.php\?id=[0-9]+'|head -1|grep -Eo '[0-9]+')
+  [[ ! $t_id ]] && {
+  result="$(http --verify=no --ignore-stdin -b --timeout=25 GET "${postUrl%/*}/torrents.php?search=${dot_name}&incldead=1" "$cookie" "$user_agent")"
+  t_id=$(echo "$result"|grep "$dot_name"|grep -Eoi '[^a-z]details\.php\?id=[0-9]+'|head -1|grep -Eo '[0-9]+')
+  }
+
+}
+#---------------------------------------#
 unset_tempfiles() {
     [ ! "$test_func_probe" ] && \
     rm -f "$source_desc" "$source_html" "$source_desc2tjupt"
@@ -64,6 +85,7 @@ unset_tempfiles() {
 
 #-----import and call functions---------#
 
+my_dupe_rules        # 导入自定义规则
 from_desc_get_param  # $ROOT_PATH/post/parameter.sh
 
 if [ "$enable_hudbt" = 'yes' ]; then

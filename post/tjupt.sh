@@ -113,7 +113,7 @@ t_id="$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
 
 if [ -z "$t_id" ]; then
     # 辅种
-    :
+    reseed_torrent
 fi
 }
 
