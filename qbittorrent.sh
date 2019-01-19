@@ -23,10 +23,9 @@ qbit_webui_cookie() {
     if [ "$qb_Cookie" ]; then
       sed -i "s/^qb_Cookie=.*/qb_Cookie=\'$qb_Cookie\'/" "$ROOT_PATH/settings.sh" 
     else
-      echo 'Failed to get qb cookie!' >> "$debug_Log"
+      debug_func 'qb:failed-to-get-cookie'  #----debug---
     fi
-    #----debug---
-    debug_func 'qb:cookie'  #----debug---
+    debug_func 'qb:update-cookie'  #----debug---
   fi
 }
 
@@ -43,7 +42,7 @@ qb_delete_torrent() {
     # delete
     http --ignore-stdin -f POST "$qb_delete" hashes=$torrent_hash \
         deleteFiles=false "$qb_Cookie"
-    debug_func 'qb:deleted'  #----debug---
+    debug_func 'qb:deleted-one'  #----debug---
 }
 
 #---------------------------------------#
@@ -53,12 +52,15 @@ qb_set_ratio_queue() {
       add_site_tracker="${trackers[$site]}" && break # get out of for loop
   done
 
+  debug_func 'qb:set-ratio-queue'  #----debug---
   echo -e "${org_tr_name}\n${add_site_tracker}\n${ratio_set}" >> "$qb_rt_queue"
   # say thanks 
   [[ $Allow_Say_Thanks == yes ]] && \
   [[ "$(eval echo '$'"say_thanks_$site")" == yes ]] && \
   http --verify=no -h --ignore-stdin -f POST "${post_site[$site]}/thanks.php" \
-  id="$t_id" "$(eval echo '$'"cookie_$site")"
+  id="$t_id" "$(eval echo '$'"cookie_$site")" "$user_agent" && \
+  debug_func "qb:set-ratio-thanks-[$site]"  #----debug---
+
   unset site
 }
 
@@ -101,21 +103,22 @@ qb_set_ratio_loop() {
       sed -i '1,3d' "$qb_rt_queue"                     # delete record
       ((qb_lp_counter++))                              # C 形式的增1
     done
+    debug_func 'main:exit\n'  #----debug---
   fi
 }
 #---------------------------------------#
 qb_add_torrent_url() {
+  sleep 3
   qbit_webui_cookie
   # add url
   debug_func 'qb:add-from-url'  #----debug---
-  sleep 2
   http --ignore-stdin -f POST "$qb_add" urls="$torrent2add" root_folder=true \
-      savepath="$one_TR_Dir" skip_checking=true "$qb_Cookie" && sleep 2
+      savepath="$one_TR_Dir" skip_checking=true "$qb_Cookie" && sleep 3
   qb_set_ratio_queue
-  #qb_set_ratio
 }
 #---------------------------------------#
 qb_add_torrent_file() {
+  sleep 3
   qbit_webui_cookie
   # add file
   debug_func 'qb:add-from-file'  #----debug---
@@ -124,7 +127,6 @@ qb_add_torrent_file() {
   #  ----> ok
   sleep 1
   qb_set_ratio_queue
-  #qb_set_ratio
 }
 
 #---------------------------------------#
@@ -147,7 +149,7 @@ qb_get_torrent_completion() {
   [[ $compl_one && $size_one ]] && \
   completion=$(awk -v a="$compl_one" -v b="$size_one" 'BEGIN{printf "%d",(a/b)*100}')
   unset data compl_one size_one pos
-  debug_func 'qb:complete'  #----debug---
+  debug_func 'qb:complete-func'  #----debug---
 }
 #---------------------------------------#
 

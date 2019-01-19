@@ -71,7 +71,7 @@ generate_info_local() {
     [[ $enable_byrbt == yes && $byr_url ]] && {
     echo "$info_generated"|sed 's/ /\&nbsp; /g;s!$!&<br />!g' > "$source_html" 
     echo "<br /><br /><stong>以下是<a href=\"https://github.com/rachpt/AutoSeed\">AutoSeed</a>自动完成的截图，不喜勿看。</strong><br />${max_size_file##*/}<br />" >> "$source_html" # 追加至末尾
-    echo "<img src=\"$sm_url\" style=\"width: 900px;\" /> <br />" >> "$source_html" # 追加至末尾
+    echo "<img src=\"$byr_url\" style=\"width: 900px;\" /> <br />" >> "$source_html" # 追加至末尾
     debug_func "info:screens-byrbt[$byr_url]"  #----debug---
     }
   else
@@ -83,25 +83,27 @@ generate_info_local() {
 
 # 首先判断是否有 nfo 文件，以及nfo是否下载完成
 read_info_file() {
-  debug_func "info:one_TR_Dir.1[$one_TR_Dir]"  #----debug---
   if [ ! "$one_TR_Dir" ]; then
+      debug_func "info:one_TR_Dir.0[$one_TR_Dir]"  #----debug---
       one_TR_Dir="$(find "$default_FILE_PATH" -name \
           "$one_TR_Name" 2> /dev/null|head -1)"
       one_TR_Dir="${one_TR_Dir%/*}"
   fi
-  debug_func "info:one_TR_Dir.2[$one_TR_Dir]"  #----debug---
+  debug_func "info:one_TR_Dir[$one_TR_Dir]"  #----debug---
 
   if [ "$one_TR_Dir" ]; then
-    local nfo_file_size=$("$tr_show" "$torrent_Path"| \
+    local nfo_file_size nfo_file_path nfo_file_downloaded   
+    nfo_file_size=$("$tr_show" "$torrent_Path"| \
       grep -Eio '\.nfo \([0-9\. ]+[kb]+\)'|grep -Eo '[0-9]+\.?[0-9]*')
     if [[ $nfo_file_size ]]; then
-      local nfo_file_path="$(find "${one_TR_Dir}/${one_TR_Name}" -iname '*.nfo'|head -1)"
-      local nfo_file_downloaded=$(stat --format=%s "$nfo_file_path")
+      nfo_file_path="$(find "${one_TR_Dir}/${one_TR_Name}" -iname '*.nfo'|head -1)"
+      nfo_file_downloaded=$(stat --format=%s "$nfo_file_path")
       if [[ $nfo_file_downloaded ]]; then
-        local judge_download_nfo=$((nfo_file_downloaded/100))
-        local judge_nfo_file=$(echo "$nfo_file_size * 10"|bc|awk -F '.' '{print $1}')
+        local judge_download_nfo judge_nfo_file charset
+        judge_download_nfo=$((nfo_file_downloaded/100))
+        judge_nfo_file=$(echo "$nfo_file_size * 10"|bc|awk -F '.' '{print $1}')
         if [ "$judge_download_nfo" -eq  "$judge_nfo_file" ]; then
-          local charset="$(file -i "$nfo_file_path"|sed 's/.*charset=//')" 
+          charset="$(file -i "$nfo_file_path"|sed 's/.*charset=//')" 
           [[ ! $charset ]] && charset='iso-8859-1'
           iconv -f "$charset" -t UTF-8 -c "$nfo_file_path"| \
             sed -E "/^ú+$/d" > "$source_desc"

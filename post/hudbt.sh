@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-10
+# Date: 2019-01-19
 #
 #-------------settings---------------#
 cookie="$cookie_hudbt"
@@ -20,7 +20,7 @@ gen_hudbt_parameter() {
 
 if [ -s "$source_desc" ]; then
     hudbt_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_hudbt/g")
-$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
+$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d;s/  /　/g')"
 else
     hudbt_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_hudbt/g")
 $failed_to_get_des"

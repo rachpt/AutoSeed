@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2018-12-30
+# Date: 2019-01-12
 #-----------------------------#
 #
 # Auto clean old files/folders in 
@@ -11,7 +11,7 @@
 # on transmission and qbittorrent.
 #
 #---import settings---#
-if [ -z "$ROOT_PATH"]; then
+if [ -z "$ROOT_PATH" ]; then
     ROOT_PATH="$(dirname "$(readlink -f "$0")")"
     ROOT_PATH="${ROOT_PATH%/*}"
     source "$ROOT_PATH/settings.sh"
@@ -98,6 +98,7 @@ clean_frequence() {
   local time_threshold=$(expr 60 \* 60 \* 12)  # 12 hours
   local time_pass=$(expr $(date '+%s') - $(stat -c '%Y' "$ROOT_PATH/clean/dir"))
   [ $time_pass -gt $time_threshold ] && {
+    sleep 20 # 延时
     clean_main
     # 更新dir时间
     touch -m "$ROOT_PATH/clean/dir"; }

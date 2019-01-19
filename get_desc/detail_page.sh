@@ -13,6 +13,9 @@
 # 后续合并通过豆瓣生成的简介。
 #-------------------------------------#
 
+# 自定义发布规则
+source "$ROOT_PATH/get_desc/customize.sh"
+#-------------------------------------#
 get_source_site() {
     unset source_site_URL cookie_source_site unknown_site source_t_id
     local tracker_info="$($tr_show "$torrent_Path"|grep -A5 'TRACKERS')"
@@ -37,10 +40,10 @@ get_source_site() {
         source_site_URL='https://hdcmct.org'
         cookie_source_site="$cookie_cmct"
         echo "got source_site: hdcmct" >> "$log_Path"
-        #elif [ "$(echo $tracker_info|grep -i 'new')" ]; then
+    #elif [ "$(echo $tracker_info|grep -i 'new')" ]; then
     #    source_site_URL='https://new.tracker.org'
     else
-      unknown_site="$(echo "$tracker_info"|grep -Eo 'https?://[^/]*'| \
+        unknown_site="$(echo "$tracker_info"|grep -Eo 'https?://[^/]*'| \
           head -1|sed 's/tracker\.//')"
     fi
 }
@@ -107,7 +110,7 @@ if [ "$source_site_URL" ]; then
             "$s_search_URL" "$cookie_source_site" "$user_agent"| \
             grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
     fi
-    debug_func "get_desc:s-t_id[$source_t_id]"  #----debug---
+    debug_func "get_desc:source-t_id[$source_t_id]"  #----debug---
 else
     # 用于简介
     source_site_URL="$unknown_site"
@@ -137,36 +140,37 @@ form_source_site_get_Desc() {
 
     # 匹配官方组 简介中的 info 以及 screens 所在行号
     if [ "$source_site_URL" = "https://hdsky.me" ]; then
-      local start_line=$(sed -n '/影片参数/=' "$source_full"|head -1)
-      local end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -1) # 第一个
+      local start_line end_line middle_line   
+      start_line=$(sed -n '/影片参数/=' "$source_full"|head -1)
+      end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -1) # 第一个
 
     elif [ "$source_site_URL" = "https://hdchina.org" ]; then
-      local start_line=$(sed -n '/<fieldset><legend>/=' "$source_full"|tail -1)
-      local end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -2|tail -1) # 第二个
+      start_line=$(sed -n '/<fieldset><legend>/=' "$source_full"|tail -1)
+      end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -2|tail -1) # 第二个
 
     elif [ "$source_site_URL" = "https://totheglory.im" ]; then
-      local start_line=$(sed -n '/\.[cC]omparisons/=;/\.[sS]elected\.[sS]creens/=;/\.[mM]ore\.[sS]creens/=;/\.[pP]lot/=' "$source_full"|head -1)
-      local middle_line=$(sed -n '/.x264.[iI]nfo/=' "$source_full"|head -1)
-      local end_line=$(sed -n "$middle_line,$(expr $middle_line + 10)p" \
+      start_line=$(sed -n '/\.[cC]omparisons/=;/\.[sS]elected\.[sS]creens/=;/\.[mM]ore\.[sS]creens/=;/\.[pP]lot/=' "$source_full"|head -1)
+      middle_line=$(sed -n '/.x264.[iI]nfo/=' "$source_full"|head -1)
+      end_line=$(sed -n "$middle_line,$(expr $middle_line + 10)p" \
           "$source_full"|sed -n '/<\/table>/='|head -1) # ttg
-      local end_line=$(expr $middle_line + $end_line - 1) # ttg
+      end_line=$(expr $middle_line + $end_line - 1) # ttg
       [[ $end_line ]] || local end_line=$(sed -n 'x264 [info]' "$source_full"|tail -1)
 
 
     elif [ "$source_site_URL" = "https://tp.m-team.cc" ]; then
-      local start_line=$(sed -n '/codetop/=' "$source_full"|head -1)
-      local end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -1) # 第一个
+      start_line=$(sed -n '/codetop/=' "$source_full"|head -1)
+      end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -1) # 第一个
 
     elif [ "$source_site_URL" = "https://hdcmct.org" ]; then
-      local start_line=$(sed -n '/资料参数/=;/参数信息/=;/General Information/=' "$source_full"|head -1)
-      local end_line=$(sed -n '/下载信息/=;/郑重声明/=' "$source_full"|head -1) # 第一个
+      start_line=$(sed -n '/资料参数/=;/参数信息/=;/General Information/=' "$source_full"|head -1)
+      end_line=$(sed -n '/下载信息/=;/郑重声明/=' "$source_full"|head -1) # 第一个
 
     fi
     # 裁剪简介获取 iNFO 以及 screens
     if [[ $start_line && $end_line && $start_line -lt $end_line ]]; then
       sed -n "${start_line},${end_line}p" "$source_full" > "$source_desc"
     else
-      debug_func "get_desc:start-l:[$start_line]end-l:[$end_line]"  #----debug---
+      debug_func "get_desc:start-l-[$start_line]end-l-[$end_line]"  #----debug---
     fi
     unset start_line end_line middle_line
     #----------------desc----------------start
@@ -190,11 +194,11 @@ form_source_site_get_Desc() {
     [[ $forbid = yes ]] && echo -e "\n&禁止转载&\n" >> "$source_desc"
     #----------------desc----------------
     else
-      debug_func 'get_desc:failed to get source page!'  #----debug---
+      debug_func 'get_desc:failed-to-get-source-page!'  #----debug---
     fi
     #----------------desc----------------end
     
-    rm -f "$source_full"
+    \rm -f "$source_full"
     unset source_full forbid
   fi
   #---desc-full--end

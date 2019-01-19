@@ -14,7 +14,7 @@
 
 # 匹配已知英文名，指定豆瓣或者imdb链接，用于剧集以及动漫
 match_douban_imdb() {
-  local i j _name _one_name _d match_list _url
+  local match_list _d i j _name _one_name _url
   match_list="$ROOT_PATH/tmp/match-lists.txt"
   # 过滤后的数据
   _d="$(cat "$match_list"|sed -E 's/[#＃].*//g;s/[ 　]+//g;/^$/d;s/[A-Z]/\l&/g')"
@@ -28,7 +28,7 @@ match_douban_imdb() {
       [[ $_name =~ .*$_one_name.* ]] && {
         _url="$(echo "$_d"|sed -n "${j}{p;q}")"
         _url="$(echo "$_url"|sed 's![^\.a-z0-9/:]!!g')" # 清洗
-        debug_func "match:_url[$_url]"  #----debug---
+        debug_func "match:get-url[$_url]"  #----debug---
         [[ $_url =~ .*imdb.* ]] && \
         imdb_url="$(echo "$_url"|grep -E 'tt[0-9]{7}')" && break
         [[ $_url =~ .*douban.* ]] && douban_url="$(echo "$_url"| \
@@ -37,6 +37,6 @@ match_douban_imdb() {
       } 
     done
   else
-    debug_func 'match:no-match-lists!'  #----debug---
+    debug_func 'match:no-match-lists-file!'  #----debug---
   fi
 }

@@ -12,7 +12,7 @@
 #-------------------------------------#
 #
 my_dupe_rules() {
-  local i _name _one_name _d lists _url _site _line
+  local lists _d i _name _one_name _url _site _line
   lists="$ROOT_PATH/tmp/dupe-rules.txt"
   # 过滤后的数据
   _d="$(cat "$lists"|sed -E 's/[#＃].*//g;s/[ 　]+//g;/^$/d;s/[A-Z]/\l&/g')"
@@ -54,11 +54,12 @@ my_dupe_rules() {
          [[ $(echo "$_line"|awk -F '+' '{print $7}') =~ 0|no ]] && enable_tjupt='no'
         }
         #source "$ROOT_PATH/static.sh"  # update trackers post_site
+        debug_func 'dupe:use-customize-dupe-rules'  #----debug---
         break  # jump out
       } 
     done
   else
-    debug_func ':dupe:no-rules!'  #----debug---
+    debug_func ':dupe:no-dupe-rules-file!'  #----debug---
   fi
 }
 #----------------------------------------#

@@ -21,8 +21,9 @@ qb_rt_queue="$ROOT_PATH/tmp/qb-ratio-queue"
 #
 #--------------------------------------#
 #---path of transmission-show---#
-tr_show="transmission-show"
-tr_edit="transmission-edit"
+tr_show='transmission-show'
+tr_edit='transmission-edit'
+tr_remote='transmission-remote'
 #---path of python3---#
 python3='python3'
 #---path of mediainfo---#
@@ -113,3 +114,4 @@ source "$ROOT_PATH/qbittorrent.sh"
 source "$ROOT_PATH/transmission.sh"
 #
 #--------------------------------------#
+

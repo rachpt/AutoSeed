@@ -12,7 +12,6 @@
 source "$ROOT_PATH/get_desc/desc.sh"    # get source site
 source "$ROOT_PATH/post/parameter.sh"
 source "$ROOT_PATH/post/judge.sh"
-source "$ROOT_PATH/get_desc/customize.sh"
 #---------------------------------------#
 judge_before_upload() {
     up_status='yes'    # judge code
@@ -44,14 +43,14 @@ judge_before_upload() {
 add_t_id_2_client() {        
     #---if get t_id then add it to tr---#
     [[ $up_status = yes ]] && if [[ -z $t_id ]]; then
-        echo "======[failed to get tID]========" >> "$log_Path"
+        echo '=!==!=[failed to get tID]==!==!==' >> "$log_Path"
     else
-        echo t_id: [$t_id]                       >> "$log_Path"
+        echo "t_id: [$t_id]"                     >> "$log_Path"
         #---add torrent---#
         torrent2add="${downloadUrl}${t_id}&passkey=${passkey}"
         source "$ROOT_PATH/post/add.sh"
     fi
-    unset t_id
+    unset t_id torrent2add
 }
 #---------------------------------------#
 # 用于辅种
@@ -62,8 +61,8 @@ reseed_torrent() {
   # 介质
   name="$(echo "$name"|sed -E 's/(hdtv|blu-?ray|web-?dl|bdrip|dvdrip|webrip).*//i')"
   # 删除季数
-  name="$(echo "$name"|sed -E 's/[ \./]s([012]?[1-9])(ep?[0-9]+)?[ \.].*//i')"
-  name="$(echo "$name"|sed -E 's/[ \./]ep?[0-9]{1,2}(-e?p?[0-9]{1,2})?[ \.].*//i')"
+  name="$(echo "$name"|sed -E 's/[ \.]s([012]?[1-9])(ep?[0-9]+)?[ \.].*//i')"
+  name="$(echo "$name"|sed -E 's/[ \.]ep?[0-9]{1,2}(-e?p?[0-9]{1,2})?[ \.].*//i')"
   # 删除合集
   name="$(echo "$name"|sed -E 's/[ \.]Complete[\. ].*//i')"
   result="$(http --verify=no --ignore-stdin -b --timeout=25 GET "${postUrl%/*}/torrents.php?search=${name}&incldead=1" "$cookie" "$user_agent")"
@@ -72,21 +71,23 @@ reseed_torrent() {
   result="$(http --verify=no --ignore-stdin -b --timeout=25 GET "${postUrl%/*}/torrents.php?search=${dot_name}&incldead=1" "$cookie" "$user_agent")"
   t_id=$(echo "$result"|grep "$dot_name"|grep -Eoi '[^a-z]details\.php\?id=[0-9]+'|head -1|grep -Eo '[0-9]+')
   }
-
+  debug_func "post:reseed-get[$t_id]"  #----debug---
 }
+
 #---------------------------------------#
 unset_tempfiles() {
     [ ! "$test_func_probe" ] && \
-    rm -f "$source_desc" "$source_html" "$source_desc2tjupt"
+    \rm -f "$source_desc" "$source_html" "$source_desc2tjupt"
     unset source_desc source_html source_desc2tjupt
     unset douban_poster_url source_site_URL source_t_id imdb_url
     echo "----------[deleted tmp]----------"     >> "$log_Path"
 }
 
 #-----import and call functions---------#
-
-my_dupe_rules        # 导入自定义规则
-from_desc_get_param  # $ROOT_PATH/post/parameter.sh
+# 导入自定义规则
+my_dupe_rules            # get_desc/customize.sh
+# 获得发布所需参数
+from_desc_get_param      # $ROOT_PATH/post/parameter.sh
 
 if [ "$enable_hudbt" = 'yes' ]; then
     source "$ROOT_PATH/post/hudbt.sh"

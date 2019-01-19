@@ -16,7 +16,7 @@ source "$ROOT_PATH/settings.sh"
 source "$ROOT_PATH/get_desc/detail_page.sh"
 #----------------lock func--------------#
 remove_lock() {
-    rm -f "$lock_File" "$qb_rt_queue"
+    \rm -f "$lock_File" "$qb_rt_queue"
     #debug_func 'main:unlock'      #----debug---
 }
 is_locked() {
@@ -51,7 +51,7 @@ torrent_completed_precent() {
     elif [ "$fg_client" = 'transmission' ]; then
         tr_get_torrent_completion
     else
-        debug_func 'main:Client_Error'   #----debug---
+        debug_func 'main:Client-Error'   #----debug---
     fi
 }
 
@@ -65,7 +65,7 @@ generate_desc() {
     torrent_Path="${flexget_path}/$tr_i"
     # org_tr_name 用于和 transmission/qb 中的种子名进行比较，
     org_tr_name="$($tr_show "$torrent_Path"|grep Name|head -1|sed -r 's/Name:[ ]+//')"
-    debug_func 'main:gen_loop'  #----debug---
+    debug_func 'main:gen-loop'  #----debug---
     one_TR_Name="$org_tr_name"
     #---generate desc before done---#
     if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
@@ -92,7 +92,7 @@ main_loop() {
       org_tr_name="$("$tr_show" "${flexget_path}/$tr_i"|grep 'Name'| \
           head -1|sed -r 's/Name:[ ]+//')"
 
-      debug_func 'main:m_loop'           #----debug---
+      debug_func 'main:m-loop'           #----debug---
       #-----------------------------------------------
       if [ "$org_tr_name" = "$one_TR_Name" ]; then
           #---.torrient file path---#
@@ -102,13 +102,13 @@ main_loop() {
               debug_func 'main:failed to find desc'  #----debug---
               break
           else
-              debug_func 'main:post'  #----debug---
+              debug_func 'main:to-post'  #----debug---
               write_log_begin         # write log
               source "$ROOT_PATH/post/post.sh"
               write_log_end           # write log
               # delete uploaded torrent
               [ ! "$test_func_probe" ] && \
-              rm -f "$torrent_Path"    && \
+              \rm -f "$torrent_Path"    && \
               clean_commit_main='yes'    
           fi
       fi
@@ -131,22 +131,26 @@ time_out() {
     if [[ $main_pid && $run_time -gt $waitfor ]]; then
         # 处理超时
         kill -9 $main_pid
-        rm -f "$lock_File" "$qb_rt_queue" "$ROOT_PATH/tmp/autoseed-pic.*"
+        \rm -f "$lock_File" "$qb_rt_queue" "$ROOT_PATH/tmp/autoseed-.*"
+        debug_func "程序因超时[$run_time]被强制终止！"  #----debug---
     else
         # 重复运行
-        debug_func '主程序正在运行，稍后重试！'
+        debug_func '主程序正在运行，稍后重试！'  #----debug---
         exit
     fi
 }
 hold_on() {
   # 依据cpu负载设置一个延时，解决系统IO问题
-  local cpu_number="$(grep 'model name' /proc/cpuinfo|wc -l)"
-  local cpu_load="$(echo $(uptime |awk -F 'average:' '{print $2}'| \
+  local cpu_number cpu_load _time
+  cpu_number="$(grep 'model name' /proc/cpuinfo|wc -l)"
+  cpu_load="$(echo $(uptime |awk -F 'average:' '{print $2}'| \
       awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100/$cpu_number| \
       bc|awk -F '.' '{print $1}')"
-  sleep $(echo $(uptime |awk -F 'average:' '{print $2}'| \
-      awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100/$cpu_number*0.4*$Speed|bc)
-  unset Speed
+  _time="$(echo $(uptime |awk -F 'average:' '{print $2}'| \
+      awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100/$cpu_number*0.4*$Speed|bc)"
+  sleep "$_time"
+  debug_func "main:hold-on[$_time]"  #----debug---
+  unset Speed _time
 }
 
 #-------------start function------------#
@@ -186,11 +190,11 @@ while true; do
     one_TR_Dir="$(head -2 "$queue"|tail -1|sed 's!/$!!')"
     [[ ! "$one_TR_Name" || ! "$one_TR_Dir" ]] && break
     [[ $main_lp_counter -gt 50 ]] && break
-    debug_func 'main:queue_loop'    #----debug---
+    debug_func 'main:queue-loop'    #----debug---
 
     if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
         hold_on                     # dynamic delay
-        debug_func 'main:queue_in'  #----debug---
+        debug_func 'main:queue-in'  #----debug---
         main_loop
     fi
     [ ! "$test_func_probe" ] && \
@@ -204,5 +208,9 @@ done
 qb_set_ratio_loop
 #---------------------------------------#
 # reannounce
-tr_reannounce
+#debug_func "end-进程[$(ps -C 'main.sh' --no-headers|wc -l)]个" #----debug---
+[[ "$(ps -C 'main.sh' --no-headers|wc -l)" -le 2 ]] && \
+tr_reannounce && \
 qb_reannounce
+#---------------------------------------#
+

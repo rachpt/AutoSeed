@@ -17,7 +17,7 @@ get_douban_url_by_keywords() {
   search_doubanurl() {
   local name season year
   # 剧集季数
-  season="$(echo "$1"|sed -E 's/.*[ \./]s([012]?[1-9])(ep?[0-9]+)?[ \.].*/.Season.\1./i;s/[ \.]0([1-9])[ \.]/.\1/')"
+  season="$(echo "$1"|sed -E 's/.*[ \.]s([012]?[1-9])(ep?[0-9]+)?[ \.].*/.Season.\1./i;s/[ \.]0([1-9])[ \.]/.\1/')"
   # 年份
   year="$(echo "$1"|grep -Eo '[12][098][0-9]{2}')"
   # 分辨率
@@ -25,8 +25,8 @@ get_douban_url_by_keywords() {
   # 介质
   name="$(echo "$name"|sed -E 's/(hdtv|blu-?ray|web-?dl|bdrip|dvdrip|webrip).*//i')"
   # 删除季数
-  name="$(echo "$name"|sed -E 's/[ \./]s([012]?[1-9])(ep?[0-9]+)?[ \.].*//i')"
-  name="$(echo "$name"|sed -E 's/[ \./]ep?[0-9]{1,2}(-e?p?[0-9]{1,2})?[ \.].*//i')"
+  name="$(echo "$name"|sed -E 's/[ \.]s([012]?[1-9])(ep?[0-9]+)?[ \.].*//i')"
+  name="$(echo "$name"|sed -E 's/[ \.]ep?[0-9]{1,2}(-e?p?[0-9]{1,2})?[ \.].*//i')"
   # 删除合集
   name="$(echo "$name"|sed -E 's/[ \.]Complete[\. ].*//i')"
   # 搜索
@@ -88,7 +88,7 @@ print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=F
             head -1|awk -F '"' '{print $4}')"
 
         [[ $enable_byrbt = yes ]] && gen_desc_html="$(echo "$gen_desc_bbcode"| \
-            sed "1c <img src=\"$douban_poster_url\" />"|sed 's#$#&<br />#g')" # byrbt
+            sed "1c <img src=\"$douban_poster_url\" />"|sed 's!$!&<br />!g')" # byrbt
 
         unset search_url
     fi
