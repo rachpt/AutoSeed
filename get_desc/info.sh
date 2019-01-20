@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-12
+# Date: 2019-01-20
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -59,7 +59,7 @@ generate_info_local() {
     local info_generated="$($mediainfo "$max_size_file"| \
       sed '/Unique/d;/Encoding settings/d;/Complete name/d;/Writing library/d;/Writing application/d')"
   else
-    local info_generated="$(\cat $source_desc)"
+    local info_generated="$(\cat "$source_desc")"
   fi
   # 缩略图
   gen_screenshots
