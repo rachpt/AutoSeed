@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-20
+# Date: 2019-01-24
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -36,8 +36,12 @@ gen_screenshots() {
   # 图片上传
   unset sm_url byr_url
   sm_url="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
-    "$upload_poster_api" smfile@"$screen_file"  "$user_agent"|grep -Eo "\"url\":\"[^\"]+\""| \
+    "$upload_poster_api" smfile@"$screen_file" "$user_agent"|grep -Eo "\"url\":\"[^\"]+\""| \
     awk -F "\"" '{print $4}'|sed 's/\\//g')"
+  # 备用图床
+  [[ ! $sm_url ]] && sm_url="$(http --pretty=format --verify=no --timeout=25 -bf \
+     --ignore-stdin POST "$upload_poster_api_2" image@"$screen_file" "$user_agent"| \
+     grep -Eo "\"link\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')"
   [[ $enable_byrbt == yes ]] && byr_url="$(http --verify=no --ignore-stdin \
     --timeout=25 -bf POST "$upload_poster_api_byrbt" upload@"$screen_file" "$user_agent" \
     "$cookie_byrbt"|grep -Eio "https?://[^\'\"]+"|sed "s/http:/https:/g")"

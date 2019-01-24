@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.0v
-# Date: 2019-01-03
+# Date: 2019-01-24
 #
 #-------------------------------------#
 # 本文件用于处理所有图片问题
@@ -85,7 +85,10 @@ deal_with_images() {
       grep "i\.loli\.net")" ] && sm_url="$(http --verify=no --timeout=25 \
       --ignore-stdin -f POST "$upload_poster_api" smfile@"$img_file"| \
       grep -Eo "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" && \
-      sed -i "s!$img_url!$sm_url!g" "$source_desc2tjupt" && \
+      if [[ ! $sm_url ]]; then sm_url="$(http --pretty=format --verify=no -bf \
+      --timeout=25 --ignore-stdin POST "$upload_poster_api_2" image@"$screen_file" \
+      "$user_agent"|grep -Eo "\"link\":\"[^\"]+\""|awk -F "\"" '{print $4}'| \
+      sed 's/\\//g')";fi && sed -i "s!$img_url!$sm_url!g" "$source_desc2tjupt" && \
       debug_func "screens-byr[$sm_url]" && unset sm_url
 
     \rm -f "$img_file"
