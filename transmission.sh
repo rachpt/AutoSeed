@@ -2,8 +2,8 @@
 # FileName: transmission.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
-# Date: 2018-12-19
+# Version: 3.1v
+# Date: 2019-02-18
 #
 #---------------------------------------#
 #
@@ -61,11 +61,11 @@ tr_get_torrent_completion() {
     local id_t=$($tr_remote -l|grep "$org_tr_name"|head -1| \
         awk '{print $1}'|grep -Eo '[0-9]+')
     [[ $id_t ]] &&  { 
-    debug_func "tr:comp-id[$id_t]"  #----debug---
+    #debug_func "tr:comp-id[$id_t]"  #----debug---
     completion=$($tr_remote -t $id_t -i|grep 'Percent Done:'|grep -Eo '[0-9]+'|head -1)
     one_TR_Dir="$($tr_remote -t $id_t -i|grep 'Location:'|grep -o '/.*$')"
     unset id_t; }
-    debug_func 'tr:complete-func'  #----debug---
+    #debug_func 'tr:complete-func'  #----debug---
 }
 
 #---------------------------------------#
