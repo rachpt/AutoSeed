@@ -2,7 +2,7 @@
 # FileName: post/whu.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
+# Version: 3.1v
 # Date: 2019-01-10
 #
 #-------------settings---------------#
