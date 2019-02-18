@@ -4,7 +4,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 目前适用于 从 HDSky / TTG / HDChina / CMCT / M-Team 等站点自动转载 电影、剧集、纪录片 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT / BYRBT / 北洋园 PT 站。
 
-[![release](https://img.shields.io/badge/Version-3.0-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v3.0)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
+[![release](https://img.shields.io/badge/Version-3.1-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v3.1)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
 |  源站点（from）   |      支持站点（to）      | 时间（time） |
 | :---------------: | :-----------------------: | :----------: |
