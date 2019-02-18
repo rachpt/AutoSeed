@@ -2,8 +2,8 @@
 # FileName: get_desc/info.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
-# Date: 2019-01-24
+# Version: 3.1v
+# Date: 2019-02-18
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -43,8 +43,9 @@ gen_screenshots() {
      --ignore-stdin POST "$upload_poster_api_2" image@"$screen_file" "$user_agent"| \
      grep -Eo "\"link\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')"
   [[ $enable_byrbt == yes ]] && byr_url="$(http --verify=no --ignore-stdin \
-    --timeout=25 -bf POST "$upload_poster_api_byrbt" upload@"$screen_file" "$user_agent" \
-    "$cookie_byrbt"|grep -Eio "https?://[^\'\"]+"|sed "s/http:/https:/g")"
+    --timeout=40 -bf POST "$byrbt_up_api" command==QuickUpload type==Images \
+    upload@"$screen_file" "$user_agent" "$cookie_byrbt"| \
+    grep -Eio "https?://[^\'\"]+"|sed "s/http:/https:/g")"
   sleep 0.5 && \rm -f "$screen_file"
 }
 

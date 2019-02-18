@@ -2,8 +2,8 @@
 # FileName: get_desc/screens.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
-# Date: 2019-01-24
+# Version: 3.1v
+# Date: 2019-02-18
 #
 #-------------------------------------#
 # 本文件用于处理所有图片问题
@@ -69,17 +69,18 @@ deal_with_images() {
     # 临时图片路径，使用时间作为文件名的一部分
     img_file="$ROOT_PATH/tmp/autoseed-pic-$(date '+%s%N')$(echo "${img_url##*/}"| \
         sed -r 's/.*(\.[jpgb][pnim]e?[gfp]).*/\1/i')"
-    http --verify=no --timeout=25 --ignore-stdin -dco "$img_file" "$img_url" "$user_agent"
+    http --verify=no --timeout=25 --ignore-stdin -do "$img_file" "$img_url" "$user_agent"
     sleep 2 && [[ ! -s $img_file ]] && \
-    http --verify=no --timeout=25 --ignore-stdin -dco "$img_file" "$img_url" "$user_agent"
-    [[ ! -s $img_file ]] && debug_func 'screens_img:downloaded' || \
+    curl -o "$img_file" "$img_url" && debug_func 'screens_img:use-curl-download'
+    [[ -s $img_file ]] && debug_func 'screens_img:downloaded' || \
       debug_func 'screens_img:failed-to-dl'  #----debug---
     # byrbt
     [ "$enable_byrbt" = 'yes' ] && byr_url="$(http --verify=no --ignore-stdin \
-      --timeout=25 -bf POST "$upload_poster_api_byrbt" upload@"$img_file" "$user_agent" \
-      "$cookie_byrbt"|grep -Eio "https?://[^\'\"]+"|sed "s/http:/https:/g")" && \
-      sed -i "s!$img_url!$byr_url!g" "$source_html" && \
-      debug_func "screens-byr[$byr_url]" && unset byr_url
+      --timeout=40 -bf POST "$byrbt_up_api" command==QuickUpload type==Images \
+      upload@"$img_file" "$user_agent" "$cookie_byrbt"| \
+      grep -Eio "https?://[^\'\"]+"|sed "s/http:/https:/g")" && \
+      [[ $byr_url ]] && sed -i "s!$img_url!$byr_url!g" "$source_html" && \
+      debug_func "screens-byr[$byr_url]"
     # tjupt
     [ "$enable_tjupt" = 'yes' ] && [ ! "$(echo "$img_url"| \
       grep "i\.loli\.net")" ] && sm_url="$(http --verify=no --timeout=25 \
@@ -88,11 +89,14 @@ deal_with_images() {
       if [[ ! $sm_url ]]; then sm_url="$(http --pretty=format --verify=no -bf \
       --timeout=25 --ignore-stdin POST "$upload_poster_api_2" image@"$screen_file" \
       "$user_agent"|grep -Eo "\"link\":\"[^\"]+\""|awk -F "\"" '{print $4}'| \
-      sed 's/\\//g')";fi && sed -i "s!$img_url!$sm_url!g" "$source_desc2tjupt" && \
-      debug_func "screens-byr[$sm_url]" && unset sm_url
+      sed 's/\\//g')";fi && [[ $sm_url ]] && sed -i "s!$img_url!$sm_url!g" \
+      "$source_desc2tjupt" && debug_func "screens-byr[$sm_url]"
 
-    \rm -f "$img_file"
-    unset img_url img_file
+    #----debug---
+    [[ $byr_url ]] || debug_func "$byrbt_up_api command==QuickUpload type==Images upload@$img_file $user_agent $cookie_byrbt"
+    [[ $enable_byrbt = yes && $byr_url ]] && \rm -f "$img_file"
+    [[ $enable_tjupt = yes && $sm_url ]] && \rm -f "$img_file"
+    unset img_url img_file byr_url sm_url
     ((_counter++)) # C 形式的增1
   done
   # tjupt images
