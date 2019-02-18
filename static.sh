@@ -2,8 +2,8 @@
 # FileName: static.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
-# Date: 2019-01-24
+# Version: 3.1v
+# Date: 2019-02-17
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -36,7 +36,7 @@ user_agent='User-Agent:Mozilla/5.0(X11;Linux x86_64;rv:63.0)Gecko/20100101 Firef
 # 图片上传 API
 upload_poster_api='https://sm.ms/api/upload'
 upload_poster_api_2='https://i.endpot.com/api/upload' #备用
-upload_poster_api_byrbt='https://bt.byr.cn/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images'
+byrbt_up_api='https://bt.byr.cn/ckfinder/core/connector/php/connector.php'
 #--------------------------------------#
 #---desc---#
 failed_to_get_des='[size=6][color=Magenta][em11] 获取简介失败！！！[/color][/size]'
