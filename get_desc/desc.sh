@@ -2,7 +2,7 @@
 # FileName: get_desc/desc.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
+# Version: 3.1v
 # Date: 2019-01-11
 #
 #-------------------------------------#
@@ -37,7 +37,7 @@ source_desc="${ROOT_PATH}/tmp/${org_tr_name}_desc.txt"
 
 #---to log and edit.sh---#
 if [ -z "$source_site_URL" ]; then
-    debug_func 'desc:get-soure'       #----debug---
+    debug_func 'desc:get-source'      #----debug---
     get_source_site                   # get_desc/detail_page.sh
 else
     debug_func 'desc:get-source[0]'   #----debug---
