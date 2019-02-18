@@ -39,7 +39,8 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
   - mediainfo，用于本地生成info信息;
   - ffmpeg，用于本地生成缩略图(配合mediainfo);
   - 其他常用软件工具，sed，grep，awk等(详见 setting.sh，一般系统自带)；
-  - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖(requests,bs4,html2bbcode)。
+  - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖(requests,bs4,html2bbcode)；
+  - curl，备用下载工具。
 
 - ubuntu 系安装
   ```sh
@@ -63,7 +64,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 1. clone 本 repo (或者下载 zip) 至本地，请使用最新的版本；
 2. 修改设置文件`setting.sh`(包括cookie、passkey，监控 torrent 文件路径等)；
 3. 添加 `main.sh` 脚本路径至 transmission 的 `script-torrent-done-filename`。具体可以参见 [这里](https://rachpt.github.io/2018/03/25/transmission-settings/) ；
-4. 使用 qbittorrent，则需要添加如 `/home/AutoSeed/main.sh "%N" "%D"` 所示代码至 完成时运行外部程序处；
+4. 若使用 qbittorrent **订阅源种**(非reseed)，则需要添加如 `/home/AutoSeed/main.sh "%N" "%D"` 所示代码至 完成时运行外部程序处；
 4. (推荐)将 `main.sh` 添加到  `crontab` 之类的程序周期运行（运行锁会解决各种冲突问题），以提前生成简介；
 5. 调试请看 test.sh 中的说明。
 
@@ -122,6 +123,13 @@ t_id: [55997]
 ```
 
 ## 更新日志
+
+- 2019-02-18 --> 3.1
+  - 修复几处 bug。
+  - 新增使用 ffmpeg 生成缩略图。
+  - 新增自定义豆瓣链接匹配规则。
+  - 新增特定资源的单独发布规则。
+  - 完善多处细节，比如解决 WiKi 美剧 imdb 固定为第一季情况，添加备用图床等。
 
 - 2018-12-19 --> 3.0 (release)
   - 完善clean模块，部分功能使用多线程。
