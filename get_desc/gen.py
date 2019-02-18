@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 from html2bbcode.parser import HTML2BBCode
 
-__version__ = "0.3.3"
+__version__ = "0.3.4"
 __author__ = "Rhilip"
 
 douban_format = [
@@ -124,7 +124,8 @@ class Gen(object):
                 self.ret["img"] = self.img_list
                 self.ret["success"] = True if not self.ret.get("error") else False
             except Exception as err:
-                self.ret["error"] = "Internal error, please connect @{}, thank you.".format(__author__)
+                raw_error = self.ret["error"]
+                self.ret["error"] = "Internal error : {}, please connect @{}, thank you.".format(raw_error, __author__)
                 if _debug:
                     raise Exception("Internal error").with_traceback(err.__traceback__)
         return self.ret
@@ -132,17 +133,24 @@ class Gen(object):
     def _gen_douban(self):
         douban_link = "https://movie.douban.com/subject/{}/".format(self.sid)
         douban_page = get_page(douban_link, bs_=True)
-        data = {"douban_link": douban_link}
-        if douban_page.title.text == "页面不存在":
+        douban_api_json = get_page('https://api.douban.com/v2/movie/{}'.format(self.sid), json_=True)
+
+        if "msg" in douban_api_json:
+            self.ret["error"] = douban_api_json["msg"]
+        elif str(douban_page).find("检测到有异常请求") > -1:
+            self.ret["error"] = "GenHelp was banned by Douban."
+        elif douban_page.title.text == "页面不存在":
             self.ret["error"] = "The corresponding resource does not exist."
         else:
+            data = {"douban_link": douban_link}
+
+            def fetch(node):
+                return node.next_element.next_element.strip()
+
             # 对主页面进行解析
             data["chinese_title"] = (douban_page.title.text.replace("(豆瓣)", "").strip())
             data["foreign_title"] = (douban_page.find("span", property="v:itemreviewed").text
                                      .replace(data["chinese_title"], '').strip())
-
-            def fetch(node):
-                return node.next_element.next_element.strip()
 
             aka_anchor = douban_page.find("span", class_="pl", text=re.compile("又名"))
             data["aka"] = sorted(fetch(aka_anchor).split(' / ')) if aka_anchor else []
@@ -210,9 +218,8 @@ class Gen(object):
             data["awards"] = awards
 
             # 豆瓣评分，简介，海报，导演，编剧，演员，标签
-            douban_api_json = get_page('https://api.douban.com/v2/movie/{}'.format(self.sid), json_=True)
-            douban_average_rating = douban_api_json["rating"]["average"] or 0  # Set default douban rating value
-            douban_votes = douban_api_json["rating"]["numRaters"] or 0
+            data["douban_rating_average"] = douban_average_rating = douban_api_json["rating"]["average"] or 0
+            data["douban_votes"] = douban_votes = douban_api_json["rating"]["numRaters"] or 0
             data["douban_rating"] = "{}/10 from {} users".format(douban_average_rating, douban_votes)
             data["introduction"] = re.sub("^None$", "暂无相关剧情介绍", douban_api_json["summary"])
             data["poster"] = poster = re.sub("s(_ratio_poster|pic)", r"l\1", douban_api_json["image"])
@@ -238,8 +245,8 @@ class Gen(object):
                     descr += ft.format(_data)
             self.ret["format"] = descr
 
-        # 将清洗的数据一并发出
-        self.ret.update(data)
+            # 将清洗的数据一并发出
+            self.ret.update(data)
 
     def _gen_imdb(self):
         douban_imdb_api = get_page("https://api.douban.com/v2/movie/imdb/{}".format(self.sid), json_=True)
@@ -251,32 +258,18 @@ class Gen(object):
             self.ret["error"] = "Can't find this imdb_id({}) in Douban.".format(self.sid)
 
     def _gen_steam(self):
-        session = requests.Session()
-        session.headers.update(headers)
-        session.cookies.update({"mature_content": "/"})  # 避免 Steam 年龄认证（直接点击类）
-
         steam_chs_url = "http://store.steampowered.com/app/{}/?l=schinese".format(self.sid)
-        steam_page = session.get(steam_chs_url)
+        steam_page = requests.get(steam_chs_url,
+                                  # 使用cookies避免 Steam 年龄认证
+                                  cookies={"mature_content": "1", "birthtime": "157737601",
+                                           "lastagecheckage": "1-January-1975", "wants_mature_content": "1"})
         if re.search("(欢迎来到|Welcome to) Steam", steam_page.text):  # 不存在的资源会被302到首页，故检查标题或r.history
             self.ret["error"] = "The corresponding resource does not exist."
         else:
-            if re.search("DoAgeGateSubmit\(\)", steam_page.text):  # 出现 Steam 年龄认证 (年龄选择类)
-                post_data = {
-                    "snr": "1_agecheck_agecheck__age-gate",
-                    "sessionid": session.cookies["sessionid"],
-                    # TODO 看看需不需要随机日期
-                    "ageDay": 1,
-                    "ageMonth": "January",
-                    "ageYear": "1979"
-                }
-                session.post("http://store.steampowered.com/agecheck/app/{}/".format(self.sid), data=post_data)
-                steam_page = session.get(steam_chs_url)
-
             data = {}
             steam_bs = BeautifulSoup(steam_page.text, "lxml")
-
             # 从网页中定位数据
-            name_anchor = steam_bs.find("div", class_="apphub_AppName")  # 游戏名
+            name_anchor = steam_bs.find("div", class_="apphub_AppName") or steam_bs.find("span", itemprop="name")  # 游戏名
             cover_anchor = steam_bs.find("img", class_="game_header_image_full")  # 游戏封面图
             detail_anchor = steam_bs.find("div", class_="details_block")  # 游戏基本信息
             linkbar_anchor = steam_bs.find("a", class_="linkbar")  # 官网
@@ -298,10 +291,7 @@ class Gen(object):
 
             # 数据清洗
             def reviews_clean(tag):
-                subtitle = tag.find("div", class_="subtitle").get_text(strip=True).replace("：", ":")
-                summary = tag.find("span", class_="game_review_summary").get_text(strip=True)
-                reviewdesc = tag["data-tooltip-text"]
-                return "{} {} ({})".format(subtitle, summary, reviewdesc)
+                return tag.get_text(" ", strip=True).replace("：", ":")
 
             def sysreq_clean(tag):
                 os_dict = {"win": "Windows", "mac": "Mac OS X", "linux": "SteamOS + Linux"}
@@ -331,7 +321,7 @@ class Gen(object):
             data["review"] = list(map(reviews_clean, rate_anchor)) or []
             if linkbar_anchor and re.search("访问网站", linkbar_anchor.text):
                 data["linkbar"] = re.sub("^.+?url=(.+)$", r"\1", linkbar_anchor["href"])
-            data["language"] = list(filter(lambda s: s.find("不支持") == -1, map(lag_clean, language_anchor))) or []
+            data["language"] = list(filter(lambda s: s.find("不支持") == -1, map(lag_clean, language_anchor)))[:3] or []
 
             base_info = "中文名: {}\n".format(data["name_chs"]) if data.get("name_chs") else ""
             base_info += (data["detail"] + "\n") if data.get("detail") else ""
@@ -341,7 +331,7 @@ class Gen(object):
             base_info += ("\n".join(data["review"]) + "\n") if data.get("review") else ""
 
             data["baseinfo"] = base_info
-            data["descr"] = html2ubb(str(descr_anchor)).strip()
+            data["descr"] = html2ubb(str(descr_anchor)).replace("[h2]关于这款游戏[/h2]", "").strip()
             data["screenshot"] = list(map(lambda dic: re.sub("^.+?url=(http.+?)\.[\dx]+(.+?)(\?t=\d+)?$",
                                                              r"\1\2", dic["href"]), screenshot_anchor))
             data["sysreq"] = list(map(sysreq_clean, sysreq_anchor))
