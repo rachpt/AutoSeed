@@ -2,8 +2,8 @@
 # FileName: get_desc/detail_page.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
-# Date: 2019-01-09
+# Version: 3.1v
+# Date: 2019-02-18
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -90,27 +90,35 @@ set_source_site_cookie() {
 #-------------------------------------#
 form_source_site_get_tID() {
 if [ "$source_site_URL" ]; then
-    # 构造原种搜索链接，以获取原种ID
+    _get_s_id() {
+    ## TODO 搜索原种ID
     if [ "$source_site_URL" = "https://totheglory.im" ]; then
-        local s_search_URL="${source_site_URL}/browse.php?c=M&search_field=${dot_name}"
-    else
-        # sed 用于过滤文件后缀
-        local s_search_URL="${source_site_URL}/torrents.php?search=${dot_name}"
-    fi
+        # TTG
+        local s_search_URL="${source_site_URL}/browse.php"
 
-    source_t_id="$(http --verify=no -b --ignore-stdin --timeout=25 GET \
-        "$s_search_URL" "$cookie_source_site" "$user_agent"| \
+        source_t_id="$(http --verify=no -b --ignore-stdin --timeout=25 GET \
+        "$s_search_URL" c==M search_field=="$_search_w" "$cookie_source_site" "$user_agent"| \
         grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
+    else
+        # 一般形式
+        local s_search_URL="${source_site_URL}/torrents.php"
+
+        source_t_id="$(http --verify=no -b --ignore-stdin --timeout=25 GET \
+        "$s_search_URL" search=="$_search_w" "$cookie_source_site" "$user_agent"| \
+        grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
+    fi
+    }
+    local _search_w="$dot_name"
+    _get_s_id
 
     #---deal with wrong year---#
     if [ ! "$source_t_id" ]; then
-        local source_site_search_URL="$(echo "$source_site_search_URL"| \
-            sed "s/[12][0789][0-9][0-9]//g")"
-        source_t_id="$(http --verify=no -b --ignore-stdin --timeout=25 GET \
-            "$s_search_URL" "$cookie_source_site" "$user_agent"| \
-            grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
+        _search_w="$(echo "$dot_name"|sed "s/[12][089][0-9][0-9]//g")"
+        _get_s_id
     fi
     debug_func "get_desc:source-t_id[$source_t_id]"  #----debug---
+    unset _search_w
+    unset -f _get_s_id
 else
     # 用于简介
     source_site_URL="$unknown_site"
@@ -149,6 +157,7 @@ form_source_site_get_Desc() {
       end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -2|tail -1) # 第二个
 
     elif [ "$source_site_URL" = "https://totheglory.im" ]; then
+      sed -iE "s%<br[ ]?/>%<br />\n%ig" "$source_full" # 2019-02-19 update
       start_line=$(sed -n '/\.[cC]omparisons/=;/\.[sS]elected\.[sS]creens/=;/\.[mM]ore\.[sS]creens/=;/\.[pP]lot/=' "$source_full"|head -1)
       middle_line=$(sed -n '/.x264.[iI]nfo/=' "$source_full"|head -1)
       end_line=$(sed -n "$middle_line,$(expr $middle_line + 10)p" \
@@ -188,6 +197,7 @@ form_source_site_get_Desc() {
  
     #---copy as a duplication for byrbt---#
     [ "$enable_byrbt" = 'yes' ] && \cp -f "$source_desc" "$source_html"
+    sed -Ei 's/fieldset>|legend>/span>/ig;s/ ?引用 ?//g' "$source_html"
 
     #---html2bbcode---#
     source "$ROOT_PATH/get_desc/html2bbcode.sh"
