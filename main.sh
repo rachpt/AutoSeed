@@ -2,8 +2,8 @@
 # FileName: main.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
-# Date: 2019-01-03
+# Version: 3.1v
+# Date: 2019-02-16
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -65,16 +65,15 @@ generate_desc() {
     torrent_Path="${flexget_path}/$tr_i"
     # org_tr_name 用于和 transmission/qb 中的种子名进行比较，
     org_tr_name="$($tr_show "$torrent_Path"|grep Name|head -1|sed -r 's/Name:[ ]+//')"
-    debug_func 'main:gen-loop'  #----debug---
     one_TR_Name="$org_tr_name"
     #---generate desc before done---#
     if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
         unset completion
         [ ! "$test_func_probe" ] && torrent_completed_precent
-        [ "$test_func_probe" ] && completion=100       # convenient for test
-        debug_func "mainr:completed-[$completion]"     #----debug---
+        [ "$test_func_probe" ] && completion=100        # convenient for test
         [ "$completion" ] && [ "$completion" -ge '70' ] && {
-            debug_func 'main:gen_desc'                 #----debug---
+            debug_func "mainr:completed-[$completion]"  #----debug---
+            debug_func 'main:gen_desc[生成简介]'        #----debug---
             source "$ROOT_PATH/get_desc/desc.sh" ; }
     fi
   done
@@ -190,16 +189,16 @@ while true; do
     one_TR_Dir="$(head -2 "$queue"|tail -1|sed 's!/$!!')"
     [[ ! "$one_TR_Name" || ! "$one_TR_Dir" ]] && break
     [[ $main_lp_counter -gt 50 ]] && break
-    debug_func 'main:queue-loop'    #----debug---
+    debug_func 'main:queue-loop[发布]'  #----debug---
 
     if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
-        hold_on                     # dynamic delay
-        debug_func 'main:queue-in'  #----debug---
+        hold_on                         # dynamic delay
+        debug_func 'main:queue-in'      #----debug---
         main_loop
     fi
     [ ! "$test_func_probe" ] && \
-    sed -i '1,2d' "$queue"          # delete record
-    ((main_lp_counter++))           # C 形式的增1
+    sed -i '1,2d' "$queue"              # delete record
+    ((main_lp_counter++))               # C 形式的增1
     qb_reannounce
     sleep 2
 done
