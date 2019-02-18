@@ -2,7 +2,7 @@
 # FileName: post/post.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
+# Version: 3.1v
 # Date: 2019-01-11
 #
 #---------------------------------------#
@@ -16,8 +16,8 @@ source "$ROOT_PATH/post/judge.sh"
 judge_before_upload() {
     up_status='yes'    # judge code
     #---judge to get away from dupe---#
-    [ "$postUrl" = "${post_site[whu]}/takeupload.php" ] && \
-        judge_torrent_func # $ROOT_PATH/post/judge.sh
+    #[ "$postUrl" = "${post_site[whu]}/takeupload.php" ] && \
+        #judge_torrent_func # $ROOT_PATH/post/judge.sh
     [ "$postUrl" = "${post_site[nanyangpt]}/takeupload.php" ] && \
         judge_torrent_func # $ROOT_PATH/post/judge.sh
     #---necessary judge---# 
@@ -89,17 +89,17 @@ my_dupe_rules            # get_desc/customize.sh
 # 获得发布所需参数
 from_desc_get_param      # $ROOT_PATH/post/parameter.sh
 
-if [ "$enable_hudbt" = 'yes' ]; then
-    source "$ROOT_PATH/post/hudbt.sh"
-    judge_before_upload
-    [[ $up_status = yes ]] && hudbt_post_func
-    add_t_id_2_client
-fi
-
 if [ "$enable_whu" = 'yes' ]; then
     source "$ROOT_PATH/post/whu.sh"
     judge_before_upload
     [[ $up_status = yes ]] && whu_post_func
+    add_t_id_2_client
+fi
+
+if [ "$enable_hudbt" = 'yes' ]; then
+    source "$ROOT_PATH/post/hudbt.sh"
+    judge_before_upload
+    [[ $up_status = yes ]] && hudbt_post_func
     add_t_id_2_client
 fi
 

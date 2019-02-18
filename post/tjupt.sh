@@ -2,7 +2,7 @@
 # FileName: post/tjupt.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
+# Version: 3.1v
 # Date: 2018-12-09
 #
 #-------------settings---------------#
