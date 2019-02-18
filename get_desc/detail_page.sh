@@ -2,7 +2,7 @@
 # FileName: get_desc/detail_page.sh
 #
 # Author: rachpt@126.com
-# Version: 3.1v
+# Version: 3.0v
 # Date: 2019-02-18
 #
 #-------------------------------------#
@@ -157,7 +157,7 @@ form_source_site_get_Desc() {
       end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -2|tail -1) # 第二个
 
     elif [ "$source_site_URL" = "https://totheglory.im" ]; then
-      sed -iE "s%<br[ ]?/>%<br />\n%ig" "$source_full" # 2019-02-19 update
+      sed -E -i "s%<br[ ]?/>%<br />\n%ig" "$source_full" # 2019-02-19 update
       start_line=$(sed -n '/\.[cC]omparisons/=;/\.[sS]elected\.[sS]creens/=;/\.[mM]ore\.[sS]creens/=;/\.[pP]lot/=' "$source_full"|head -1)
       middle_line=$(sed -n '/.x264.[iI]nfo/=' "$source_full"|head -1)
       end_line=$(sed -n "$middle_line,$(expr $middle_line + 10)p" \
