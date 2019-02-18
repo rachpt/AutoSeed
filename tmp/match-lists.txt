@@ -5,3 +5,9 @@
 # 示例：
 # Einstein and Einstein
 # https://movie.douban.com/subject/25716096/ 
+
+# Cinderella.Chef                  # 萌妻食神
+# https://douban.com/subject/30395527/    # 最好使用带movie形式链接
+
+# CindeGreat.Journey.Of.Teenagers  # 少年歌行
+# https://douban.com/subject/30345127/
