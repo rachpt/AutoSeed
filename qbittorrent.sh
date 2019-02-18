@@ -2,8 +2,8 @@
 # FileName: qbittorrent.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
-# Date: 2018-12-31
+# Version: 3.1v
+# Date: 2019-02-18
 #
 #--------------------------------------#
 qb_login="${qb_HOST}:$qb_PORT/api/v2/auth/login"
@@ -112,8 +112,28 @@ qb_add_torrent_url() {
   qbit_webui_cookie
   # add url
   debug_func 'qb:add-from-url'  #----debug---
-  http --ignore-stdin -f POST "$qb_add" urls="$torrent2add" root_folder=true \
-      savepath="$one_TR_Dir" skip_checking=true "$qb_Cookie" && sleep 3
+  debug_func "urls=$torrent2add path=$one_TR_Dir $qb_Cookie"
+  if http --ignore-stdin -f POST "$qb_add" urls="$torrent2add" root_folder=true \
+    savepath="$one_TR_Dir" skip_checking=true "$qb_Cookie" &> /dev/null; then
+    echo 'qbit添加种子成功'
+    debug_func 'qbit:添加种子成功'  #----debug---
+  else
+    case $? in
+      2) debug_func 'qbit:Request timed out!' ;;
+      3) debug_func 'qbit:Unexpected HTTP 3xx Redirection!' ;;
+      4) debug_func 'qbit:HTTP 4xx Client Error!' ;;
+      5) debug_func 'qbit:HTTP 5xx Server Error!' ;;
+      6) debug_func 'qbit:Exceeded --max-redirects=<n> redirects!' ;;
+      *) debug_func 'qbit:Other Error!' ;;
+    esac
+    echo 'qbit添加种子失败'
+    sleep 5
+    curl -b "`echo "$cookie"|sed -E 's/^cookie:[ ]?//i'`" \
+      --data "urls=\'$torrent2add\'root_folder=true&savepath=$one_TR_Dir&skip_checking=true" \
+      "$qb_add" && debug_func 'qbit:use-curl'
+  fi
+
+  sleep 10
   qb_set_ratio_queue
 }
 #---------------------------------------#
@@ -149,7 +169,7 @@ qb_get_torrent_completion() {
   [[ $compl_one && $size_one ]] && \
   completion=$(awk -v a="$compl_one" -v b="$size_one" 'BEGIN{printf "%d",(a/b)*100}')
   unset data compl_one size_one pos
-  debug_func 'qb:complete-func'  #----debug---
+  #debug_func 'qb:complete-func'  #----debug---
 }
 #---------------------------------------#
 
