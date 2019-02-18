@@ -2,8 +2,8 @@
 # FileName: get_desc/generate.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
-# Date: 2019-01-03
+# Version: 3.1v
+# Date: 2019-02-18
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -31,14 +31,14 @@ get_douban_url_by_keywords() {
   name="$(echo "$name"|sed -E 's/[ \.]Complete[\. ].*//i')"
   # 搜索
   get_douban_url="$(http -b --verify=no --pretty=format --ignore-stdin \
-   --timeout=25 GET "https://api.douban.com/v2/movie/search?q=${name}${season}.${year}" \
+   --timeout=25 GET 'https://api.douban.com/v2/movie/search' q=="${name}${season}.${year}" \
    "$user_agent"|grep -E '(movie.)?douban.com/subject/'|head -1|awk -F '"' '{print $4}')"
   # 去掉可能不准确的年份
   [[ ! $get_douban_url ]] && \
    get_douban_url="$(http -b --verify=no --pretty=format --ignore-stdin \
-   --timeout=25 GET "https://api.douban.com/v2/movie/search?q=${name}${season}" \
+   --timeout=25 GET 'https://api.douban.com/v2/movie/search' q=="${name}${season}" \
    "$user_agent"|grep -E '(movie.)?douban.com/subject/'|head -1|awk -F '"' '{print $4}')"
-  debug_func "generate:[$name]"  #----debug---
+  debug_func "generate:[${name}${season}.${year}]"  #----debug---
   }
 
   search_doubanurl "$org_tr_name"
@@ -49,6 +49,7 @@ get_douban_url_by_keywords() {
       echo "搜索得到豆瓣链接：$get_douban_url"        >> "$log_Path"
   else
       echo '未搜索到豆瓣链接！！！'                   >> "$log_Path"
+      unset search_url
   fi
   unset -f search_doubanurl
 }
@@ -59,7 +60,11 @@ from_douban_get_desc() {
     if [ "$douban_url" ]; then
         search_url="$douban_url"
     elif [ "$imdb_url" ]; then
-        search_url="http://www.imdb.com/title/$imdb_url"
+        if [[ $dot_name =~ .*\.[Ss](0?[2-9]|[1-9]?[0-9])\..*WiKi ]]; then
+          get_douban_url_by_keywords  # WiKi series
+        else
+          search_url="http://www.imdb.com/title/$imdb_url"
+        fi
     else
         get_douban_url_by_keywords
     fi
@@ -102,13 +107,13 @@ generate_main_func() {
     # bbcode
 source_desc_tmp="${gen_desc_bbcode}
 
-[quote][font=monospace]
+[quote=iNFO][font=monospace]
 $([[ -s $source_desc ]] && cat "$source_desc" || echo 'Failed to get mediainfo!')
 [/font][/quote]
 $(if [ $source_t_id ]; then
-    echo -e "\n[quote][b]本种来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}[/quote]"
+    echo -e "\n[quote=转载来源][b]本种来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}[/quote]"
 else
-    echo -e "\n[quote][b]本种来自：[/b] ${source_site_URL}[/quote]"
+    echo -e "\n[quote=转载来源][b]本种来自：[/b] ${source_site_URL}[/quote]"
 fi )
 &shc_name_douban&${chs_name_douban}
 &eng_name_douban&${eng_name_douban}
@@ -116,14 +121,17 @@ fi )
 
     # byrbt 所需要的 html 简介
 [[ $enable_byrbt = yes ]] && source_html_tmp="${gen_desc_html}<br /><br />
-<fieldset><br /> $([[ -s $source_desc ]] && cat "$source_html" || echo 'Failed to get mediainfo!') </fieldset><br />
-$(echo -e "\n<br /><br /><br /><fieldset><br />\n")
+<br /><fieldset><font face=\"Courier New\"><legend>
+<span style=\"color:#ffffff;background-color:#000000;\">iNFO</span></legend>
+$([[ -s $source_desc ]] && cat "$source_html" || echo 'Failed to get mediainfo!')
+</font></fieldset><br /><br /><br /><br /><br /><fieldset><legend>
+<span style=\"color:#ffffff;background-color:#000000;\">转载来源</span></legend>
 $(if [ $source_t_id ]; then
     echo '<span style="font-size:20px;">本种来自： '${source_site_URL}/details.php?id=${source_t_id}'</span>'
 else
     echo '<span style="font-size:20px;">本种来自： '${source_site_URL}'</span>'
-fi
-echo -e "\n<br /></fieldset><br /><br />\n")"
+fi)
+<br /></fieldset><br />"
 
     # 简介覆盖保存至文件 
     echo "$source_desc_tmp" > "$source_desc"
