@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-18
+# Date: 2019-02-21
 #
 #--------------------------------------#
 qb_login="${qb_HOST}:$qb_PORT/api/v2/auth/login"
@@ -128,9 +128,9 @@ qb_add_torrent_url() {
     esac
     echo 'qbit添加种子失败'
     sleep 5
-    curl -b "`echo "$cookie"|sed -E 's/^cookie:[ ]?//i'`" \
-      --data "urls=\'$torrent2add\'root_folder=true&savepath=$one_TR_Dir&skip_checking=true" \
-      "$qb_add" && debug_func 'qbit:use-curl'
+    curl -b "`echo "$qb_Cookie"|sed -E 's/^cookie:[ ]?//i'`" -X POST \
+      -F "urls=$torrent2add" -F 'root_folder=true' -F "savepath=$one_TR_Dir" \
+      -F 'skip_checking=true' "$qb_add" && debug_func 'qbit:used-curl-POST'
   fi
 
   sleep 10
@@ -145,6 +145,10 @@ qb_add_torrent_file() {
   http --ignore-stdin -f POST "$qb_add" skip_checking=true root_folder=true \
       name@"${ROOT_PATH}/tmp/${t_id}.torrent" savepath="$one_TR_Dir" "$qb_Cookie"
   #  ----> ok
+  # curl 
+# curl -b "`echo "$qb_Cookie"|sed -E 's/^cookie:[ ]?//i'`" -X POST -F 'root_folder=true' \
+#   -F "name=@$${ROOT_PATH}/tmp/${t_id}.torrent" -F "savepath=$one_TR_Dir" \
+#   -F 'skip_checking=true' "$qb_add" && debug_func 'qbit:used-curl-POST'
   sleep 1
   qb_set_ratio_queue
 }
