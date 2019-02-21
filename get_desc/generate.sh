@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-18
+# Date: 2019-02-20
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -105,7 +105,10 @@ generate_main_func() {
     from_douban_get_desc
 
     # bbcode
-source_desc_tmp="${gen_desc_bbcode}
+source_desc_tmp="&my_extra_comment&
+&shc_name_douban&${chs_name_douban}
+&eng_name_douban&${eng_name_douban}
+${gen_desc_bbcode}
 
 [quote=iNFO][font=monospace]
 $([[ -s $source_desc ]] && cat "$source_desc" || echo 'Failed to get mediainfo!')
@@ -115,14 +118,11 @@ $(if [ $source_t_id ]; then
 else
     echo -e "\n[quote=转载来源][b]本种来自：[/b] ${source_site_URL}[/quote]"
 fi )
-&shc_name_douban&${chs_name_douban}
-&eng_name_douban&${eng_name_douban}
 "
 
     # byrbt 所需要的 html 简介
-[[ $enable_byrbt = yes ]] && source_html_tmp="${gen_desc_html}<br /><br />
-<br /><fieldset><font face=\"Courier New\"><legend>
-<span style=\"color:#ffffff;background-color:#000000;\">iNFO</span></legend>
+[[ $enable_byrbt = yes ]] && source_html_tmp="${gen_desc_html}<br /><br /><br />
+<fieldset><legend><span style=\"color:#ffffff;background-color:#000000;\">iNFO</span></legend><font face=\"Courier New\">
 $([[ -s $source_desc ]] && cat "$source_html" || echo 'Failed to get mediainfo!')
 </font></fieldset><br /><br /><br /><br /><br /><fieldset><legend>
 <span style=\"color:#ffffff;background-color:#000000;\">转载来源</span></legend>
@@ -135,7 +135,7 @@ fi)
 
     # 简介覆盖保存至文件 
     echo "$source_desc_tmp" > "$source_desc"
-    echo "$source_html_tmp" > "$source_html"
+    [[ $enable_byrbt = yes ]] && echo "$source_html_tmp" > "$source_html"
     # 清空变量，防止不同种子简介互串
     unset source_desc_tmp  source_html_tmp  source_t_id
     unset chs_name_douban  eng_name_douban  douban_poster_url
