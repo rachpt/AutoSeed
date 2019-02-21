@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-01-10
+# Date: 2019-02-20
 #
 #-------------------------------------#
 # 通过之前生成的 desc 简介文档，提取其中的各种参数。
@@ -14,7 +14,7 @@ unset_all_parameter() {
     unset noDot_name region serials season normal documentary genre language
     unset chs_included chinese_title foreign_title imdb_url douban_url is_ipad
     unset is_bd is_hdtv is_webdl is_4k is_1080p is_720p is_other file_type
-    unset is_package is_264 is_265 is_dts is_ac3 is_aac is_flac animation
+    unset is_package is_264 is_265 is_dts is_ac3 is_aac is_flac animation theater
 }
 from_desc_get_param() {
     unset_all_parameter
@@ -54,11 +54,19 @@ from_desc_get_param() {
     else
         normal='yes'
     fi
+    # 是否为剧场版
+    [[ $(grep -E '^.标　　签　.*$' "$source_desc"|grep -o '剧场版') ]] && \
+        theater='yes' || theater='no'
     # 语言
     language="$(grep -E '^.语　　言　.*$' "$source_desc"| \
         sed -r 's/.语　　言　//'|sed -r 's#[ ]+##g')"
     # 中文字幕
-    [ "$(grep -i "CH[ST]" "$source_desc")" ] && chs_included='中文字幕'
+    [ "$(grep -i "CH[ST]" "$source_desc")" ] && chs_included='中文字幕 '
+    # 添加额外信息
+    chs_included="${chs_included}$(grep '&my_extra_comment&' "$source_desc"| \
+        sed 's/&my_extra_comment&//')"
+    # 删除
+    sed -i '/&my_extra_comment&/d' "$source_desc"
 
     # 中文名
     chinese_title="$(grep '&shc_name_douban&' "$source_desc"| \
