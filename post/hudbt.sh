@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-01-19
+# Date: 2019-02-21
 #
 #-------------settings---------------#
 cookie="$cookie_hudbt"
@@ -30,9 +30,9 @@ fi
 # 判断类型，纪录片、电影、剧集、动漫
 if [[ $documentary = yes ]]; then
     hudbt_type='404'
-elif [[ $animation = yes ]]; then
-    # 国创动漫
-    hudbt_type='427' #连载
+elif [[ $theater = yes ]]; then
+    # 动漫 剧场版
+    hudbt_type='428' #剧场版
 elif [[ $is_ipad = yes ]]; then
     # 移动视频
     hudbt_type='430'
@@ -45,11 +45,12 @@ elif [[ $serials = yes ]]; then
         hudbt_type='417' ;;
     *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
         hudbt_type='416' ;;
-    *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+      *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*|*瑞典*|*芬兰*|*爱尔兰*|*阿联酋*|*土耳其*|*意大利*)
         hudbt_type='418' ;;
     *)
         hudbt_type='409' ;;
   esac
+  [[ $animation = yes ]] && hudbt_type='427' #连载动画
 else
   # 电影类别
   case "$region" in
@@ -59,7 +60,7 @@ else
         hudbt_type='413' ;;
     *日本*|*韩国*|*印度*|*新加坡*|*泰国*|*菲律宾*)
         hudbt_type='414' ;;
-    *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*)
+      *美国*|*英国*|*德国*|*法国*|*墨西哥*|*俄罗斯*|*西班牙*|*加拿大*|*澳大利亚*|*瑞典*|*芬兰*|*爱尔兰*|*阿联酋*|*土耳其*|*意大利*)
         hudbt_type='415' ;;
     *)
         hudbt_type='409' ;;
