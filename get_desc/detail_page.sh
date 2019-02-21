@@ -2,7 +2,7 @@
 # FileName: get_desc/detail_page.sh
 #
 # Author: rachpt@126.com
-# Version: 3.0v
+# Version: 3.1v
 # Date: 2019-02-18
 #
 #-------------------------------------#
