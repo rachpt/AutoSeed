@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-18
+# Date: 2019-02-21
 #
 #-------------------------------------#
 # 本文件用于处理所有图片问题
@@ -44,7 +44,7 @@ deal_with_images() {
   fi
   
   # 遍历 html 简介中的非法图片
-  local img_url img_file byr_url sm_url
+  local img_url img_url_d img_file byr_url sm_url
   local _counter=0
   while true; do
     if [ "$enable_byrbt" = 'yes' ]; then
@@ -57,6 +57,10 @@ deal_with_images() {
           sed "/i\.loli\.net/d"|head -1|sed -E "s!\[/?img\]!!ig")"
       debug_func "screens:desc-url-tju[$img_url]"  #----debug---
     fi
+    # ttg img use https url
+    [[ $img_url =~ .*tu\.totheglory\.im.* ]] && \
+      img_url_d="$(echo "$img_url"|sed 's%http:%https:%')" || \
+      img_url_d="$img_url"
     debug_func "screens-loop[$_counter]"  #----debug---
     # 跳出循环条件
     if [ ! "$img_url" ]; then
@@ -69,9 +73,9 @@ deal_with_images() {
     # 临时图片路径，使用时间作为文件名的一部分
     img_file="$ROOT_PATH/tmp/autoseed-pic-$(date '+%s%N')$(echo "${img_url##*/}"| \
         sed -r 's/.*(\.[jpgb][pnim]e?[gfp]).*/\1/i')"
-    http --verify=no --timeout=25 --ignore-stdin -do "$img_file" "$img_url" "$user_agent"
+    http --verify=no --timeout=25 --ignore-stdin -do "$img_file" "$img_url_d" "$user_agent"
     sleep 2 && [[ ! -s $img_file ]] && \
-    curl -o "$img_file" "$img_url" && debug_func 'screens_img:use-curl-download'
+    curl -o "$img_file" "$img_url_d" && debug_func 'screens_img:use-curl-download'
     [[ -s $img_file ]] && debug_func 'screens_img:downloaded' || \
       debug_func 'screens_img:failed-to-dl'  #----debug---
     # byrbt
@@ -96,7 +100,7 @@ deal_with_images() {
     [[ $byr_url ]] || debug_func "$byrbt_up_api command==QuickUpload type==Images upload@$img_file $user_agent $cookie_byrbt"
     [[ $enable_byrbt = yes && $byr_url ]] && \rm -f "$img_file"
     [[ $enable_tjupt = yes && $sm_url ]] && \rm -f "$img_file"
-    unset img_url img_file byr_url sm_url
+    unset img_url img_url_d img_file byr_url sm_url
     ((_counter++)) # C 形式的增1
   done
   # tjupt images
