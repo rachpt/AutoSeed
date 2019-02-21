@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-01-12
+# Date: 2019-02-20
 #-----------------------------#
 #
 # Auto clean old files/folders in 
@@ -34,19 +34,20 @@ is_old_file() {
 comparer_file_and_delete() {
   IFS_OLD=$IFS
   IFS=$'\n'
+  local i 
   for i in $(ls -1 "$FILE_PATH")
   do
     IFS=$IFS_OLD
     local old_status=$(is_old_file "$i") 
     if [ $old_status -eq 1 ]; then
        # 删除不在qb tr中的文件
-       delete_commit='yes'
-       [ "$qb" = 'yes' ] && qb_is_seeding "$i"
-       [ "$tr" = 'yes' ] && tr_is_seeding "$i"
+       local delete_commit='yes'
+       [[ $qb = yes ]] && qb_is_seeding "$i"
+       [[ $tr = yes && $delete_commit = yes ]] && tr_is_seeding "$i"
        [[ $qb != yes && $tr != yes ]] && delete_commit='no'
-       if [ "$i" ] && [ "$delete_commit" = 'yes' ]; then
-           debug_func "tr:del:[$i]"  #----debug---
-           rm -rf "$FILE_PATH/$i"
+       if [[ $i && $delete_commit = yes ]]; then
+           debug_func "clean:del-file:[$i]"  #----debug---
+           \rm -rf "$FILE_PATH/$i"
            echo "[$(date '+%m-%d %H:%M:%S')]deleted Torrent[$i]" >> "$log_Path"
        fi
     fi
@@ -77,11 +78,11 @@ clean_dir() {
   if [ ! -s "$ROOT_PATH/clean/dir" ]; then
     # add to the first line
     [ "$one_TR_Dir" ] && echo "$one_TR_Dir" > "$ROOT_PATH/clean/dir"
-    : # do nothing
   else
     OLD_IFS="$IFS"
     IFS=$'\n'
     local add_to_dir=1
+    local line
     for line in $(cat "$ROOT_PATH/clean/dir")
     do
        IFS="$OLD_IFS"
@@ -106,22 +107,24 @@ clean_frequence() {
 
 #-----------------------------#
 clean_main() {
-  qb='yes'
-  tr='yes'
+  local qb tr one_line
+  qb='yes'         # if you donot use qbittorrent, change value!
+  tr='yes'         # if you donot use transmission, change value!
   [ "$qb" = 'yes' ] && qb_delete_old
   [ "$tr" = 'yes' ] && tr_delete_old
   [ -s "$ROOT_PATH/clean/dir" ] && \
   cat "$ROOT_PATH/clean/dir"|while read one_line
   do
     FILE_PATH="$one_line"
-    comparer_file_and_delete
-    disk_is_over_use
-    echo "+++++++++++++[clean]+++++++++++++" >> "$log_Path"
+    comparer_file_and_delete   # make sure new file will not be deleted
+    disk_is_over_use           # make sure free space
   done
+  unset qb tr one_line
+  echo "+++++++++++++[clean]+++++++++++++" >> "$log_Path"
 }
 
 #---------call func-----------#
-clean_dir
+clean_dir                # update clean queue
 # maybe need more test !!!
-clean_frequence
+clean_frequence          # check and clean
 

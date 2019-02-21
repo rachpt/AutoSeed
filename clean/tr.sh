@@ -11,7 +11,7 @@ tr_delete_old() {
   local thread="$ROOT_PATH/tmp/thread"
   local THREAD_num=8                #定义进程数量
   if [[ -a "$thread" ]];then        #防止计数文件存在引起冲突
-      rm -f "$thread"               #若存在先删除
+      \rm -f "$thread"               #若存在先删除
   fi
   mkfifo "$thread"                  #创建fifo型文件用于计数
   exec 9<> "$thread"
@@ -46,7 +46,7 @@ tr_delete_old() {
     }&
   done
   wait                   #等待所有后台子进程结束
-  rm -f "$thread"
+  \rm -f "$thread"
 }
 
 #-----------------------------#
