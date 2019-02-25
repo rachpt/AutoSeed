@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-21
+# Date: 2019-02-22
 #
 #--------------------------------------#
 qb_login="${qb_HOST}:$qb_PORT/api/v2/auth/login"
@@ -57,9 +57,22 @@ qb_set_ratio_queue() {
   # say thanks 
   [[ $Allow_Say_Thanks == yes ]] && \
   [[ "$(eval echo '$'"say_thanks_$site")" == yes ]] && \
-  http --verify=no -h --ignore-stdin -f POST "${post_site[$site]}/thanks.php" \
-  id="$t_id" "$(eval echo '$'"cookie_$site")" "$user_agent" && \
-  debug_func "qb:set-ratio-thanks-[$site]"  #----debug---
+  if http --verify=no -h --ignore-stdin -f POST "${post_site[$site]}/thanks.php" \
+    id="$t_id" "$(eval echo '$'"cookie_$site")" "$user_agent" &> /dev/null; then
+    debug_func "qb:set-ratio-thanks-[$site]"  #----debug---
+  else
+    case $? in
+      2) debug_func 'qbit[thx]:Request timed out!' ;;
+      3) debug_func 'qbit[thx]:Unexpected HTTP 3xx Redirection!' ;;
+      4) debug_func 'qbit[thx]:HTTP 4xx Client Error!' ;;
+      5) debug_func 'qbit[thx]:HTTP 5xx Server Error!' ;;
+      6) debug_func 'qbit[thx]:Exceeded --max-redirects=<n> redirects!' ;;
+      *) debug_func 'qbit[thx]:Other Error!' ;;
+    esac
+    curl -k -b "`eval echo '$'"cookie_$site"|sed -E 's/^cookie:[ ]?//i'`" -X POST \
+      -F "id=$t_id" -A "`echo "$user_agent"|sed -E 's/^User-Agent:[ ]?//i'`" \
+      "${post_site[$site]}/thanks.php" && debug_func 'qbit:used-curl-say-thanks'
+  fi
 
   unset site
 }
@@ -95,11 +108,25 @@ qb_set_ratio_loop() {
       local rtio="$(head -3 "$qb_rt_queue"|tail -1)"   # line third
       local hash="$(qb_get_hash "$name" "$trker")"     # get hash  
       # 设置qbit 做种时间以及做种分享率
-      [ "${#hash}" -eq 40 ] && \
-        http --ignore-stdin -f POST "$qb_ratio" hashes="$hash" \
-         ratioLimit=$rtio seedingTimeLimit="$(echo \
-         ${MAX_SEED_TIME} \* 60 \* 60|bc)" "$qb_Cookie" && sleep 1 && \
-         debug_func "qb:sussess_set_rt[$trker]"        #----debug---
+      [ "${#hash}" -eq 40 ] && debug_func "find[$hash]" && \
+      if http --ignore-stdin -f POST "$qb_ratio" hashes="$hash" \
+        ratioLimit=$rtio seedingTimeLimit="$(echo \
+        ${MAX_SEED_TIME} \* 60 \* 60|bc)" "$qb_Cookie" &> /dev/null; then
+          debug_func "qb:sussess_set_rt[$trker]"       #----debug---
+      else
+        case $? in
+          2) debug_func 'qbit[rtio]:Request timed out!' ;;
+          3) debug_func 'qbit[rtio]:Unexpected HTTP 3xx Redirection!' ;;
+          4) debug_func 'qbit[rtio]:HTTP 4xx Client Error!' ;;
+          5) debug_func 'qbit[rtio]:HTTP 5xx Server Error!' ;;
+          6) debug_func 'qbit[rtio]:Exceeded --max-redirects=<n> redirects!' ;;
+          *) debug_func 'qbit[rtio]:Other Error!' ;;
+        esac
+        curl -k -b "`echo "$qb_Cookie"|sed -E 's/^cookie:[ ]?//i'`" -X POST \
+          -F "hashes=$hash" -F "ratioLimit=$rtio" \
+          -F "seedingTimeLimit=$(echo ${MAX_SEED_TIME} \* 60 \* 60|bc)" \
+          "$qb_ratio" && debug_func "qb:sussess_set_rt-curl[$trker]"
+      fi
       sed -i '1,3d' "$qb_rt_queue"                     # delete record
       ((qb_lp_counter++))                              # C 形式的增1
     done
@@ -128,7 +155,7 @@ qb_add_torrent_url() {
     esac
     echo 'qbit添加种子失败'
     sleep 5
-    curl -b "`echo "$qb_Cookie"|sed -E 's/^cookie:[ ]?//i'`" -X POST \
+    curl -k -b "`echo "$qb_Cookie"|sed -E 's/^cookie:[ ]?//i'`" -X POST \
       -F "urls=$torrent2add" -F 'root_folder=true' -F "savepath=$one_TR_Dir" \
       -F 'skip_checking=true' "$qb_add" && debug_func 'qbit:used-curl-POST'
   fi
@@ -146,7 +173,7 @@ qb_add_torrent_file() {
       name@"${ROOT_PATH}/tmp/${t_id}.torrent" savepath="$one_TR_Dir" "$qb_Cookie"
   #  ----> ok
   # curl 
-# curl -b "`echo "$qb_Cookie"|sed -E 's/^cookie:[ ]?//i'`" -X POST -F 'root_folder=true' \
+# curl -k -b "`echo "$qb_Cookie"|sed -E 's/^cookie:[ ]?//i'`" -X POST -F 'root_folder=true' \
 #   -F "name=@$${ROOT_PATH}/tmp/${t_id}.torrent" -F "savepath=$one_TR_Dir" \
 #   -F 'skip_checking=true' "$qb_add" && debug_func 'qbit:used-curl-POST'
   sleep 1

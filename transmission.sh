@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-18
+# Date: 2019-02-22
 #
 #---------------------------------------#
 #
@@ -24,9 +24,22 @@ tr_set_ratio() {
               $tr_remote -t $Tr_ID -sr "$(eval echo '$'"ratio_$tracker")" && \
               [[ $Allow_Say_Thanks == yes ]] && \
               [[ "$(eval echo '$'"say_thanks_$tracker")" == yes ]] && \
-  http --verify=no --ignore-stdin -f POST "${post_site[$tracker]}/thanks.php" \
-                id="$t_id" "$(eval echo '$'"cookie_$tracker")" && \
-                debug_func "tr:set-ratio-success[$tracker]" && break 2
+  if http --verify=no --ignore-stdin -f POST "${post_site[$tracker]}/thanks.php" \
+                id="$t_id" "$(eval echo '$'"cookie_$tracker")" &> /dev/null; then
+                debug_func "tr:set-ratio-success[$tracker]" 
+            else
+            case $? in
+              2) debug_func 'qbit[thx]:Request timed out!' ;;
+              3) debug_func 'qbit[thx]:Unexpected HTTP 3xx Redirection!' ;;
+              4) debug_func 'qbit[thx]:HTTP 4xx Client Error!' ;;
+              5) debug_func 'qbit[thx]:HTTP 5xx Server Error!' ;;
+              6) debug_func 'qbit[thx]:Exceeded --max-redirects=<n> redirects!' ;;
+              *) debug_func 'qbit[thx]:Other Error!' ;;
+            esac
+            curl -k -b "`eval echo '$'"cookie_$tracker"|sed -E 's/^cookie:[ ]?//i'`" -X POST \
+              -F "id=$t_id" -A "`echo "$user_agent"|sed -E 's/^User-Agent:[ ]?//i'`" \
+              "${post_site[$tracker]}/thanks.php" && debug_func 'tr:used-curl-say-thanks'
+          fi && break 2
           done
       fi
     done

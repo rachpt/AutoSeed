@@ -75,7 +75,7 @@ deal_with_images() {
         sed -r 's/.*(\.[jpgb][pnim]e?[gfp]).*/\1/i')"
     http --verify=no --timeout=25 --ignore-stdin -do "$img_file" "$img_url_d" "$user_agent"
     sleep 2 && [[ ! -s $img_file ]] && \
-    curl -o "$img_file" "$img_url_d" && debug_func 'screens_img:use-curl-download'
+    curl -k -o "$img_file" "$img_url_d" && debug_func 'screens_img:use-curl-download'
     [[ -s $img_file ]] && debug_func 'screens_img:downloaded' || \
       debug_func 'screens_img:failed-to-dl'  #----debug---
     # byrbt
