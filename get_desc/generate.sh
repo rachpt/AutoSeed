@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-20
+# Date: 2019-02-28
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -54,6 +54,50 @@ get_douban_url_by_keywords() {
   unset -f search_doubanurl
 }
 
+poster_to_bbcode() {
+  # 参数，海报列表
+  local _one_url _the_rest _line
+  local _url_lists="$1"
+  _line=$(expr $RANDOM % $(echo "$_url_lists"|wc -l) + 1)  # 随机海报
+  [[ $_line ]] || _line=1   # default
+  _one_url="$(echo "$_url_lists"|sed -n "$_line p")"
+  gen_desc_bbcode="$(echo "$gen_desc_bbcode"|sed "s%$douban_poster_url%$_one_url%")"
+  _the_rest="$(echo "$_url_lists"|sed "/$_one_url/d")"
+  [[ $_the_rest ]] && {
+   _the_rest="$(echo "$_the_rest"|sed "1i 其他海报:")"
+   _the_rest="$(echo $_the_rest|sed "s/ /\\n/g")"  # 转化为\n分割的一行
+   gen_desc_bbcode="$(echo "$gen_desc_bbcode"|sed "/$\[img\]/a $_the_rest")"
+  }
+  debug_func "gen-other-poster-url:[$_one_url]"    #----debug---
+}
+
+mtime_poster() {
+  # 获取时光网海报
+  local mtime_id mtime_lists mt_url_one _the_rest
+  mtime_id="$(http --ignore-stdin --timeout=26 GET 'http://service-channel.mtime.com/Search.api' Ajax_CallBack==true Ajax_CallBackType=='Mtime.Channel.Services' Ajax_CallBackMethod==GetSuggestObjs Ajax_CallBackArgument0=="$chs_name_douban"|sed -E 's/(,|:\[\{)/\n/g'|grep -B3 "\"$chs_name_douban\""|grep -E 'id.*[0-9]+'|grep -Eo '[0-9]+'|head -1)"
+  if [[ $mtime_id ]]; then
+    mtime_lists="$(http --ignore-stdin --timeout=26 GET "http://movie.mtime.com/$mtime_id/posters_and_images/posters/hot.html"|grep '海报'|grep -Eo "http://img[0-9]+\.mtime\.cn/pi/u/[/0-9\._]+X[0-9]+\.(jpg|jpeg|png|gif)")"
+    if [[ $mtime_lists ]]; then
+      poster_to_bbcode "$mtime_lists"
+    else
+      debug_func 'gen-mtime-poster-url:[failed!]'    #----debug---
+    fi
+  else
+    debug_func 'gen-mtime:[failed-to-find-id!]'      #----debug---
+  fi
+}
+
+m1905_poster() {
+  # 获取m1905 网海报
+  local m1905_lists m_url_one the_rest
+  m1905_lists="$(http --pretty=format --ignore-stdin --timeout=26 GET "http://www.1905.com/search/?q=$chs_name_douban"|grep "alt=.$chs_name_douban"|grep -E -o "http://image[0-9]+.m1905.com[^\"\']+\.(jpg|jpeg|png|gif)"|sed -E 's/thumb_[0-9]_[0-9]{2,3}_[0-9]{2,3}_//')"
+  if [[ $m1905_lists ]]; then
+      poster_to_bbcode "$m1905_lists"
+  else
+      debug_func 'gen-m1905-poster-url:[failed!] || try-mtime...'    #----debug---
+      mtime_poster
+  fi
+}
 #-------------------------------------#
 from_douban_get_desc() {
     # 获取搜索链接
@@ -91,6 +135,7 @@ print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=F
         # 英文名
         eng_name_douban="$(echo "$desc_json_info"|grep 'foreign_title'| \
             head -1|awk -F '"' '{print $4}')"
+        m1905_poster
 
         [[ $enable_byrbt = yes ]] && gen_desc_html="$(echo "$gen_desc_bbcode"| \
             sed "1c <img src=\"$douban_poster_url\" />"|sed 's!$!&<br />!g')" # byrbt
