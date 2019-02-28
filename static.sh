@@ -179,6 +179,4 @@ is_tracker_down() {
   unset _site
 }
 #-------------------------------------#
-is_tracker_down  # test tracker status
-#-------------------------------------#
 
