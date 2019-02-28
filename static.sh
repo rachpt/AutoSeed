@@ -164,4 +164,21 @@ upload_image_byrbt() {
 }
 #
 #-------------------------------------#
+# test tracker is down?
+is_tracker_down() {
+  local _site
+  for _site in  hudbt whu nanyangpt npupt byrbt cmct tjupt; do
+    if http --verify=no --ignore-stdin GET "${post_site[$_site]}/" \
+    "$(eval echo '$'"cookie_$_site")" "$user_agent" &> /dev/null; then
+      debug_func "static-[$_site is OK]"  #----debug---
+    else
+      eval "enable_$_site"='no'
+      debug_func "static-[$_site is Down !!!]"  #----debug---
+    fi
+  done
+  unset _site
+}
+#-------------------------------------#
+is_tracker_down  # test tracker status
+#-------------------------------------#
 

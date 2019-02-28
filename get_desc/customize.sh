@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-01-11
+# Date: 2019-02-28
 #
 #-------------------------------------#
 # 本文件对特定资源发布站点进行特殊设置，
@@ -61,6 +61,8 @@ my_dupe_rules() {
   else
     debug_func ':dupe:no-dupe-rules-file!'  #----debug---
   fi
+  # test tracker status
+  is_tracker_down    # static.sh
 }
 #----------------------------------------#
 
