@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-18
+# Date: 2019-02-28
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -33,19 +33,10 @@ gen_screenshots() {
     "tile=3x4:nb_frames=0:padding=5:margin=5:color=random" "$screen_file" -y 2>/dev/null
   \rm -f "${ROOT_PATH}/tmp"/thumbnail-[0-9]*.jpg # 通配符，不能使用引号
 
-  # 图片上传
-  unset sm_url byr_url
-  sm_url="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
-    "$upload_poster_api" smfile@"$screen_file" "$user_agent"|grep -Eo "\"url\":\"[^\"]+\""| \
-    awk -F "\"" '{print $4}'|sed 's/\\//g')"
-  # 备用图床
-  [[ ! $sm_url ]] && sm_url="$(http --pretty=format --verify=no --timeout=25 -bf \
-     --ignore-stdin POST "$upload_poster_api_2" image@"$screen_file" "$user_agent"| \
-     grep -Eo "\"link\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')"
-  [[ $enable_byrbt == yes ]] && byr_url="$(http --verify=no --ignore-stdin \
-    --timeout=40 -bf POST "$byrbt_up_api" command==QuickUpload type==Images \
-    upload@"$screen_file" "$user_agent" "$cookie_byrbt"| \
-    grep -Eio "https?://[^\'\"]+"|sed "s/http:/https:/g")"
+  # 图片上传 img_url_com  img_url_byr
+  upload_image_com "$screen_file"
+  [[ $enable_byrbt == yes ]] && upload_image_byrbt "$screen_file"
+
   sleep 0.5 && \rm -f "$screen_file"
 }
 
@@ -69,15 +60,15 @@ generate_info_local() {
   # 缩略图
   gen_screenshots
   # 存档
-  if [[ $byr_url || $sm_url ]]; then
-    echo -e "$info_generated\n\n[b]以下是[url=https://github.com/rachpt/AutoSeed] AutoSeed [/url]自动完成的截图，不喜勿看。[/b]\n"${max_size_file##*/}"\n[img]$sm_url[/img]" > "$source_desc"
-    debug_func "info:screens-gened[$sm_url]"  #----debug---
+  if [[ $img_url_byr || $img_url_com ]]; then
+    echo -e "$info_generated\n\n[b]以下是[url=https://github.com/rachpt/AutoSeed] AutoSeed [/url]自动完成的截图，不喜勿看。[/b]\n"${max_size_file##*/}"\n[img]$img_url_com[/img]" > "$source_desc"
+    debug_func "info:screens-gened[$img_url_com]"  #----debug---
     # byrbt bbcode to html
-    [[ $enable_byrbt == yes && $byr_url ]] && {
+    [[ $enable_byrbt == yes && $img_url_byr ]] && {
     echo "$info_generated"|sed 's/ /\&nbsp; /g;s!$!&<br />!g' > "$source_html" 
     echo "<br /><br /><stong>以下是<a href=\"https://github.com/rachpt/AutoSeed\"> AutoSeed </a>自动完成的截图，不喜勿看。</strong><br />${max_size_file##*/}<br />" >> "$source_html" # 追加至末尾
-    echo "<img src=\"$byr_url\" style=\"width: 900px;\" /> <br />" >> "$source_html" # 追加至末尾
-    debug_func "info:screens-byrbt[$byr_url]"  #----debug---
+    echo "<img src=\"$img_url_byr\" style=\"width: 900px;\" /> <br />" >> "$source_html" # 追加至末尾
+    debug_func "info:screens-byrbt[$img_url_byr]"  #----debug---
     }
   else
     # byrbt bbcode to html
@@ -123,7 +114,7 @@ read_info_file() {
     generate_info_local
   fi
   debug_func 'info:exit'  #----debug---
-  unset sm_url byr_url info_generated
+  unset img_url_com img_url_byr info_generated
 }
 
 #-------------------------------------#

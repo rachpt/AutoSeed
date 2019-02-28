@@ -3,14 +3,12 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-21
+# Date: 2019-02-28
 #
 #-------------------------------------#
-# 本文件用于处理所有图片问题
+# 本文件用于处理原种中所有screen图片问题
 #-------------------------------------#
-#
-#-------------------------------------#
-# 豆瓣海报上传至图床
+# 包括 bytbt 以及 tjupt
 #-------------------------------------#
 delete_screenshots_img() {
   debug_func 'screens:delete-screenshots'  #----debug---
@@ -44,7 +42,7 @@ deal_with_images() {
   fi
   
   # 遍历 html 简介中的非法图片
-  local img_url img_url_d img_file byr_url sm_url
+  local img_url img_url_d img_file img_url_byr img_url_com
   local _counter=0
   while true; do
     if [ "$enable_byrbt" = 'yes' ]; then
@@ -52,10 +50,10 @@ deal_with_images() {
       img_url="$(grep -Eo "src=[\"\']http[^\'\"]+" "$source_html"| \
           sed "/bt\.byr\.cn/d"|head -1|sed "s/src=[\"\']//g")"
       debug_func "screens:desc-url-byr[$img_url]"  #----debug---
-    elif [ "$enable_tjupt" = 'yes' ]; then
-      img_url="$(grep -Eio "[img]http.*[/img]" "$source_desc2tjupt"| \
-          sed "/i\.loli\.net/d"|head -1|sed -E "s!\[/?img\]!!ig")"
-      debug_func "screens:desc-url-tju[$img_url]"  #----debug---
+    #elif [ "$enable_tjupt" = 'yes' ]; then
+      #img_url="$(grep -Eio "[img]http.*[/img]" "$source_desc2tjupt"| \
+          #sed "/i\.loli\.net/d"|head -1|sed -E "s!\[/?img\]!!ig")"
+      #debug_func "screens:desc-url-tju[$img_url]"  #----debug---
     fi
     # ttg img use https url
     [[ $img_url =~ .*tu\.totheglory\.im.* ]] && \
@@ -74,38 +72,29 @@ deal_with_images() {
     img_file="$ROOT_PATH/tmp/autoseed-pic-$(date '+%s%N')$(echo "${img_url##*/}"| \
         sed -r 's/.*(\.[jpgb][pnim]e?[gfp]).*/\1/i')"
     http --verify=no --timeout=25 --ignore-stdin -do "$img_file" "$img_url_d" "$user_agent"
-    sleep 2 && [[ ! -s $img_file ]] && \
+    [[ ! -s $img_file ]] && \
     curl -k -o "$img_file" "$img_url_d" && debug_func 'screens_img:use-curl-download'
     [[ -s $img_file ]] && debug_func 'screens_img:downloaded' || \
       debug_func 'screens_img:failed-to-dl'  #----debug---
-    # byrbt
-    [ "$enable_byrbt" = 'yes' ] && byr_url="$(http --verify=no --ignore-stdin \
-      --timeout=40 -bf POST "$byrbt_up_api" command==QuickUpload type==Images \
-      upload@"$img_file" "$user_agent" "$cookie_byrbt"| \
-      grep -Eio "https?://[^\'\"]+"|sed "s/http:/https:/g")" && \
-      [[ $byr_url ]] && sed -i "s!$img_url!$byr_url!g" "$source_html" && \
-      debug_func "screens-byr[$byr_url]"
-    # tjupt
-    [ "$enable_tjupt" = 'yes' ] && [ ! "$(echo "$img_url"| \
-      grep "i\.loli\.net")" ] && sm_url="$(http --verify=no --timeout=25 \
-      --ignore-stdin -f POST "$upload_poster_api" smfile@"$img_file"| \
-      grep -Eo "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" && \
-      if [[ ! $sm_url ]]; then sm_url="$(http --pretty=format --verify=no -bf \
-      --timeout=25 --ignore-stdin POST "$upload_poster_api_2" image@"$screen_file" \
-      "$user_agent"|grep -Eo "\"link\":\"[^\"]+\""|awk -F "\"" '{print $4}'| \
-      sed 's/\\//g')";fi && [[ $sm_url ]] && sed -i "s!$img_url!$sm_url!g" \
-      "$source_desc2tjupt" && debug_func "screens-byr[$sm_url]"
 
-    #----debug---
-    [[ $byr_url ]] || debug_func "$byrbt_up_api command==QuickUpload type==Images upload@$img_file $user_agent $cookie_byrbt"
-    [[ $enable_byrbt = yes && $byr_url ]] && \rm -f "$img_file"
-    [[ $enable_tjupt = yes && $sm_url ]] && \rm -f "$img_file"
-    unset img_url img_url_d img_file byr_url sm_url
+    # byrbt image
+    [[ $enable_byrbt = yes ]] && upload_image_byrbt "$img_file" && \
+      [[ $img_url_byr ]] && sed -i "s!$img_url!$img_url_byr!g" "$source_html" && \
+      debug_func "screens-byr[$img_url_byr]"
+    # tjupt image
+    [[ $enable_tjupt = yes ]] && [ ! "$(echo "$img_url"| \
+      grep "i\.loli\.net")" ] && upload_image_com "$img_file" && \
+      [[ $img_url_com ]] && sed -i "s!$img_url!$img_url_com!g" \
+      "$source_desc2tjupt" && debug_func "screens-byr[$img_url_com]"
+
+    [[ $enable_byrbt = yes && $img_url_byr ]] && \rm -f "$img_file"
+    #[[ $enable_tjupt = yes && $img_url_com ]] && \rm -f "$img_file"
+    unset img_url img_url_d img_file img_url_byr img_url_com
     ((_counter++)) # C 形式的增1
   done
   # tjupt images
-  [ "$enable_tjupt" = 'yes' ] && sed -i \
-    '/jpg\|png\|jpeg\|gif\|webp/ {/i\.loli\.net/!d}' "$source_desc2tjupt"
+  #[ "$enable_tjupt" = 'yes' ] && sed -i \
+    #'/jpg\|png\|jpeg\|gif\|webp/ {/i\.loli\.net/!d}' "$source_desc2tjupt"
   debug_func 'screens:exit'  #----debug---
 }
 
