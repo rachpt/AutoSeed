@@ -168,12 +168,21 @@ upload_image_byrbt() {
 is_tracker_down() {
   local _site
   for _site in  hudbt whu nanyangpt npupt byrbt cmct tjupt; do
-    if http --verify=no --ignore-stdin GET "${post_site[$_site]}/" \
+    if http --verify=no  --timeout=40 --ignore-stdin GET "${post_site[$_site]}/login.php" \
     "$(eval echo '$'"cookie_$_site")" "$user_agent" &> /dev/null; then
       debug_func "static-[$_site is OK]"  #----debug---
     else
-      eval "enable_$_site"='no'
-      debug_func "static-[$_site is Down !!!]"  #----debug---
+      case $? in
+        2|3|4)
+            : ;;
+        5|6)
+          eval "enable_$_site"='no'
+          debug_func "static-[$_site is Down !!!]"  #----debug---
+          ;;
+        *)
+          debug_func "static-[$_site http error!!]"  #----debug---
+          ;;
+      esac
     fi
   done
   unset _site
