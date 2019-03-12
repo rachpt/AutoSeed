@@ -96,14 +96,14 @@ if [ "$source_site_URL" ]; then
         # TTG
         local s_search_URL="${source_site_URL}/browse.php"
 
-        source_t_id="$(http --verify=no -b --ignore-stdin --timeout=25 GET \
+        source_t_id="$(http --verify=no --ignore-stdin --timeout=25 -b GET \
         "$s_search_URL" c==M search_field=="$_search_w" "$cookie_source_site" "$user_agent"| \
         grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
     else
         # 一般形式
         local s_search_URL="${source_site_URL}/torrents.php"
 
-        source_t_id="$(http --verify=no -b --ignore-stdin --timeout=25 GET \
+        source_t_id="$(http --verify=no --ignore-stdin --timeout=25 -b GET \
         "$s_search_URL" search=="$_search_w" "$cookie_source_site" "$user_agent"| \
         grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
     fi
@@ -129,17 +129,17 @@ no_source_2_source # 减少不必要的过程
 
 #-------------------------------------#
 form_source_site_get_Desc() {
+  unset imdb_url douban_url # 防止上次结果影响到下一次
   form_source_site_get_tID
   # source_t_id will be unset in generate.sh
   if [ "$source_t_id" ]; then
     #---define temp file name---#
     source_full="${ROOT_PATH}/tmp/${org_tr_name}_full.txt"
-    http -b --verify=no --ignore-stdin --timeout=25 GET \
+    http --verify=no --ignore-stdin --timeout=25 -b GET \
         "${source_site_URL}/details.php?id=${source_t_id}" \
         "$cookie_source_site" "$user_agent" > "$source_full"
   #---desc-full--start
   if [ -s "$source_full" ]; then
-    unset imdb_url douban_url # 防止上次结果影响到下一次
     # imdb 和豆瓣链接,用于生成简介
     imdb_url="$(grep -Eo 'tt[0-9]{7}' "$source_full"|head -1)"
     douban_url="$(grep -Eo 'https?://(movie\.)?douban\.com/subject/[0-9]{7,8}' "$source_full"|head -1)"
