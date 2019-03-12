@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-28
+# Date: 2019-03-12
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -110,6 +110,12 @@ trackers[cmct]='tracker.hdcmct.org'
 post_site[cmct]='https://hdcmct.org'
 trackers[tjupt]='.tjupt.org'
 post_site[tjupt]='https://tjupt.org'
+#--------------------------------------#
+# source tracker url
+trackers[ttg]='tracker.totheglory.im'
+trackers[hdc]='tracker.hdchina.org'
+trackers[hds]='tracker.hdsky.me'
+trackers[mt]='tp.m-team.cc'
 #--------------------------------------#
 # import functions
 source "$ROOT_PATH/qbittorrent.sh"

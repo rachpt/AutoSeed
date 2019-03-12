@@ -79,34 +79,33 @@ qb_set_ratio_queue() {
 
 #---------------------------------------#
 qb_get_hash() {
-  # $1 name; $2 tracker; return hash
+  # $1 name; $2 tracker; return hash(echo)
+  local hash tr_one pos
   echo "$data"|sed -n "/name.*$1/="|while read pos; do
-    local hash="$(echo "$data"|head -n "$(expr $pos - 1)"|tail -1| \
-        sed -E 's/hash:[ ]*//')"
-    local tr_one="$(echo "$data"|head -n "$(expr $pos + 1)"|tail -1| \
-        sed -E 's/tracker:[ ]*//;s/passkey=.*//')"
-    [ "$(echo "$tr_one"|grep "$2")" ] && echo "$hash" && break
+    hash="$(echo "$data"|head -n $(($pos - 1))|tail -1|sed -E 's/hash:[ ]*//')"
+    tr_one="$(echo "$data"|head -n $(($pos + 1))|tail -1|sed -E 's/tracker:[ ]*//;s/passkey=.*//')"
+    [[ "$(echo "$tr_one"|grep "$2")" ]] && echo "$hash" && break
   done
-  unset pos hash tr_one
 }
 
 #---------------------------------------#
 qb_set_ratio_loop() {
   if [ -s "$qb_rt_queue" ]; then
+    local data qb_lp_counter trker rtio hash 
     sleep 20 # 延时
     qbit_webui_cookie
-    local data="$(http --ignore-stdin --pretty=format -f POST "$qb_lists" sort=added_on reverse=true \
+    data="$(http --ignore-stdin --pretty=format -f POST "$qb_lists" sort=added_on reverse=true \
     "$qb_Cookie"|sed -E '/^[ ]*[},]+$/d;s/^[ ]+//;s/[ ]+[{]+//;s/[},]+//g'| \
-    grep -B18 -A19 'name":'|sed -Ee \
+    grep -B18 -A19 'name":'|sed -E \
     '/"hash":/{s/"//g};/"name":/{s/"//g};/"tracker":/{s/"//g};'|sed '/"/d')" 
     qb_lp_counter=0
     while true; do
-      local name="$(head -1 "$qb_rt_queue")"           # line one
+      name="$(head -1 "$qb_rt_queue")"                 # line one
       [[ ! $name ]] && break                           # jump out
       [[ $qb_lp_counter -gt 50 ]] && break             # jump out
-      local trker="$(head -2 "$qb_rt_queue"|tail -1)"  # line second
-      local rtio="$(head -3 "$qb_rt_queue"|tail -1)"   # line third
-      local hash="$(qb_get_hash "$name" "$trker")"     # get hash  
+      trker="$(head -2 "$qb_rt_queue"|tail -1)"        # line second
+      rtio="$(head -3 "$qb_rt_queue"|tail -1)"         # line third
+      hash="$(qb_get_hash "$name" "$trker")"           # get hash  
       # 设置qbit 做种时间以及做种分享率
       [ "${#hash}" -eq 40 ] && debug_func "find[$hash]" && \
       if http --ignore-stdin -f POST "$qb_ratio" hashes="$hash" \
@@ -139,7 +138,6 @@ qb_add_torrent_url() {
   qbit_webui_cookie
   # add url
   debug_func 'qb:add-from-url'  #----debug---
-  debug_func "urls=$torrent2add path=$one_TR_Dir $qb_Cookie"
   if http --ignore-stdin -f POST "$qb_add" urls="$torrent2add" root_folder=true \
     savepath="$one_TR_Dir" skip_checking=true "$qb_Cookie" &> /dev/null; then
     echo 'qbit添加种子成功'
@@ -155,6 +153,7 @@ qb_add_torrent_url() {
     esac
     echo 'qbit添加种子失败'
     sleep 5
+    debug_func "urls=$torrent2add path=$one_TR_Dir $qb_Cookie"
     curl -k -b "`echo "$qb_Cookie"|sed -E 's/^cookie:[ ]?//i'`" -X POST \
       -F "urls=$torrent2add" -F 'root_folder=true' -F "savepath=$one_TR_Dir" \
       -F 'skip_checking=true' "$qb_add" && debug_func 'qbit:used-curl-POST'
@@ -185,16 +184,22 @@ qb_add_torrent_file() {
 qb_get_torrent_completion() {
   qbit_webui_cookie
   # need a parameter
-  local data="$(http --ignore-stdin --pretty=format -f POST "$qb_lists" sort=added_on reverse=true \
+  local data pos compl_one size_one
+  data="$(http --ignore-stdin --pretty=format -f POST "$qb_lists" sort=added_on reverse=true \
     "$qb_Cookie"|sed -E '/^[ ]*[},]+$/d;s/^[ ]+//;s/[ ]+[{]+//;s/[},]+//g'| \
     grep -B17 -A15 'name":'|sed -E \
     '/"completed":/{s/"//g};/"name":/{s/"//g};/"save_path":/{s/"//g};/"size":/{s/"//g};'|sed '/"/d')" 
   # match one!
-  local pos=$(echo "$data"|sed -n "/name.*$org_tr_name/="|tail -1)
+  pos=$(echo "$data"|sed -n "/name.*$org_tr_name/="|tail -1)
   [[ $pos ]] && {
-  local compl_one="$(echo "$data"|head -n $(expr $pos - 1)|tail -1|grep -Eo '[0-9]{4,}')"
-  local size_one="$(echo "$data"|head -n $(expr $pos + 2)|tail -1|grep -Eo '[0-9]{4,}')"
-  one_TR_Dir="$(echo "$data"|head -n $(expr $pos + 1)|tail -1|grep -o '/.*$')";
+   compl_one="$(echo "$data"|head -n $(($pos - 1))|tail -1|grep -Eo '[0-9]{4,}')"
+   size_one="$(echo "$data"|head -n $(($pos + 2))|tail -1|grep -Eo '[0-9]{4,}')"
+   # one_TR_Dir is not local variable
+   one_TR_Dir="$(echo "$data"|head -n $(($pos + 1))|tail -1|grep -o '/.*$')";
+   # set source torrent's ratio
+   [[ $source_uid ]] || get_source_site # get_desc/detail_page.sh
+   [[ $fg_client = qbittorrent ]] && \
+   echo -e "${org_tr_name}\n${trackers[$source_uid]}\n`eval echo '$'ratio_$source_uid`" >> "$qb_rt_queue"
   }
   # return completed precent
   [[ $compl_one && $size_one ]] && \

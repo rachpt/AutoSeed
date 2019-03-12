@@ -199,8 +199,6 @@ while true; do
     [ ! "$test_func_probe" ] && \
     sed -i '1,2d' "$queue"              # delete record
     ((main_lp_counter++))               # C 形式的增1
-    qb_reannounce
-    sleep 2
 done
 
 # qbittorrent set ratio

@@ -17,28 +17,33 @@
 source "$ROOT_PATH/get_desc/customize.sh"
 #-------------------------------------#
 get_source_site() {
-    unset source_site_URL cookie_source_site unknown_site source_t_id
+    unset source_site_URL cookie_source_site unknown_site source_t_id source_uid
     local tracker_info="$($tr_show "$torrent_Path"|grep -A5 'TRACKERS')"
     # 获取种子原站点
     if [ "$(echo $tracker_info|grep -i 'hdsky')" ]; then
         source_site_URL='https://hdsky.me'
         cookie_source_site="$cookie_hds"
+        source_uid='hds'
         echo "got source_site: hdsky" >> "$log_Path"
     elif [ "$(echo $tracker_info|grep -i 'totheglory')" ]; then
         source_site_URL='https://totheglory.im'
         cookie_source_site="$cookie_ttg"
+        source_uid='ttg'
         echo "got source_site: ttg" >> "$log_Path"
     elif [ "$(echo $tracker_info|grep -i 'hdchina')" ]; then
         source_site_URL='https://hdchina.org'
         cookie_source_site="$cookie_hdc"
+        source_uid='hdc'
         echo "got source_site: hdchina" >> "$log_Path"
     elif [ "$(echo $tracker_info|grep -i 'tp.m-team.cc')" ]; then
         source_site_URL='https://tp.m-team.cc'
         cookie_source_site="$cookie_mt"
+        source_uid='mt'
         echo "got source_site :mteam" >> "$log_Path"
     elif [ "$(echo $tracker_info|grep -i 'hdcmct.org')" ]; then
         source_site_URL='https://hdcmct.org'
         cookie_source_site="$cookie_cmct"
+        source_uid='cmct'
         echo "got source_site: hdcmct" >> "$log_Path"
     #elif [ "$(echo $tracker_info|grep -i 'new')" ]; then
     #    source_site_URL='https://new.tracker.org'

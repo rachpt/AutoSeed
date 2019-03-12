@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2018-12-31
+# Date: 2019-03-12
 #
 # Environmental requirements:
 # - transmission-[remote,daemon or gtk] or qbittorrent
@@ -31,7 +31,7 @@ Use_Local_Gen='yes'
 #---torrent file path---#
 flexget_path="/home/rachpt/Downloads/tmp"
 #---transmission or qbittorrent---#
-fg_client='transmission'
+fg_client='transmission' # download source torrent
 #
 # data folder
 # for find nfo file in get_desc/info.sh
@@ -136,28 +136,47 @@ cookie_tjupt='Cookie:c_secure_uid=XXXXXX; c_secure_pass=xxxxxxxxxxxxxxxxxxxxxxxx
 #---your passkey---#
 passkey_tjupt='12345678909876543212345654'
 #######################===##############
+#---[neu6]---#
+enable_neu6='no'
+say_thanks_neu6='yes'
+client_neu6='qbittorrent'
+#---use 'yes' delete screens img---#
+just_poster_neu6='yes'
+anonymous_tjupt='yes'
+#---ratio of uploaded torrent---#
+ratio_neu6='4'
+cookie_neu6='Cookie: LRpW_2132_saltkey=xxx; LRpW_2132_auth=xxxxxxx'
+#---your passkey---#
+passkey_neu6='12345678909876543212345654'
+
+#############################===########
 #------------[transmission]------------#
 #---authoriz for transmission---#
 tr_HOST='127.0.0.1'
 tr_PORT='9091'
-tr_USER='username'
-tr_PASSWORD='passkey'
+tr_USER='tr-username'
+tr_PASSWORD='tr-passkey'
 #-------------[qbittorrent]------------#
+#---authoriz for qbittorrent---#
 qb_HOST='http://127.0.0.1'
 qb_PORT='8080'
-qb_USER='username'
-qb_PASSWORD='passkey'
+qb_USER='qbit-username'
+qb_PASSWORD='qbit-passkey'
 qb_Cookie='cookie:SID=xxx'
 #----------------[site]----------------#
 #---cookie for source site---#
 cookie_hds='Cookie:c_secure_uid=XXXXXX; c_secure_pass=xxxxxxxxxxxxxxxxxxxxxxxxxxxxx; c_secure_login=bm9wZQ=='
+ratio_hds='2'  # just for fg_client='qbittorrent' case
 #
 cookie_ttg='Cookie:uid=000000; pass=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx; PHPSESSID=xxxxxxxxxxxxxxxxxxxxxxxxx'
+ratio_ttg='2'  # just for fg_client='qbittorrent' case
 #
-cookie_hdc='Cookie:mv_secure_uid=00000000; mv_secure_pass=xxxxxxxxxxxxxxxxxxxxxxxx; mv_secure_login=bm9wZQ=='
-cookie_hdc='Cookie:PHPSESSID=xxxxxxxxxxxxxxxxxxxxxxxxxxxx;hdchina=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+cookie_hdc='Cookie:mv_secure_uid=xxxx; mv_secure_pass=xxx;hdchina=xxx;PHPSESSID=xxx;mv_secure_login=bm9wZQ=='
+ratio_hdc='2'  # just for fg_client='qbittorrent' case
 #
 cookie_mt='Cookie:tp=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=='
+ratio_hdc='2'  # just for fg_client='qbittorrent' case
 #------------[donot change]------------#
 source "$ROOT_PATH/static.sh"
 #-----------------[EOF]----------------#
+
