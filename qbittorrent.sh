@@ -57,7 +57,7 @@ qb_set_ratio_queue() {
   # say thanks 
   [[ $Allow_Say_Thanks == yes ]] && \
   [[ "$(eval echo '$'"say_thanks_$site")" == yes ]] && \
-  if http --verify=no -h --ignore-stdin -f POST "${post_site[$site]}/thanks.php" \
+  if http --verify=no --ignore-stdin -h -f POST "${post_site[$site]}/thanks.php" \
     id="$t_id" "$(eval echo '$'"cookie_$site")" "$user_agent" &> /dev/null; then
     debug_func "qb:set-ratio-thanks-[$site]"  #----debug---
   else

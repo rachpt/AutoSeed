@@ -125,7 +125,7 @@ upload_image_com() {
   case $_rand_ in
     0)
       # endpot.com
-      img_url_com="$(http --pretty=format --timeout=25 -bf --ignore-stdin POST \
+      img_url_com="$(http --pretty=format --timeout=25 --ignore-stdin -bf POST \
         --verify=no "$upload_poster_api_2" image@"$_file" "$user_agent"|grep -Eo \
         "\"link\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" ;;
     1)
@@ -168,7 +168,8 @@ upload_image_byrbt() {
 is_tracker_down() {
   local _site
   for _site in  hudbt whu nanyangpt npupt byrbt cmct tjupt; do
-    if http --verify=no  --timeout=40 --ignore-stdin GET "${post_site[$_site]}/login.php" \
+    [[ "$(eval echo '$'enable_$_site)" = yes ]] && \
+    if http --verify=no --timeout=40 --ignore-stdin GET "${post_site[$_site]}/login.php" \
     "$(eval echo '$'"cookie_$_site")" "$user_agent" &> /dev/null; then
       debug_func "static-[$_site is OK]"  #----debug---
     else

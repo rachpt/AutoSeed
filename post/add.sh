@@ -12,7 +12,7 @@ if [ "$one_TR_Dir" ]; then
   if [ "$postUrl" = "${post_site[whu]}/takeupload.php" ]; then
       whu_tr="${ROOT_PATH}/tmp/${t_id}.torrent"
       dl_whu_tr() {
-      http --verify=no --timeout=25 --ignore-stdin -do "$whu_tr" \
+      http --verify=no --timeout=25 --ignore-stdin -o "$whu_tr" -d \
           "${downloadUrl}${t_id}" "$user_agent" "$cookie" && sleep 3
       [[ ! -s $whu_tr ]] && curl -b "`echo "$cookie"|sed -E 's/^Cookie:[ ]?//i'`" \
           -A "`echo "$user_agent"|sed -E 's/^User-Agent:[ ]?//i'`" -k \

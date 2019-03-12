@@ -30,13 +30,13 @@ get_douban_url_by_keywords() {
   # 删除合集
   name="$(echo "$name"|sed -E 's/[ \.]Complete[\. ].*//i')"
   # 搜索
-  get_douban_url="$(http -b --verify=no --pretty=format --ignore-stdin \
-   --timeout=25 GET 'https://api.douban.com/v2/movie/search' q=="${name}${season}.${year}" \
+  get_douban_url="$(http --verify=no --pretty=format --ignore-stdin --timeout=25 \
+    -b GET 'https://api.douban.com/v2/movie/search' q=="${name}${season}.${year}" \
    "$user_agent"|grep -E '(movie.)?douban.com/subject/'|head -1|awk -F '"' '{print $4}')"
   # 去掉可能不准确的年份
   [[ ! $get_douban_url ]] && \
-   get_douban_url="$(http -b --verify=no --pretty=format --ignore-stdin \
-   --timeout=25 GET 'https://api.douban.com/v2/movie/search' q=="${name}${season}" \
+   get_douban_url="$(http --verify=no --pretty=format --ignore-stdin --timeout=25 \
+   -b GET 'https://api.douban.com/v2/movie/search' q=="${name}${season}" \
    "$user_agent"|grep -E '(movie.)?douban.com/subject/'|head -1|awk -F '"' '{print $4}')"
   debug_func "generate:[${name}${season}.${year}]"  #----debug---
   }
@@ -137,7 +137,7 @@ print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=F
             awk -F '"' '{print $4}'|sed 's#\\n#\n#g')"
 
         douban_poster_url="$(echo "$desc_json_info"|grep '"poster":'| \
-            head -1|awk -F '"' '{print $4}')"
+            head -1|awk -F '"' '{print $4}'|sed 's/img3/img1/')"
         # 中文名
         chs_name_douban="$(echo "$desc_json_info"|grep 'chinese_title'| \
             head -1|awk -F '"' '{print $4}')"

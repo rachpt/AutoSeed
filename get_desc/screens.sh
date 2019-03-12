@@ -71,7 +71,7 @@ deal_with_images() {
     # 临时图片路径，使用时间作为文件名的一部分
     img_file="$ROOT_PATH/tmp/autoseed-pic-$(date '+%s%N')$(echo "${img_url##*/}"| \
         sed -r 's/.*(\.[jpgb][pnim]e?[gfp]).*/\1/i')"
-    http --verify=no --timeout=25 --ignore-stdin -do "$img_file" "$img_url_d" "$user_agent"
+    http --verify=no --timeout=25 --ignore-stdin -o "$img_file" -d "$img_url_d" "$user_agent"
     [[ ! -s $img_file ]] && \
     curl -k -o "$img_file" "$img_url_d" && debug_func 'screens_img:use-curl-download'
     [[ -s $img_file ]] && debug_func 'screens_img:downloaded' || \
