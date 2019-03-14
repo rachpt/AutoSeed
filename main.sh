@@ -3,16 +3,16 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-16
+# Date: 2019-03-13
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
-# use source run
+# use source command run
 [[ $ROOT_PATH == /*bin* ]] && \
 ROOT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$ROOT_PATH/settings.sh"
 #---------------------------------------#
-# import functions
+# import extra functions
 source "$ROOT_PATH/get_desc/detail_page.sh"
 #----------------lock func--------------#
 remove_lock() {
@@ -23,9 +23,9 @@ is_locked() {
     if [ -f "$lock_File" ]; then
         exit
     else
-        set -o noclobber          # 禁止重定向覆盖
-        echo "$$" > "$lock_File"
-        set +o noclobber          # 允许重定向覆盖
+        set -o noclobber           # 禁止重定向覆盖
+        echo "$$" > "$lock_File"   # pid 写入文件
+        set +o noclobber           # 允许重定向覆盖
         #debug_func 'main:locked'  #----debug---
         trap remove_lock INT TERM EXIT
     fi
@@ -43,22 +43,23 @@ write_log_end() {
     echo "已经发布:[$org_tr_name]"             >> "$log_Path"
 }
 
-#---------------------------------------#
+#--------------is-completed-------------#
 torrent_completed_precent() {
-    unset completion
-    if [ "$fg_client" = 'qbittorrent' ]; then
-        qb_get_torrent_completion
-    elif [ "$fg_client" = 'transmission' ]; then
-        tr_get_torrent_completion
-    else
-        debug_func 'main:Client-Error'   #----debug---
-    fi
+    unset completion # clean, use_qbt use_trs cannot be setted here!
+    case "$fg_client" in
+      qbittorrent)
+        qb_get_torrent_completion ;;
+      transmission)
+        tr_get_torrent_completion ;;
+      *)
+        debug_func 'main:Client-Error'  #----debug---
+    esac
 }
 
-#---------------------------------------#
+#----------------desc-------------------#
 generate_desc() {
   IFS_OLD=$IFS; IFS=$'\n'
-  #---loop for torrent in flexget path ---#
+  #---loop for torrent in flexget path---#
   for tr_i in $(find "$flexget_path" -iname '*.torrent*'|awk -F '/' '{print $NF}')
   do
     IFS=$IFS_OLD
@@ -69,15 +70,15 @@ generate_desc() {
     #---generate desc before done---#
     if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
         unset completion
-        [ ! "$test_func_probe" ] && torrent_completed_precent
-        [ "$test_func_probe" ] && completion=100        # convenient for test
-        [ "$completion" ] && [ "$completion" -ge '70' ] && {
+        [[ "$test_func_probe" ]] || torrent_completed_precent
+        [[ "$test_func_probe" ]] && completion=100      # convenient for test
+        [[ "$completion" && $completion -ge 70 ]] && {
             debug_func "mainr:completed-[$completion]"  #----debug---
             debug_func 'main:gen_desc[生成简介]'        #----debug---
             source "$ROOT_PATH/get_desc/desc.sh" ; }
     fi
   done
-  unset tr_i org_tr_name one_TR_Name one_TR_Dir
+  unset tr_i org_tr_name one_TR_Name one_TR_Dir # clean
 }
 
 #-------------main loop func-------------#
@@ -107,7 +108,7 @@ main_loop() {
               write_log_end           # write log
               # delete uploaded torrent
               [ ! "$test_func_probe" ] && \
-              \rm -f "$torrent_Path"    && \
+              \rm -f "$torrent_Path"   && \
               clean_commit_main='yes'    
           fi
       fi
@@ -186,10 +187,10 @@ generate_desc        # 提前生成简介
 main_lp_counter=0
 while true; do
     one_TR_Name="$(head -1 "$queue")"
-    one_TR_Dir="$(head -2 "$queue"|tail -1|sed 's!/$!!')"
-    [[ ! "$one_TR_Name" || ! "$one_TR_Dir" ]] && break
+    one_TR_Dir="$(head -2 "$queue"|tail -1|sed 's%/$%%')" # no slash end
+    [[ "$one_TR_Name" && "$one_TR_Dir" ]] || break
     [[ $main_lp_counter -gt 50 ]] && break
-    debug_func 'main:queue-loop[发布]'  #----debug---
+    debug_func "main:queue-loop[$main_lp_counter]"  #----debug---
 
     if [ "$(find "$flexget_path" -iname '*.torrent*')" ]; then
         hold_on                         # dynamic delay
@@ -206,8 +207,8 @@ qb_set_ratio_loop
 #---------------------------------------#
 # reannounce
 #debug_func "end-进程[$(ps -C 'main.sh' --no-headers|wc -l)]个" #----debug---
-[[ "$(ps -C 'main.sh' --no-headers|wc -l)" -le 2 ]] && \
-tr_reannounce && \
-qb_reannounce
+[[ "$(ps -C 'main.sh' --no-headers|wc -l)" -le 2 ]] && {
+  [[ $use_trs = yes ]] && tr_reannounce
+  [[ $use_qbt = yes ]] && qb_reannounce; }
 #---------------------------------------#
 

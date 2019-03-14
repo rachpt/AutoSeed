@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2018-12-18
+# Date: 2019-03-14
 #
 #-----------------------------#
 tr_delete_old() {
@@ -51,17 +51,13 @@ tr_delete_old() {
 
 #-----------------------------#
 tr_is_seeding() {
-  if [ -n "$1" ]; then
-    for ID in $($tr_remote -l|grep -Eo '^[ ]*[0-9]+'|sed 's/ //g')
-    do
-      local one_na=$($tr_remote -t $ID -i|grep 'Name'|head -1|awk '{print $2}')
-      if [ "$1" = "$one_na" ]; then
-          delete_commit='no'
-          break
-      fi
-    done
-    unset ID
-  fi
+  # _tr_names in clean/clean.sh
+  # transmission 第10 列开始为种子名, NR>1去掉第一行，最后一行被for去掉
+  [[ "$_tr_names" ]] && _tr_names="$($tr_remote -l|awk \
+    'NR>1{for(i=10;i<=NF;i++)print $i}')"
+  [[ "$1" && "$_tr_names" ]] && {
+    [[ "$_tr_names" =~ .*${1}.* ]] && delete_commit='no' || delete_commit='yes'
+  }
 }
 #-----------------------------#
 

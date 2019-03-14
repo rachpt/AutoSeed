@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-22
+# Date: 2019-03-14
 #
 #--------------------------------------#
 qb_login="${qb_HOST}:$qb_PORT/api/v2/auth/login"
@@ -39,10 +39,10 @@ qb_reannounce() {
 #--------------------------------------#
 qb_delete_torrent() {
     qbit_webui_cookie
-    # delete
-    http --ignore-stdin -f POST "$qb_delete" hashes=$torrent_hash \
+    # delete torrent, need a parameter; used in clean/qb.sh
+    http --ignore-stdin -f POST "$qb_delete" hashes="$1" \
         deleteFiles=false "$qb_Cookie"
-    debug_func 'qb:deleted-one'  #----debug---
+    debug_func "qb:del:[$1]"  #----debug---
 }
 
 #---------------------------------------#
@@ -109,8 +109,8 @@ qb_set_ratio_loop() {
       # 设置qbit 做种时间以及做种分享率
       [ "${#hash}" -eq 40 ] && debug_func "find[$hash]" && \
       if http --ignore-stdin -f POST "$qb_ratio" hashes="$hash" \
-        ratioLimit=$rtio seedingTimeLimit="$(echo \
-        ${MAX_SEED_TIME} \* 60 \* 60|bc)" "$qb_Cookie" &> /dev/null; then
+        ratioLimit=$rtio seedingTimeLimit="$(echo "$MAX_SEED_TIME * 3600"|bc)" \
+        "$qb_Cookie" &> /dev/null; then
           debug_func "qb:sussess_set_rt[$trker]"       #----debug---
       else
         case $? in
@@ -123,7 +123,7 @@ qb_set_ratio_loop() {
         esac
         curl -k -b "`echo "$qb_Cookie"|sed -E 's/^cookie:[ ]?//i'`" -X POST \
           -F "hashes=$hash" -F "ratioLimit=$rtio" \
-          -F "seedingTimeLimit=$(echo ${MAX_SEED_TIME} \* 60 \* 60|bc)" \
+          -F "seedingTimeLimit=$(echo "$MAX_SEED_TIME * 3600"|bc)" \
           "$qb_ratio" && debug_func "qb:sussess_set_rt-curl[$trker]"
       fi
       sed -i '1,3d' "$qb_rt_queue"                     # delete record
@@ -196,10 +196,10 @@ qb_get_torrent_completion() {
    size_one="$(echo "$data"|head -n $(($pos + 2))|tail -1|grep -Eo '[0-9]{4,}')"
    # one_TR_Dir is not local variable
    one_TR_Dir="$(echo "$data"|head -n $(($pos + 1))|tail -1|grep -o '/.*$')";
-   # set source torrent's ratio
-   [[ $source_uid ]] || get_source_site # get_desc/detail_page.sh
+   # set source site torrent's ratio
+   [[ $s_site_uid ]] || get_source_site # get_desc/detail_page.sh
    [[ $fg_client = qbittorrent ]] && \
-   echo -e "${org_tr_name}\n${trackers[$source_uid]}\n`eval echo '$'ratio_$source_uid`" >> "$qb_rt_queue"
+   echo -e "${org_tr_name}\n${trackers[$s_site_uid]}\n`eval echo '$'ratio_$s_site_uid`" >> "$qb_rt_queue"
   }
   # return completed precent
   [[ $compl_one && $size_one ]] && \

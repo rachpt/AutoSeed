@@ -122,6 +122,25 @@ source "$ROOT_PATH/qbittorrent.sh"
 source "$ROOT_PATH/transmission.sh"
 #
 #--------------------------------------#
+# set client mode
+unset _site use_qbt use_trs # clean
+for _site in hudbt whu nanyangpt npupt byrbt cmct tjupt; do
+  [[ "$(eval echo '$'enable_$_site)" = yes ]] && \
+    case $(eval '$'client_$_site) in
+      qbittorrent)
+          use_qbt='yes' ;;
+      transmission)
+          use_trs='yes' ;;
+    esac
+done
+case "$fg_client" in
+  qbittorrent)
+      use_qbt='yes' ;;
+  transmission)
+      use_trs='yes' ;;
+esac
+unset _site # clean
+#--------------------------------------#
 # 普通 图片上传
 upload_image_com() {
   unset img_url_com    # clean

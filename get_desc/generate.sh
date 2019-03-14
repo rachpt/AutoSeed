@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-28
+# Date: 2019-03-14
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -13,44 +13,46 @@
 
 # 通过 豆瓣 API 搜索资源豆瓣ID，用于后续简介获取
 get_douban_url_by_keywords() {
-  local get_douban_url
+  # function
   search_doubanurl() {
-  local name season year
+  local name season year num
   # 剧集季数
-  season="$(echo "$1"|sed -E 's/.*[ \.]s([012]?[1-9])(ep?[0-9]+)?[ \.].*/.Season.\1./i;s/[ \.]0([1-9])[ \.]/.\1/')"
+  season="$(echo "$1"|grep -Eio '[ \.]s0?(10|20|[1-9]+).?(ep?[0-9]+)?[ \.]')"
+  [[ $season ]] && season="$(echo "$season"|sed -E \
+    's/s0?(10|20|[1-9]+).?(ep?[0-9]+)?[ \.]/Season.\1/i')"
   # 年份
-  year="$(echo "$1"|grep -Eo '[12][098][0-9]{2}')"
-  # 分辨率
+  year="$(echo "$1"|grep -Eo '[12][098][0-9]{2}'|tail -1)"
+  num="$(echo "$1"|grep -Eo '[12][098][0-9]{2}'|wc -l)" # 统计year个数
+  # 删除分辨率
   name="$(echo "$1"|sed -E 's/(1080[pi]|720p|4k|2160p).*//i')"
-  # 介质
+  # 删除介质
   name="$(echo "$name"|sed -E 's/(hdtv|blu-?ray|web-?dl|bdrip|dvdrip|webrip).*//i')"
   # 删除季数
-  name="$(echo "$name"|sed -E 's/[ \.]s([012]?[1-9])(ep?[0-9]+)?[ \.].*//i')"
+  name="$(echo "$name"|sed -E 's/[ \.]s0?(10|20|[1-9]+).?(ep?[0-9]+)?[ \.].*//i')"
   name="$(echo "$name"|sed -E 's/[ \.]ep?[0-9]{1,2}(-e?p?[0-9]{1,2})?[ \.].*//i')"
   # 删除合集
   name="$(echo "$name"|sed -E 's/[ \.]Complete[\. ].*//i')"
+  # 删除年份
+  [[ $num -ge 1 ]] && name="$(echo "$name"|sed -E 's/[ \.][12][098][0-9]{2}[ \.]/./g')"
+  # 删除连续点和空格
+  name="$(echo "$name"|sed -E 's/[ \.]+/./g')"
   # 搜索
-  get_douban_url="$(http --verify=no --pretty=format --ignore-stdin --timeout=25 \
+  search_url="$(http --verify=no --pretty=format --ignore-stdin --timeout=25 \
     -b GET 'https://api.douban.com/v2/movie/search' q=="${name}${season}.${year}" \
    "$user_agent"|grep -E '(movie.)?douban.com/subject/'|head -1|awk -F '"' '{print $4}')"
-  # 去掉可能不准确的年份
-  [[ ! $get_douban_url ]] && \
-   get_douban_url="$(http --verify=no --pretty=format --ignore-stdin --timeout=25 \
+  # 去掉可能不准确的年份再试
+  [[ "$search_url" ]] || \
+   search_url="$(http --verify=no --pretty=format --ignore-stdin --timeout=25 \
    -b GET 'https://api.douban.com/v2/movie/search' q=="${name}${season}" \
    "$user_agent"|grep -E '(movie.)?douban.com/subject/'|head -1|awk -F '"' '{print $4}')"
-  debug_func "generate:[${name}${season}.${year}]"  #----debug---
+  debug_func "豆瓣关键词:[${name}|${season}|.${year}]"  #----debug---
   }
-
+  # the first time try
   search_doubanurl "$org_tr_name"
-  [[ ! $get_douban_url ]] && sleep 2 && search_doubanurl "$dot_name"
+  [[  $search_url ]] || sleep 3 && search_doubanurl "$dot_name" # try again
   # 写入日志
-  if [ "$get_douban_url" ]; then
-      search_url="$get_douban_url"
-      echo "搜索得到豆瓣链接：$get_douban_url"        >> "$log_Path"
-  else
-      echo '未搜索到豆瓣链接！！！'                   >> "$log_Path"
-      unset search_url
-  fi
+  [[ "$search_url" ]] && echo "搜索得到豆瓣链接：$search_url" >> "$log_Path" || \
+    echo '未搜索到豆瓣链接！！！'   >> "$log_Path"
   unset -f search_doubanurl
 }
 
@@ -110,10 +112,14 @@ m1905_poster() {
 #-------------------------------------#
 from_douban_get_desc() {
     # 获取搜索链接
-    if [ "$douban_url" ]; then
+    [[ $douban_url ]] || douban_url="$(grep -Eio \
+      'https?://(www\.|movie\.)?douban\.com/subject/[0-9]{7,8}/?' "$source_desc"|head -1)"
+    [[ $imdb_url ]] || imdb_url="$(grep -Eio 'tt[0-9]{7}' "$source_desc"|head -1)"
+    if [[ "$douban_url" ]]; then
         search_url="$douban_url"
-    elif [ "$imdb_url" ]; then
+    elif [[ "$imdb_url" ]]; then
         if [[ $dot_name =~ .*\.[Ss](0?[2-9]|[1-9]?[0-9])\..*WiKi ]]; then
+          debug_func 'gen-wiki-series!...'  #----debug---
           get_douban_url_by_keywords  # WiKi series
         else
           search_url="http://www.imdb.com/title/$imdb_url"
