@@ -96,7 +96,7 @@ read_info_file() {
       nfo_file_downloaded=$(stat --format=%s "$nfo_file_path")
       if [[ $nfo_file_downloaded ]]; then
         local judge_download_nfo judge_nfo_file charset
-        judge_download_nfo=$((nfo_file_downloaded/100))
+        judge_download_nfo=$((nfo_file_downloaded/100)) # $(())中变量可以不要$
         judge_nfo_file=$(echo "$nfo_file_size * 10"|bc|awk -F '.' '{print $1}')
         if [ "$judge_download_nfo" -eq  "$judge_nfo_file" ]; then
           charset="$(file -i "$nfo_file_path"|sed 's/.*charset=//')" 

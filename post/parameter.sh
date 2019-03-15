@@ -63,10 +63,11 @@ from_desc_get_param() {
     # 中文字幕
     [ "$(grep -i "CH[ST]" "$source_desc")" ] && chs_included='中文字幕 '
     # 添加额外信息
-    chs_included="${chs_included}$(grep '&my_extra_comment&' "$source_desc"| \
-        sed 's/&my_extra_comment&//')"
+    chs_included="$(grep '&extra_comment&' "$source_desc"|sed 's/&extra_comment&//')"
+    [[ ! $chs_included && "$(grep -i "CH[ST]" "$source_desc")" ]] && \
+        chs_included='中文字幕 '
     # 删除
-    sed -i '/&my_extra_comment&/d' "$source_desc"
+    sed -i '/&extra_comment&/d' "$source_desc"
 
     # 中文名
     chinese_title="$(grep '&shc_name_douban&' "$source_desc"| \

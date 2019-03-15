@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-03-14
+# Date: 2019-03-15
 #
 #--------------------------------------#
 qb_login="${qb_HOST}:$qb_PORT/api/v2/auth/login"
@@ -79,19 +79,19 @@ qb_set_ratio_queue() {
 
 #---------------------------------------#
 qb_get_hash() {
-  # $1 name; $2 tracker; return hash(echo)
-  local hash tr_one pos
-  echo "$data"|sed -n "/name.*$1/="|while read pos; do
-    hash="$(echo "$data"|head -n $(($pos - 1))|tail -1|sed -E 's/hash:[ ]*//')"
-    tr_one="$(echo "$data"|head -n $(($pos + 1))|tail -1|sed -E 's/tracker:[ ]*//;s/passkey=.*//')"
-    [[ "$(echo "$tr_one"|grep "$2")" ]] && echo "$hash" && break
+  # $1 name; $2 tracker; $3 qb info lists; return hash(echo), used in qb_set_ratio_loop
+  local _hash _one _pos
+  echo "$3"|sed -n "/name.*$1/="|while read _pos; do
+    _hash="$(echo "$3"|head -n $(($_pos - 1))|tail -1|sed -E 's/hash:[ ]*//')"
+    _one="$(echo "$3"|head -n $(($_pos + 1))|tail -1|sed -E 's/tracker:[ ]*//;s/passkey=.*//')"
+    [[ "$(echo "$_one"|grep "$2")" ]] && echo "$_hash" && break
   done
 }
 
 #---------------------------------------#
 qb_set_ratio_loop() {
   if [ -s "$qb_rt_queue" ]; then
-    local data qb_lp_counter trker rtio hash 
+    local data qb_lp_counter trker rtio tr_hash
     sleep 20 # 延时
     qbit_webui_cookie
     data="$(http --ignore-stdin --pretty=format -f POST "$qb_lists" sort=added_on reverse=true \
@@ -100,16 +100,16 @@ qb_set_ratio_loop() {
     '/"hash":/{s/"//g};/"name":/{s/"//g};/"tracker":/{s/"//g};'|sed '/"/d')" 
     qb_lp_counter=0
     while true; do
-      name="$(head -1 "$qb_rt_queue")"                 # line one
-      [[ ! $name ]] && break                           # jump out
-      [[ $qb_lp_counter -gt 50 ]] && break             # jump out
-      trker="$(head -2 "$qb_rt_queue"|tail -1)"        # line second
-      rtio="$(head -3 "$qb_rt_queue"|tail -1)"         # line third
-      hash="$(qb_get_hash "$name" "$trker")"           # get hash  
-      # 设置qbit 做种时间以及做种分享率
-      [ "${#hash}" -eq 40 ] && debug_func "find[$hash]" && \
-      if http --ignore-stdin -f POST "$qb_ratio" hashes="$hash" \
-        ratioLimit=$rtio seedingTimeLimit="$(echo "$MAX_SEED_TIME * 3600"|bc)" \
+      name="$(head -1 "$qb_rt_queue")"                    # line one
+      [[ ! $name ]] && break                              # jump out
+      [[ $qb_lp_counter -gt 50 ]] && break                # jump out
+      trker="$(head -2 "$qb_rt_queue"|tail -1)"           # line second
+      rtio="$(head -3 "$qb_rt_queue"|tail -1)"            # line third
+      tr_hash="$(qb_get_hash "$name" "$trker" "$data")"   # get hash
+      # 设置qbit 做种时间以及做种分享率，一天1440分钟，qbt时间分钟
+      [ "${#tr_hash}" -eq 40 ] && debug_func "find[$tr_hash]" && \
+      if http --ignore-stdin -f POST "$qb_ratio" hashes="$tr_hash" \
+        ratioLimit=$rtio seedingTimeLimit="$(echo "$MAX_SEED_TIME * 1440"|bc)" \
         "$qb_Cookie" &> /dev/null; then
           debug_func "qb:sussess_set_rt[$trker]"       #----debug---
       else
@@ -122,8 +122,8 @@ qb_set_ratio_loop() {
           *) debug_func 'qbit[rtio]:Other Error!' ;;
         esac
         curl -k -b "`echo "$qb_Cookie"|sed -E 's/^cookie:[ ]?//i'`" -X POST \
-          -F "hashes=$hash" -F "ratioLimit=$rtio" \
-          -F "seedingTimeLimit=$(echo "$MAX_SEED_TIME * 3600"|bc)" \
+          -F "hashes=$tr_hash" -F "ratioLimit=$rtio" \
+          -F "seedingTimeLimit=$(echo "$MAX_SEED_TIME * 1440"|bc)" \
           "$qb_ratio" && debug_func "qb:sussess_set_rt-curl[$trker]"
       fi
       sed -i '1,3d' "$qb_rt_queue"                     # delete record
@@ -196,10 +196,6 @@ qb_get_torrent_completion() {
    size_one="$(echo "$data"|head -n $(($pos + 2))|tail -1|grep -Eo '[0-9]{4,}')"
    # one_TR_Dir is not local variable
    one_TR_Dir="$(echo "$data"|head -n $(($pos + 1))|tail -1|grep -o '/.*$')";
-   # set source site torrent's ratio
-   [[ $s_site_uid ]] || get_source_site # get_desc/detail_page.sh
-   [[ $fg_client = qbittorrent ]] && \
-   echo -e "${org_tr_name}\n${trackers[$s_site_uid]}\n`eval echo '$'ratio_$s_site_uid`" >> "$qb_rt_queue"
   }
   # return completed precent
   [[ $compl_one && $size_one ]] && \

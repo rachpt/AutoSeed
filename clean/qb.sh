@@ -21,7 +21,7 @@ qb_delete_old() {
   for one_1 in $_paused_data; do qb_delete_torrent "$one_1"; done
   #---------------------------------------#
   # 达到做种时间的种子
-  max_time="$(($MAX_SEED_TIME * 24 * 60 * 60))"
+  max_time="$(($MAX_SEED_TIME * 24 * 60 * 60))" # 此处时间为秒，不是分钟
   _sd_timeData="$(echo "$_qb_data"|grep -B4 '"time_active":.*[0-9]*'|sed \
     '/"name":/d;/"ratio":/d;/"state":/d;s/[",:]//g'|sed 'N;s/\n//')"
   for one_2 in $(echo "$_sd_timeData"|awk -v t=$max_time '{if($4 >= t)print $2}')

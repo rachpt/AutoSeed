@@ -59,7 +59,7 @@ get_douban_url_by_keywords() {
 poster_to_bbcode() {
   # 参数，海报列表
   local _one_url _the_rest _line
-  local _url_lists="$1"
+  local _url_lists="$(echo "$1"|sed 's/http:/https:/')" # https 图片url
   _line=$(($RANDOM % $(echo "$_url_lists"|wc -l) + 1))  # 随机海报
   [[ $_line ]] || _line=1   # default the first one
   _one_url="$(echo "$_url_lists"|sed -n "$_line p")"
@@ -86,7 +86,7 @@ mtime_poster() {
   if [[ $mtime_id ]]; then
     mtime_lists="$(http --ignore-stdin --timeout=26 GET \
       "http://movie.mtime.com/$mtime_id/posters_and_images/posters/hot.html"|grep '海报'| \
-      grep -Eo "http://img[0-9]+\.mtime\.cn/pi/u/[/0-9\._]+X[0-9]+\.(jpg|jpeg|png|gif)")"
+      grep -Eo "https?://img[0-9]+\.mtime\.cn/pi/u/[/0-9\._]+X[0-9]+\.(jpg|jpeg|png|gif)")"
     if [[ $mtime_lists ]]; then
       poster_to_bbcode "$mtime_lists"
     else
@@ -102,7 +102,7 @@ m1905_poster() {
   local m1905_lists m_url_one the_rest
   m1905_lists="$(http --pretty=format --ignore-stdin --timeout=26 GET \
     "http://www.1905.com/search/?q=$chs_name_douban"|grep "alt=.$chs_name_douban"| \
-    grep -E -o "http://image[0-9]+.m1905.com[^\"\']+\.(jpg|jpeg|png|gif)"| \
+    grep -E -o "https?://image[0-9]+.m1905.com[^\"\']+\.(jpg|jpeg|png|gif)"| \
     sed -E 's/thumb_[0-9]_[0-9]{2,3}_[0-9]{2,3}_//')"
   if [[ $m1905_lists ]]; then
     poster_to_bbcode "$m1905_lists"
@@ -161,14 +161,19 @@ print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=F
   fi
   unset search_url
 }
-
+filt_subt() {
+ [[ "$chs_name_douban" && "$extra_subt" ]] && {
+   extra_subt="$(echo "$extra_subt"|sed -E \
+   "s/$chs_name_douban//;s%^[ /]+%%;s/ +/ /g")"
+ }
+}
 #-------------------------------------#
 # 拼接简介
 generate_main_func() {
     from_douban_get_desc
-
+    filt_subt
     # bbcode
-source_desc_tmp="&my_extra_comment&
+source_desc_tmp="&extra_comment&${extra_subt}
 &shc_name_douban&${chs_name_douban}
 &eng_name_douban&${eng_name_douban}
 ${gen_desc_bbcode}
@@ -200,7 +205,7 @@ fi)
     echo "$source_desc_tmp" > "$source_desc"
     [[ $enable_byrbt = yes ]] && echo "$source_html_tmp" > "$source_html"
     # 清空变量，防止不同种子简介互串
-    unset source_desc_tmp  source_html_tmp  source_t_id
+    unset source_desc_tmp  source_html_tmp  source_t_id extra_subt
     unset chs_name_douban  eng_name_douban  douban_poster_url
 }
 

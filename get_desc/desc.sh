@@ -60,6 +60,10 @@ if [ ! -s "$source_desc" ]; then
         read_info_file; }             # get_desc/info.sh
     fi
     if [ -s "$source_desc" ]; then
+        # set source site torrent's ratio, only once
+        [[ $fg_client = qbittorrent && $s_site_uid ]] && \
+        echo -e "${org_tr_name}\n${trackers[$s_site_uid]}\n`eval echo \
+          '$'ratio_$s_site_uid`" >> "$qb_rt_queue"
         # import functions to generate desc
         debug_func 'desc:match'       #----debug---
         source "$ROOT_PATH/get_desc/match.sh"

@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-18
+# Date: 2019-03-15
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -25,27 +25,22 @@ get_source_site() {
         source_site_URL='https://hdsky.me'
         cookie_source_site="$cookie_hds"
         s_site_uid='hds'
-        echo "got source_site: hdsky" >> "$log_Path"
     elif [ "$(echo $tracker_info|grep -i 'totheglory')" ]; then
         source_site_URL='https://totheglory.im'
         cookie_source_site="$cookie_ttg"
         s_site_uid='ttg'
-        echo "got source_site: ttg" >> "$log_Path"
     elif [ "$(echo $tracker_info|grep -i 'hdchina')" ]; then
         source_site_URL='https://hdchina.org'
         cookie_source_site="$cookie_hdc"
         s_site_uid='hdc'
-        echo "got source_site: hdchina" >> "$log_Path"
     elif [ "$(echo $tracker_info|grep -i 'tp.m-team.cc')" ]; then
         source_site_URL='https://tp.m-team.cc'
         cookie_source_site="$cookie_mt"
         s_site_uid='mt'
-        echo "got source_site :mteam" >> "$log_Path"
     elif [ "$(echo $tracker_info|grep -i 'hdcmct.org')" ]; then
         source_site_URL='https://hdcmct.org'
         cookie_source_site="$cookie_cmct"
         s_site_uid='cmct'
-        echo "got source_site: hdcmct" >> "$log_Path"
     #elif [ "$(echo $tracker_info|grep -i 'new')" ]; then
     #    source_site_URL='https://new.tracker.org'
     else
@@ -133,9 +128,10 @@ fi
 no_source_2_source # 减少不必要的过程
 }
 
-#-------------------------------------#
+#--------------main-func--------------#
 form_source_site_get_Desc() {
-  unset imdb_url douban_url # 防止上次结果影响到下一次
+  echo "got source_site: [$s_site_uid]" >> "$log_Path"
+  unset imdb_url douban_url extra_subt # 防止上次结果影响到下一次
   form_source_site_get_tID
   # source_t_id will be unset in generate.sh
   if [ "$source_t_id" ]; then
@@ -148,35 +144,43 @@ form_source_site_get_Desc() {
   if [ -s "$source_full" ]; then
     # imdb 和豆瓣链接,用于生成简介
     imdb_url="$(grep -Eo 'tt[0-9]{7}' "$source_full"|head -1)"
-    douban_url="$(grep -Eo 'https?://(movie\.)?douban\.com/subject/[0-9]{7,8}' "$source_full"|head -1)"
+    douban_url="$(grep -Eo 'douban\.com/subject/[0-9]{7,8}' "$source_full"|head -1)"
     [[ $douban_url ]] && douban_url="https://movie.douban.com/subject/${douban_url##*/}"
     [ "$(grep -E '禁止转载|禁转资源|谢绝转发|独占资源|禁转资源|No forward anywhere' "$source_full")" ] && local forbid='yes'
 
     # 匹配官方组 简介中的 info 以及 screens 所在行号
+    local start_line end_line middle_line # extra_subt 原种副标题，非局域变量
     if [ "$source_site_URL" = "https://hdsky.me" ]; then
-      local start_line end_line middle_line   
+      extra_subt="$(grep -A1 '&passkey=' "$source_full"|sed -E 's/.*">//;s%</.*>%%g')"
       start_line=$(sed -n '/影片参数/=' "$source_full"|head -1)
       end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -1) # 第一个
 
     elif [ "$source_site_URL" = "https://hdchina.org" ]; then
+      extra_subt="$(grep -A1 '<h2' "$source_full"|grep '<h3>'|sed -E \
+        "s/[[:space:]]+/ /;s%</?h3>%%g")"
       start_line=$(sed -n '/<fieldset><legend>/=' "$source_full"|tail -1)
       end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -2|tail -1) # 第二个
 
     elif [ "$source_site_URL" = "https://totheglory.im" ]; then
+      extra_subt="$(grep '<h1>' "$source_full"|sed -E "s/[^\[]+\[//;s/]//;s%</?h1>%%g")"
       sed -E -i "s%<br[ ]?/>%<br />\n%ig" "$source_full" # 2019-02-19 update
+      # 使用 sed -n '/匹配内容/=' 获取行号
       start_line=$(sed -n '/\.[cC]omparisons/=;/\.[sS]elected\.[sS]creens/=;/\.[mM]ore\.[sS]creens/=;/\.[pP]lot/=' "$source_full"|head -1)
       middle_line=$(sed -n '/.x264.[iI]nfo/=' "$source_full"|head -1)
-      end_line=$(sed -n "$middle_line,$(expr $middle_line + 10)p" \
-          "$source_full"|sed -n '/<\/table>/='|head -1) # ttg
-      end_line=$(expr $middle_line + $end_line - 1) # ttg
-      [[ $end_line ]] || local end_line=$(sed -n 'x264 [info]' "$source_full"|tail -1)
+      end_line=$(sed -n "$middle_line,$(($middle_line + 10))p" \
+        "$source_full"|sed -n '/<\/table>/='|head -1)  # ttg
+      end_line=$(($middle_line + $end_line - 1))       # ttg
+      [[ $end_line ]] || end_line=$(sed -n '/x264 [info]/=' "$source_full"|tail -1)
 
 
     elif [ "$source_site_URL" = "https://tp.m-team.cc" ]; then
+      extra_subt="$(grep -A2 '^<h1' "$source_full"|grep 'class="rowhead"'| \
+        sed -E 's/.*">//;s%</.*>%%g')"
       start_line=$(sed -n '/codetop/=' "$source_full"|head -1)
       end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -1) # 第一个
 
     elif [ "$source_site_URL" = "https://hdcmct.org" ]; then
+      extra_subt="$(grep '<h1>' "$source_full"|sed -E 's/.*">//;s%</.*>%%g')" # not finished !!!
       start_line=$(sed -n '/资料参数/=;/参数信息/=;/General Information/=' "$source_full"|head -1)
       end_line=$(sed -n '/下载信息/=;/郑重声明/=' "$source_full"|head -1) # 第一个
 
