@@ -68,26 +68,30 @@ poster_to_bbcode() {
   [[ $_the_rest ]] && {
    _the_rest="$(echo "$_the_rest"|sed "1i 其他海报:")"
     # 转化为\n分割的一行, `` cmd have to use \\\n, while $() cmd use \\n
-   _the_rest="$(echo $_the_rest|sed ':a;N;s/\n/\\n/;ta;')"
+   _the_rest="$(echo "$_the_rest"|sed ':a;N;s/\n/\\n/;ta;')"
    # sed append use a line contain '\n' to append multi lines
    gen_desc_bbcode="$(echo "$gen_desc_bbcode"|sed "/\[img\]/a $_the_rest")"
+   debug_func "gen-multi-url:[`echo "$_url_lists"|wc -l`]"  #----debug---
   }
   debug_func "gen-other-poster-url:[$_one_url]" #----debug---
 }
 
 mtime_poster() {
   # 获取时光网海报
-  local mtime_id mtime_lists mt_url_one _the_rest
+  local mtime_id mtime_lists _name
+  _name="$1" # one param to search, chinese name
   mtime_id="$(http --ignore-stdin --timeout=26 GET \
     'http://service-channel.mtime.com/Search.api' Ajax_CallBack==true \
     Ajax_CallBackType=='Mtime.Channel.Services' Ajax_CallBackMethod==GetSuggestObjs \
-    Ajax_CallBackArgument0=="$chs_name_douban"|sed -E 's/(,|:\[\{)/\n/g'|grep -B3 \
-    "\"$chs_name_douban\""|grep -E 'id.*[0-9]+'|grep -Eo '[0-9]+'|head -1)"
-  if [[ $mtime_id ]]; then
+    Ajax_CallBackArgument0=="$_name"|sed -E 's/(,|:\[\{)/\n/g'|grep -B3 \
+    "\"$_name\""|grep -E 'id.*[0-9]+'|grep -Eo '[0-9]+'|head -1)"
+  if [[ "$mtime_id" ]]; then
+    debug_func "gen-mtime-id:[$mtime_id]"  #----debug---
     mtime_lists="$(http --ignore-stdin --timeout=26 GET \
-      "http://movie.mtime.com/$mtime_id/posters_and_images/posters/hot.html"|grep '海报'| \
-      grep -Eo "https?://img[0-9]+\.mtime\.cn/pi/u/[/0-9\._]+X[0-9]+\.(jpg|jpeg|png|gif)")"
-    if [[ $mtime_lists ]]; then
+      "http://movie.mtime.com/$mtime_id/posters_and_images/posters/hot.html"| \
+      grep 'imageList'|sed 's/},{/\n/g'|grep '正式海报'|grep -Eo \
+      "https?://img[0-9]+\.mtime\.(cn|com)/pi/(u/)?[/0-9\._]+X1000\.(jpg|jpeg|png|gif)")"
+    if [[ "$mtime_lists" ]]; then
       poster_to_bbcode "$mtime_lists"
     else
       debug_func 'gen-mtime-poster-url:[failed!]'    #----debug---
@@ -99,16 +103,21 @@ mtime_poster() {
 
 m1905_poster() {
   # 获取m1905 网海报
-  local m1905_lists m_url_one the_rest
-  m1905_lists="$(http --pretty=format --ignore-stdin --timeout=26 GET \
-    "http://www.1905.com/search/?q=$chs_name_douban"|grep "alt=.$chs_name_douban"| \
-    grep -E -o "https?://image[0-9]+.m1905.com[^\"\']+\.(jpg|jpeg|png|gif)"| \
+  local m1905_id m1905_lists _name
+  _name="$1" # one param to search, chinese name
+  m1905_id="$(http --ignore-stdin --timeout=26 GET "http://www.1905.com/search/?q=$_name"| \
+    grep "title=\"$_name\""|grep -Eo 'film/[0-9]{3,}/'|head -1|grep -Eo '[0-9]+')"
+  if [[ "$m1905_id" ]]; then
+  debug_func "gen-mtime-id:[$m1905_id]"  #----debug---
+  m1905_lists="$(http --ignore-stdin --timeout=26 GET "http://www.1905.com/mdb/film/$m1905_id/still/"| \
+    grep -A2 '>海报'|grep -Eo "https?://image[0-9]+.m1905.(com|cn)[^\"\']+\.(jpg|jpeg|png|gif)"| \
     sed -E 's/thumb_[0-9]_[0-9]{2,3}_[0-9]{2,3}_//')"
-  if [[ $m1905_lists ]]; then
+  fi
+  if [[ "$m1905_lists" ]]; then
     poster_to_bbcode "$m1905_lists"
   else
     debug_func 'gen-m1905-poster-url:[failed!] || trying-mtime...'  #----debug---
-    mtime_poster
+    mtime_poster "$_name"
   fi
 }
 #-------------------------------------#
@@ -154,7 +163,7 @@ print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=F
     # 英文名
     eng_name_douban="$(echo "$desc_json_info"|grep 'foreign_title'| \
         head -1|awk -F '"' '{print $4}')"
-    m1905_poster # try to find another poster image url
+    m1905_poster "$chs_name_douban" # try to find another poster image url
 
     [[ $enable_byrbt = yes ]] && gen_desc_html="$(echo "$gen_desc_bbcode"| \
         sed "1c <img src=\"$douban_poster_url\" />"|sed 's!$!&<br />!g')" # byrbt
