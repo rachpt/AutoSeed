@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-03-14
+# Date: 2019-03-15
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -60,17 +60,19 @@ poster_to_bbcode() {
   # 参数，海报列表
   local _one_url _the_rest _line
   local _url_lists="$1"
-  _line=$(expr $RANDOM % $(echo "$_url_lists"|wc -l) + 1)  # 随机海报
-  [[ $_line ]] || _line=1   # default
+  _line=$(($RANDOM % $(echo "$_url_lists"|wc -l) + 1))  # 随机海报
+  [[ $_line ]] || _line=1   # default the first one
   _one_url="$(echo "$_url_lists"|sed -n "$_line p")"
   gen_desc_bbcode="$(echo "$gen_desc_bbcode"|sed "s%$douban_poster_url%$_one_url%")"
   _the_rest="$(echo "$_url_lists"|sed "/$_one_url/d")"
   [[ $_the_rest ]] && {
    _the_rest="$(echo "$_the_rest"|sed "1i 其他海报:")"
-   _the_rest="$(echo $_the_rest|sed "s/ /\\n/g")"  # 转化为\n分割的一行
+    # 转化为\n分割的一行, `` cmd have to use \\\n, while $() cmd use \\n
+   _the_rest="$(echo $_the_rest|sed ':a;N;s/\n/\\n/;ta;')"
+   # sed append use a line contain '\n' to append multi lines
    gen_desc_bbcode="$(echo "$gen_desc_bbcode"|sed "/\[img\]/a $_the_rest")"
   }
-  debug_func "gen-other-poster-url:[$_one_url]"    #----debug---
+  debug_func "gen-other-poster-url:[$_one_url]" #----debug---
 }
 
 mtime_poster() {
@@ -111,52 +113,53 @@ m1905_poster() {
 }
 #-------------------------------------#
 from_douban_get_desc() {
-    # 获取搜索链接
-    [[ $douban_url ]] || douban_url="$(grep -Eio \
-      'https?://(www\.|movie\.)?douban\.com/subject/[0-9]{7,8}/?' "$source_desc"|head -1)"
-    [[ $imdb_url ]] || imdb_url="$(grep -Eio 'tt[0-9]{7}' "$source_desc"|head -1)"
-    if [[ "$douban_url" ]]; then
-        search_url="$douban_url"
-    elif [[ "$imdb_url" ]]; then
-        if [[ $dot_name =~ .*\.[Ss](0?[2-9]|[1-9]?[0-9])\..*WiKi ]]; then
-          debug_func 'gen-wiki-series!...'  #----debug---
-          get_douban_url_by_keywords  # WiKi series
-        else
-          search_url="http://www.imdb.com/title/$imdb_url"
-        fi
+  # 获取搜索链接
+  [[ $douban_url ]] || douban_url="$(grep -Eio \
+    'https?://(www\.|movie\.)?douban\.com/subject/[0-9]{7,8}/?' "$source_desc"|head -1)"
+  [[ $imdb_url ]] || imdb_url="$(grep -Eio 'tt[0-9]{7}' "$source_desc"|head -1)"
+  if [[ "$douban_url" ]]; then
+    search_url="$douban_url"
+  elif [[ "$imdb_url" ]]; then
+    if [[ $dot_name =~ .*\.[Ss](0?[2-9]|[1-9]?[0-9])\..*WiKi ]]; then
+      debug_func 'gen-wiki-series!...'  #----debug---
+      get_douban_url_by_keywords  # WiKi series case
     else
-        get_douban_url_by_keywords
+      search_url="http://www.imdb.com/title/$imdb_url"
     fi
-    # 使用 API 或者 python 本地解析豆瓣简介
-    if [ "$search_url" ]; then
-        desc_json_info="$(http --pretty=format --ignore-stdin --timeout=26 GET \
-            "https://api.rhilip.info/tool/movieinfo/gen?url=${search_url}")"
-        success_get_json_info="$(echo "$desc_json_info"|grep '"success": true')"
-        if [ ! "$success_get_json_info" ] && [ "$Use_Local_Gen" = 'yes' ]; then
-            desc_json_info="$("$python3" -c  \
+  else
+      get_douban_url_by_keywords
+  fi
+  # 使用 API 或者 python 本地解析豆瓣简介
+  if [ "$search_url" ]; then
+    local desc_json_info get_info_code
+    unset gen_desc_bbcode douban_poster_url chs_name_douban eng_name_douban
+    desc_json_info="$(http --pretty=format --ignore-stdin --timeout=26 GET \
+        "https://api.rhilip.info/tool/movieinfo/gen?url=${search_url}")"
+    get_info_code="$(echo "$desc_json_info"|grep '"success": false')" # 失败
+    if [[ "$get_info_code" && "$Use_Local_Gen" = yes ]]; then
+        desc_json_info="$("$python3" -c  \
 "import sys;sys.path.append(\"${ROOT_PATH}/get_desc/\"); \
 from gen import Gen;import json;gen=Gen(\"${search_url}\").gen(_debug=True); \
 print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=False))")"
-        fi
-
-        gen_desc_bbcode="$(echo "$desc_json_info"|grep 'format'| \
-            awk -F '"' '{print $4}'|sed 's#\\n#\n#g')"
-
-        douban_poster_url="$(echo "$desc_json_info"|grep '"poster":'| \
-            head -1|awk -F '"' '{print $4}'|sed 's/img3/img1/')"
-        # 中文名
-        chs_name_douban="$(echo "$desc_json_info"|grep 'chinese_title'| \
-            head -1|awk -F '"' '{print $4}')"
-        # 英文名
-        eng_name_douban="$(echo "$desc_json_info"|grep 'foreign_title'| \
-            head -1|awk -F '"' '{print $4}')"
-        m1905_poster
-
-        [[ $enable_byrbt = yes ]] && gen_desc_html="$(echo "$gen_desc_bbcode"| \
-            sed "1c <img src=\"$douban_poster_url\" />"|sed 's!$!&<br />!g')" # byrbt
-
-        unset search_url
     fi
+
+    gen_desc_bbcode="$(echo "$desc_json_info"|grep 'format'| \
+        awk -F '"' '{print $4}'|sed 's#\\n#\n#g;s/img3/img1/')"
+
+    douban_poster_url="$(echo "$desc_json_info"|grep '"poster":'| \
+        head -1|awk -F '"' '{print $4}'|sed 's/img3/img1/')"
+    # 中文名
+    chs_name_douban="$(echo "$desc_json_info"|grep 'chinese_title'| \
+        head -1|awk -F '"' '{print $4}')"
+    # 英文名
+    eng_name_douban="$(echo "$desc_json_info"|grep 'foreign_title'| \
+        head -1|awk -F '"' '{print $4}')"
+    m1905_poster # try to find another poster image url
+
+    [[ $enable_byrbt = yes ]] && gen_desc_html="$(echo "$gen_desc_bbcode"| \
+        sed "1c <img src=\"$douban_poster_url\" />"|sed 's!$!&<br />!g')" # byrbt
+  fi
+  unset search_url
 }
 
 #-------------------------------------#
