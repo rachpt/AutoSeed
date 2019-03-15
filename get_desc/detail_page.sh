@@ -117,7 +117,13 @@ if [ "$source_site_URL" ]; then
         _search_w="$(echo "$dot_name"|sed "s/[12][089][0-9][0-9]//g")"
         _get_s_id
     fi
-    debug_func "get_desc:source-t_id[$source_t_id]"  #----debug---
+    # 判断cookie是否有效，写入debug
+    [[ $source_t_id ]] && debug_func "get_desc:source-t_id[$source_t_id]" || {
+      [[ "$(http --verify=no --ignore-stdin -b "$source_site_URL" \
+      "$cookie_source_site" "$user_agent"|grep 'name="username"')" ]] && \
+      echo "[$source_site_URL]invalid cookie!!!" >> "$log_Path"
+      debug_func "get_desc:[$source_site_URL]invalid cookie!!!" # 无效 cookie
+    }
     unset _search_w
     unset -f _get_s_id
 else
@@ -162,7 +168,7 @@ form_source_site_get_Desc() {
       end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -2|tail -1) # 第二个
 
     elif [ "$source_site_URL" = "https://totheglory.im" ]; then
-      extra_subt="$(grep '<h1>' "$source_full"|sed -E "s/[^\[]+\[//;s/]//;s%</?h1>%%g")"
+      extra_subt="$(grep '<h1>' "$source_full"|sed -E "s/[^\[]+\[//;s/\]//;s%</?h1>%%g")"
       sed -E -i "s%<br[ ]?/>%<br />\n%ig" "$source_full" # 2019-02-19 update
       # 使用 sed -n '/匹配内容/=' 获取行号
       start_line=$(sed -n '/\.[cC]omparisons/=;/\.[sS]elected\.[sS]creens/=;/\.[mM]ore\.[sS]creens/=;/\.[pP]lot/=' "$source_full"|head -1)
@@ -180,7 +186,8 @@ form_source_site_get_Desc() {
       end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -1) # 第一个
 
     elif [ "$source_site_URL" = "https://hdcmct.org" ]; then
-      extra_subt="$(grep '<h1>' "$source_full"|sed -E 's/.*">//;s%</.*>%%g')" # not finished !!!
+      extra_subt="$(grep -E "download.php\?id=[0-9]+\">\[CMCT\]" "$source_full"| \
+        sed -E 's/.*">//;s%</.*>%%g;s/\[//g;s/\]//g')"
       start_line=$(sed -n '/资料参数/=;/参数信息/=;/General Information/=' "$source_full"|head -1)
       end_line=$(sed -n '/下载信息/=;/郑重声明/=' "$source_full"|head -1) # 第一个
 
