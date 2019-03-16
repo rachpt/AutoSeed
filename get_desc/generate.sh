@@ -57,16 +57,17 @@ get_douban_url_by_keywords() {
 }
 
 poster_to_bbcode() {
-  # 参数，海报列表
+  # 参数$1，海报列表，$2，链接
   local _one_url _the_rest _line
   local _url_lists="$(echo "$1"|sed 's/http:/https:/')" # https 图片url
   _line=$(($RANDOM % $(echo "$_url_lists"|wc -l) + 1))  # 随机海报
   [[ $_line ]] || _line=1   # default the first one
   _one_url="$(echo "$_url_lists"|sed -n "$_line p")"
   gen_desc_bbcode="$(echo "$gen_desc_bbcode"|sed "s%$douban_poster_url%$_one_url%")"
-  _the_rest="$(echo "$_url_lists"|sed "/$_one_url/d")"
+  # 删除url中的/，否则需要使用\对每个\转义！！！
+  _the_rest="$(echo "$_url_lists"|sed "/${_one_url##*/}/d")" # url contents slash!!!
   [[ $_the_rest ]] && {
-   _the_rest="$(echo "$_the_rest"|sed "1i 其他海报:")"
+   _the_rest="$(echo "$_the_rest"|sed "1i 其他海报: [来自$2]")"
     # 转化为\n分割的一行, `` cmd have to use \\\n, while $() cmd use \\n
    _the_rest="$(echo "$_the_rest"|sed ':a;N;s/\n/\\n/;ta;')"
    # sed append use a line contain '\n' to append multi lines
@@ -92,7 +93,7 @@ mtime_poster() {
       grep 'imageList'|sed 's/},{/\n/g'|grep '正式海报'|grep -Eo \
       "https?://img[0-9]+\.mtime\.(cn|com)/pi/(u/)?[/0-9\._]+X1000\.(jpg|jpeg|png|gif)")"
     if [[ "$mtime_lists" ]]; then
-      poster_to_bbcode "$mtime_lists"
+      poster_to_bbcode "$mtime_lists" "http://movie.mtime.com/$mtime_id/"
     else
       debug_func 'gen-mtime-poster-url:[failed!]'    #----debug---
     fi
@@ -114,7 +115,7 @@ m1905_poster() {
     sed -E 's/thumb_[0-9]_[0-9]{2,3}_[0-9]{2,3}_//')"
   fi
   if [[ "$m1905_lists" ]]; then
-    poster_to_bbcode "$m1905_lists"
+    poster_to_bbcode "$m1905_lists" "http://www.1905.com/mdb/film/$m1905_id/"
   else
     debug_func 'gen-m1905-poster-url:[failed!] || trying-mtime...'  #----debug---
     mtime_poster "$_name"
@@ -173,7 +174,7 @@ print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=F
 filt_subt() {
  [[ "$chs_name_douban" && "$extra_subt" ]] && {
    extra_subt="$(echo "$extra_subt"|sed -E \
-   "s/$chs_name_douban//;s%^[ /]+%%;s/ +/ /g")"
+   "s/$chs_name_douban//;s%^[ /]+%%;s/ +/ /g;s/&quot;//g")"
  }
 }
 #-------------------------------------#
