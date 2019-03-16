@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-01-11
+# Date: 2019-03-16
 #
 #---------------------------------------#
 # 将简介以及种子以post方式发布
@@ -21,9 +21,12 @@ judge_before_upload() {
     [ "$postUrl" = "${post_site[nanyangpt]}/takeupload.php" ] && \
         judge_torrent_func # $ROOT_PATH/post/judge.sh
     #---necessary judge---# 
-    if [ "$(grep -E '禁止转载|禁转|独占资源|情色' "$source_desc")" ]; then
+    if [ "$(grep -E '禁止转载|禁转|独占资源' "$source_desc")" ]; then
         up_status='no'  # give up upload
         echo "禁转禁发资源"                      >> "$log_Path"
+    elif [[ "$(grep -E '.类.*别.*情色' "$source_desc")" ]]; then
+        up_status='no'  # give up upload
+        echo "情色电影。--"                      >> "$log_Path"
     fi
 
     unset t_id        # set t_id to none
