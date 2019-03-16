@@ -22,6 +22,9 @@ from_desc_get_param() {
     local pl_name_tmp="autoseed.$(date +%s%N).torrent"
     mv "$torrent_Path" "${flexget_path}/${pl_name_tmp}"
     torrent_Path="${flexget_path}/${pl_name_tmp}"
+    [[ -f "$ROOT_PATH/post/xseed" ]] && "$ROOT_PATH/post/xseed" -ec \
+    'Powered by rachpt/AutoSeed. https://github.com/rachpt/AutoSeed' "$torrent_Path" 
+    [[ $? -ne 0 ]] && debug_func "para:xseed[bencode unstall]!!" #----debug---
     #---name for post---#
     noDot_name="$(echo "$dot_name"| \
         sed 's/\./ /g;s/ DD2 0/ DD2.0/i;s/ H 26/ H.26/i;s/5 1/5.1/;s/7 1/7.1/')"
