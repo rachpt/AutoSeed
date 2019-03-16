@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-03-15
+# Date: 2019-03-16
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -157,7 +157,7 @@ form_source_site_get_Desc() {
     # 匹配官方组 简介中的 info 以及 screens 所在行号
     local start_line end_line middle_line # extra_subt 原种副标题，非局域变量
     if [ "$source_site_URL" = "https://hdsky.me" ]; then
-      extra_subt="$(grep -A1 '&passkey=' "$source_full"|sed -E 's/.*">//;s%</.*>%%g')"
+      extra_subt="$(grep '&passkey=' "$source_full"|sed -E 's/.*">//;s%</.*>%%g')"
       start_line=$(sed -n '/影片参数/=' "$source_full"|head -1)
       end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -1) # 第一个
 
