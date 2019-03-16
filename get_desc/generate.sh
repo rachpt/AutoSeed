@@ -64,8 +64,8 @@ poster_to_bbcode() {
   [[ $_line ]] || _line=1   # default the first one
   _one_url="$(echo "$_url_lists"|sed -n "$_line p")"
   gen_desc_bbcode="$(echo "$gen_desc_bbcode"|sed "s%$douban_poster_url%$_one_url%")"
-  # 删除url中的/，否则需要使用\对每个\转义！！！
-  _the_rest="$(echo "$_url_lists"|sed "/${_one_url##*/}/d")" # url contents slash!!!
+  # 删除url中的/，否则需要使用\对每个\转义！！！最多留12条链接
+  _the_rest="$(echo "$_url_lists"|sed "/${_one_url##*/}/d"|head -12)" # url contents slash!!!
   [[ $_the_rest ]] && {
    _the_rest="$(echo "$_the_rest"|sed "1i 其他海报: [来自$2]")"
     # 转化为\n分割的一行, `` cmd have to use \\\n, while $() cmd use \\n
@@ -104,15 +104,22 @@ mtime_poster() {
 
 m1905_poster() {
   # 获取m1905 网海报
-  local m1905_id m1905_lists _name
+  local m1905_id m1905_lists _name _urls
   _name="$1" # one param to search, chinese name
   m1905_id="$(http --ignore-stdin --timeout=26 GET "http://www.1905.com/search/?q=$_name"| \
     grep "title=\"$_name\""|grep -Eo 'film/[0-9]{3,}/'|head -1|grep -Eo '[0-9]+')"
   if [[ "$m1905_id" ]]; then
   debug_func "gen-mtime-id:[$m1905_id]"  #----debug---
-  m1905_lists="$(http --ignore-stdin --timeout=26 GET "http://www.1905.com/mdb/film/$m1905_id/still/"| \
-    grep -A2 '>海报'|grep -Eo "https?://image[0-9]+.m1905.(com|cn)[^\"\']+\.(jpg|jpeg|png|gif)"| \
-    sed -E 's/thumb_[0-9]_[0-9]{2,3}_[0-9]{2,3}_//')"
+  _urls="$(http --ignore-stdin --timeout=26 GET "http://www.1905.com/mdb/film/$m1905_id/still/"| \
+    grep -A2 '>海报'|grep -Eo "https?://(image[0-9]+|www)\.m?1905\.(com|cn)[^\"\']+\.(jpg|jpeg|png|gif|shtml)"| \
+    sort|uniq|sed -E 's/thumb_[0-9]_[0-9]{2,3}_[0-9]{2,3}_//')"
+  m1905_lists="$(echo "$_urls"|grep -Eo "https?://image[0-9]+[^\"\']+\.(jpg|jpeg|png|gif)")"
+  # 获取更多的海报
+  [[ "$(echo "$m1905_lists"|wc -l)" -le 3 ]] && {
+  _urls="$(echo "$_urls"|grep '.*\.shtml'|head -1)" # newgallery/hdpic
+  [[ "$_urls" ]] && m1905_lists="$(http --ignore-stdin --timeout=26 GET "$_urls"| \
+    grep -A2 '<div class="inner">'|grep -Eo "https?://image[0-9]+.m1905.(com|cn)[^\"\']+\.(jpg|jpeg|png|gif)"| \
+    grep -v 'thumb'|sort|uniq)"; }
   fi
   if [[ "$m1905_lists" ]]; then
     poster_to_bbcode "$m1905_lists" "http://www.1905.com/mdb/film/$m1905_id/"
