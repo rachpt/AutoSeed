@@ -109,7 +109,7 @@ m1905_poster() {
   m1905_id="$(http --ignore-stdin --timeout=26 GET "http://www.1905.com/search/?q=$_name"| \
     grep "title=\"$_name\""|grep -Eo 'film/[0-9]{3,}/'|head -1|grep -Eo '[0-9]+')"
   if [[ "$m1905_id" ]]; then
-  debug_func "gen-mtime-id:[$m1905_id]"  #----debug---
+  debug_func "gen-m1905-id:[$m1905_id]"  #----debug---
   _urls="$(http --ignore-stdin --timeout=26 GET "http://www.1905.com/mdb/film/$m1905_id/still/"| \
     grep -A2 '>海报'|grep -Eo "https?://(image[0-9]+|www)\.m?1905\.(com|cn)[^\"\']+\.(jpg|jpeg|png|gif|shtml)"| \
     sort|uniq|sed -E 's/thumb_[0-9]_[0-9]{2,3}_[0-9]{2,3}_//')"
@@ -133,7 +133,7 @@ from_douban_get_desc() {
   # 获取搜索链接
   [[ $douban_url ]] || douban_url="$(grep -Eio \
     'https?://(www\.|movie\.)?douban\.com/subject/[0-9]{7,8}/?' "$source_desc"|head -1)"
-  [[ $imdb_url ]] || imdb_url="$(grep -Eio 'tt[0-9]{7}' "$source_desc"|head -1)"
+  [[ $imdb_url ]] || imdb_url="$(grep -Eio 'tt[0-9]{7,8}' "$source_desc"|head -1)"
   if [[ "$douban_url" ]]; then
     search_url="$douban_url"
   elif [[ "$imdb_url" ]]; then

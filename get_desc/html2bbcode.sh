@@ -55,7 +55,7 @@ sed -i "s#<#[#g;s#>#]#g" "$source_desc"
 sed -i "s!\[url=[^\]]\+/\]\[url=\(.*\)\[/url\]\[/url\]![url=\1[/url]!g" "$source_desc"
 
 #---ttg imdb url---#
-sed -i "s!\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\]\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\]\(http[s]*://www.imdb.com/title/tt[0-9]\{7\}[/]*\)\[/url\]\[/url\]!\1!g" "$source_desc"
+sed -i "s!\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7,8\}[/]*\]\[url=http[s]*://www.imdb.com/title/tt[0-9]\{7,8\}[/]*\]\(http[s]*://www.imdb.com/title/tt[0-9]\{7,8\}[/]*\)\[/url\]\[/url\]!\1!g" "$source_desc"
 sed -i "s!\[url=http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\]\[url=http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\]\(http[s]*://movie.douban.com/subject/[0-9]\{8\}[/]*\)\[/url\]\[/url\]!\1!g" "$source_desc"
 
 sed -i -r '/quote/{s/font color=["]([a-zA-Z]+)["]/color=\1/g;s/\[\/font\]/[\/size]/;s/\[\/font\]/[\/color]/}' "$source_desc"

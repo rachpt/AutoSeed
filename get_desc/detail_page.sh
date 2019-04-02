@@ -149,7 +149,7 @@ form_source_site_get_Desc() {
   #---desc-full--start
   if [ -s "$source_full" ]; then
     # imdb 和豆瓣链接,用于生成简介
-    imdb_url="$(grep -Eo 'tt[0-9]{7}' "$source_full"|head -1)"
+    imdb_url="$(grep -Eo 'tt[0-9]{7,8}' "$source_full"|head -1)"
     douban_url="$(grep -Eo 'douban\.com/subject/[0-9]{7,8}' "$source_full"|head -1)"
     [[ $douban_url ]] && douban_url="https://movie.douban.com/subject/${douban_url##*/}"
     [ "$(grep -E '禁止转载|禁转资源|谢绝转发|独占资源|禁转资源|No forward anywhere' "$source_full")" ] && local forbid='yes'

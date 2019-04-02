@@ -37,11 +37,12 @@ from_desc_get_param() {
     if [ "$(grep -E '^.集　　数　.*$' "$source_desc")" ]; then
         serials='yes'
         # 剧集季度
-        season="$(echo "$dot_name"|sed -r 's/.*\.(s[0-9]{1,2}\.?(ep?[0-9]{1,3})?)\..*/\1/i'| \
-            sed 's/[a-z]/\u&/g')"
-        [[ $(echo "$season"|awk '{print length($0)}') -gt 8 ]] && \
-        season="$(echo "$dot_name"|sed -r 's/.*\.(ep?[0-9]{1,3}-?(e?p?[0-9]{1,3})?)\..*/\1/i'| \
-            sed 's/[a-z]/\u&/g')"
+        season="$(echo "$dot_name"|grep -Eio '[ \.]s0?(10|20|[1-9]+).?(ep?[0-9]+)?[ \.]'| \
+            sed 's/[a-z]/\u&/g;s/\.//g')"
+        #[[ $(echo "$season"|awk '{print length($0)}') -gt 8 ]] && \
+        [[ $season ]] || \
+        season="$(echo "$dot_name"|grep -Eio '[ \.]ep?[0-9]{1,3}-?(e?p?[0-9]{1,3})?[\. ]'| \
+            sed 's/[a-z]/\u&/g;s/\.//g')"
     else
         normal='yes'
     fi
@@ -63,12 +64,13 @@ from_desc_get_param() {
     # 语言
     language="$(grep -E '^.语　　言　.*$' "$source_desc"| \
         sed -r 's/.语　　言　//'|sed -r 's#[ ]+##g')"
-    # 中文字幕
-    [ "$(grep -i "CH[ST]" "$source_desc")" ] && chs_included='中文字幕 '
-    # 添加额外信息
+    # 添加额外信息  ---1
     chs_included="$(grep '&extra_comment&' "$source_desc"|sed 's/&extra_comment&//')"
+    # 中文字幕  ---2
     [[ ! $chs_included && "$(grep -i "CH[ST]" "$source_desc")" ]] && \
         chs_included='中文字幕 '
+    # 剧集集数信息  ---3
+    [[ ! $chs_included && $serials = yes ]] && chs_included="$season"
     # 删除
     sed -i '/&extra_comment&/d' "$source_desc"
 
@@ -83,7 +85,7 @@ from_desc_get_param() {
     # 删除 简介中的中英文名
     #sed -i '/&shc_name_douban&/d;/&eng_name_douban&/d' "$source_desc"
 
-    imdb_url="$(grep -Eo 'tt[0-9]{7}' "$source_desc"|head -1)"
+    imdb_url="$(grep -Eo 'tt[0-9]{7,8}' "$source_desc"|head -1)"
     douban_url="$(grep -Eo 'https?://movie\.douban\.com/subject/[0-9]{7,8}/?' \
         "$source_desc"|head -1)"
 
