@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-03-15
+# Date: 2019-04-07
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -146,30 +146,34 @@ from_douban_get_desc() {
   else
       get_douban_url_by_keywords
   fi
+  debug_func "generate-search-url:[$search_url]" #----debug---
   # 使用 API 或者 python 本地解析豆瓣简介
   if [ "$search_url" ]; then
-    local desc_json_info get_info_code
+    local desc_json _get
     unset gen_desc_bbcode douban_poster_url chs_name_douban eng_name_douban
-    desc_json_info="$(http --pretty=format --ignore-stdin --timeout=26 GET \
-        "https://api.rhilip.info/tool/movieinfo/gen?url=${search_url}")"
-    get_info_code="$(echo "$desc_json_info"|grep '"success": false')" # 失败
-    if [[ "$get_info_code" && "$Use_Local_Gen" = yes ]]; then
-        desc_json_info="$("$python3" -c  \
-"import sys;sys.path.append(\"${ROOT_PATH}/get_desc/\"); \
+    if [[ $Use_Local_Gen = yes ]]; then
+      desc_json="$("$python3" -c "import sys;sys.path.append(\"${ROOT_PATH}/get_desc/\"); \
 from gen import Gen;import json;gen=Gen(\"${search_url}\").gen(_debug=True); \
 print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=False))")"
     fi
+    _get="$(echo "$desc_json"|grep -Eq '"format": ".+"' && echo yes || echo no)"
+    if [[ $_get = no ]]; then
+      desc_json="$(http --pretty=format --ignore-stdin --timeout=46 GET \
+        "https://api.rhilip.info/tool/movieinfo/gen?url=${search_url}")"
+      _get="$(echo "$desc_json"|grep -Eq '"format": ".+"' && echo yes || echo no)"
+    fi
 
-    gen_desc_bbcode="$(echo "$desc_json_info"|grep 'format'| \
+    debug_func "generate-code:[$_get]" #----debug---
+    gen_desc_bbcode="$(echo "$desc_json"|grep 'format'| \
         awk -F '"' '{print $4}'|sed 's#\\n#\n#g;s/img3/img1/')"
 
-    douban_poster_url="$(echo "$desc_json_info"|grep '"poster":'| \
+    douban_poster_url="$(echo "$desc_json"|grep '"poster":'| \
         head -1|awk -F '"' '{print $4}'|sed 's/img3/img1/')"
     # 中文名
-    chs_name_douban="$(echo "$desc_json_info"|grep 'chinese_title'| \
+    chs_name_douban="$(echo "$desc_json"|grep 'chinese_title'| \
         head -1|awk -F '"' '{print $4}')"
     # 英文名
-    eng_name_douban="$(echo "$desc_json_info"|grep 'foreign_title'| \
+    eng_name_douban="$(echo "$desc_json"|grep 'foreign_title'| \
         head -1|awk -F '"' '{print $4}')"
     m1905_poster "$chs_name_douban" # try to find another poster image url
 
