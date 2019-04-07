@@ -41,7 +41,7 @@ my_dupe_rules() {
          [[ $(echo "$_line"|awk -F '+' '{print $4}') =~ 1|yes ]] && enable_nanyangpt='yes'
          [[ $(echo "$_line"|awk -F '+' '{print $4}') =~ 0|no ]] && enable_nanyangpt='no'
         }
-        ((_site>7)) && {
+        ((_site>6)) && {
          [[ $(echo "$_line"|awk -F '+' '{print $5}') =~ 1|yes ]] && enable_byrbt='yes'
          [[ $(echo "$_line"|awk -F '+' '{print $5}') =~ 0|no ]] && enable_byrbt='no'
         }
