@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-03-12
+# Date: 2019-04-07
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -145,19 +145,19 @@ unset _site # clean
 upload_image_com() {
   unset img_url_com    # clean
   local _file="$1"     # 参数：图片路径
-  local _rand_="$(expr $RANDOM % 3)" # choose an api randomly
+  local _rand_=$((RANDOM % 3)) # choose an api randomly
   up_case_func() {
   case $_rand_ in
     0)
       # endpot.com
-      img_url_com="$(http --pretty=format --timeout=25 --ignore-stdin -bf POST \
+      img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
         --verify=no "$upload_poster_api_2" image@"$_file" "$user_agent"|grep -Eo \
-        "\"link\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" ;;
+        "\"link\".*\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" ;;
     1)
       # sm.ms
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
         "$upload_poster_api_1" smfile@"$_file" "$user_agent"|grep -Eo \
-        "\"url\":\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" ;;
+        "\"url\".*\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" ;;
     2)
       # catbox.moe
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
@@ -168,7 +168,7 @@ upload_image_com() {
   up_case_func
   local _count=1
   while [[ ! $img_url_com && $_count -le 3 ]]; do
-    [[ $_rand_ -eq 2 ]] && _rand_=0 || _rand_=$(expr $_rand_ + 1)
+    [[ $_rand_ -eq 2 ]] && _rand_=0 || _rand_=$((_rand_ + 1))
     up_case_func
     ((_count++))
   done
