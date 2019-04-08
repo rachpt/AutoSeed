@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-07
+# Date: 2019-04-08
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -37,6 +37,10 @@ user_agent='User-Agent:Mozilla/5.0(X11;Linux x86_64;rv:63.0)Gecko/20100101 Firef
 upload_poster_api_1='https://sm.ms/api/upload'
 upload_poster_api_2='https://i.endpot.com/api/upload'
 upload_poster_api_3='https://catbox.moe/user/api.php'
+upload_poster_api_4='https://share1223.com/free.html'
+upload_poster_api_5='https://pic.xiaojianjian.net/webtools/picbed/upload.htm'
+upload_poster_api_6='http://upload.ouliu.net/'
+upload_poster_api_7='https://ooxx.ooo/upload'
 byrbt_upload_api='https://bt.byr.cn/ckfinder/core/connector/php/connector.php'
 #--------------------------------------#
 #---desc---#
@@ -145,7 +149,7 @@ unset _site # clean
 upload_image_com() {
   unset img_url_com    # clean
   local _file="$1"     # 参数：图片路径
-  local _rand_=$((RANDOM % 3)) # choose an api randomly
+  local _rand_=$((RANDOM % 7)) # choose an api randomly
   up_case_func() {
   case $_rand_ in
     0)
@@ -163,17 +167,43 @@ upload_image_com() {
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
       "$upload_poster_api_3" fileToUpload@"$_file" reqtype='fileupload' \
       "$user_agent"|grep -Eio 'http[:/a-z0-9\.]+'|sed 's/\\//g')" ;;
+    3)
+      # sina 图床
+      local _da _tok _url
+      _da="$(http --verify=no --timeout=25 --ignore-stdin "$upload_poster_api_4" \
+        "$user_agent"|grep -Ei -A15 'YoungxjApisToken.+[0-9a-z]+')"
+      _tok="$(echo "$_da"|grep -Eio '[a-z0-9]{30,}')"
+      _url="$(echo "$_da"|grep -A2 "'sina'"|grep -Eio 'https?:[0-9z-a/\.]+')"
+      img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
+      "$_url" "token==$_tok" file@"$_file" "$user_agent"| \
+      grep -Eio 'https?:[/\\a-z0-9\.]+'|sed 's/\\//g')" ;;
+    4)
+      # sina 图床, 小贱贱图床
+      img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
+        "$upload_poster_api_5" file@"$_file" "$user_agent"|grep -Eio \
+        'https?:[/\\a-z0-9\.]+'|sed 's/\\//g;s/http:/https:/')" ;;
+    5)
+      # http://upload.ouliu.net/ 图床
+      img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
+      "$upload_poster_api_6" ifile@"$_file" "$user_agent"|grep 'id="codedirect"'| \
+      grep -Eio 'https?:[/\\a-z0-9\.]+'|sed 's/\\//g;s/http:/https:/'|head -1)" ;;
+    6)
+      # https://ooxx.ooo 图床
+      img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
+        "$upload_poster_api_7" files[]@"$_file" "$user_agent"|grep -Eio '[0-9a-z/\.]+')"
+      [[ $img_url_com ]] && img_url_com="https://i.ooxx.ooo/$img_url_com" ;;
+
   esac
   }
   up_case_func
   local _count=1
-  while [[ ! $img_url_com && $_count -le 3 ]]; do
-    [[ $_rand_ -eq 2 ]] && _rand_=0 || _rand_=$((_rand_ + 1))
+  while [[ ! $img_url_com && $_count -le 7 ]]; do
+    [[ $_rand_ -eq 6 ]] && _rand_=0 || _rand_=$((_rand_ + 1))
     up_case_func
     ((_count++))
   done
   unset -f up_case_func
-  debug_func "img:com-img-url[$img_url_com]"  #----debug---
+  debug_func "img:com-img-url[$img_url_com][$_rand_]"  #----debug---
 }
 # byr 图片上传
 upload_image_byrbt() {
