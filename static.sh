@@ -37,7 +37,7 @@ user_agent='User-Agent:Mozilla/5.0(X11;Linux x86_64;rv:63.0)Gecko/20100101 Firef
 upload_poster_api_1='https://sm.ms/api/upload'
 upload_poster_api_2='https://i.endpot.com/api/upload'
 upload_poster_api_3='https://catbox.moe/user/api.php'
-upload_poster_api_4='https://share1223.com/free.html'
+upload_poster_api_4='https://apis.yum6.cn/api/5bd44dc94bcfc' #https://wiki.yum6.cn
 upload_poster_api_5='https://pic.xiaojianjian.net/webtools/picbed/upload.htm'
 upload_poster_api_6='http://upload.ouliu.net/'
 upload_poster_api_7='https://ooxx.ooo/upload'
@@ -168,17 +168,14 @@ upload_image_com() {
       "$upload_poster_api_3" fileToUpload@"$_file" reqtype='fileupload' \
       "$user_agent"|grep -Eio 'http[:/a-z0-9\.]+'|sed 's/\\//g')" ;;
     3)
-      # sina 图床
-      local _da _tok _url
-      _da="$(http --verify=no --timeout=25 --ignore-stdin "$upload_poster_api_4" \
-        "$user_agent"|grep -Ei -A15 'YoungxjApisToken.+[0-9a-z]+')"
-      _tok="$(echo "$_da"|grep -Eio '[a-z0-9]{30,}')"
-      _url="$(echo "$_da"|grep -A2 "'sina'"|grep -Eio 'https?:[0-9z-a/\.]+')"
+      # sina 图床，YoungxjApis
+      # 更多请看 https://www.youngxj.cn/565.html
+      local _tok='f07b711396f9a05bc7129c4507fb65c5'
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
-      "$_url" "token==$_tok" file@"$_file" "$user_agent"| \
+      "$upload_poster_api_4" "token==$_tok" file@"$_file" "$user_agent"| \
       grep -Eio 'https?:[/\\a-z0-9\.]+'|sed 's/\\//g')" ;;
     4)
-      # sina 图床, 小贱贱图床
+      # sina 图床, 小贱贱api
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
         "$upload_poster_api_5" file@"$_file" "$user_agent"|grep -Eio \
         'https?:[/\\a-z0-9\.]+'|sed 's/\\//g;s/http:/https:/')" ;;
