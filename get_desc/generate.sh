@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-07
+# Date: 2019-04-12
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -157,13 +157,16 @@ from gen import Gen;import json;gen=Gen(\"${search_url}\").gen(_debug=True); \
 print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=False))")"
     fi
     _get="$(echo "$desc_json"|grep -Eq '"format": ".+"' && echo yes || echo no)"
+    debug_func "generate-code-local:[$_get]" #----debug---
     if [[ $_get = no ]]; then
+      local _s_key
+      [[ $imdb_url ]] && _s_key="site=douban&sid=$imdb_url" || _s_key="url=$search_url"
       desc_json="$(http --pretty=format --ignore-stdin --timeout=46 GET \
-        "https://api.rhilip.info/tool/movieinfo/gen?url=${search_url}")"
+        "https://api.rhilip.info/tool/movieinfo/gen?${_s_key}")"
       _get="$(echo "$desc_json"|grep -Eq '"format": ".+"' && echo yes || echo no)"
+      debug_func "generate-code-api:[$_get]" #----debug---
     fi
 
-    debug_func "generate-code:[$_get]" #----debug---
     gen_desc_bbcode="$(echo "$desc_json"|grep 'format'| \
         awk -F '"' '{print $4}'|sed 's#\\n#\n#g;s/img3/img1/')"
 
