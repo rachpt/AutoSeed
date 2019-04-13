@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-12
+# Date: 2019-04-13
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -156,14 +156,14 @@ from_douban_get_desc() {
 from gen import Gen;import json;gen=Gen(\"${search_url}\").gen(_debug=True); \
 print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=False))")"
     fi
-    _get="$(echo "$desc_json"|grep -Eq '"format": ".+"' && echo yes || echo no)"
+    _get="$(echo "$desc_json"|grep -Eq '"format".+".+",' && echo yes || echo no)"
     debug_func "generate-code-local:[$_get]" #----debug---
     if [[ $_get = no ]]; then
       local _s_key
       [[ $imdb_url ]] && _s_key="site=douban&sid=$imdb_url" || _s_key="url=$search_url"
       desc_json="$(http --pretty=format --ignore-stdin --timeout=46 GET \
         "https://api.rhilip.info/tool/movieinfo/gen?${_s_key}")"
-      _get="$(echo "$desc_json"|grep -Eq '"format": ".+"' && echo yes || echo no)"
+      _get="$(echo "$desc_json"|grep -Eq '"format".+".+",' && echo yes || echo no)"
       debug_func "generate-code-api:[$_get]" #----debug---
     fi
 
@@ -229,7 +229,9 @@ fi)
     echo "$source_desc_tmp" > "$source_desc"
     [[ $enable_byrbt = yes ]] && echo "$source_html_tmp" > "$source_html"
     # 清空变量，防止不同种子简介互串
-    unset source_desc_tmp  source_html_tmp  source_t_id extra_subt
+    unset source_t_id extra_subt source_site_URL s_site_uid
+    unset imdb_url douban_url
+    unset source_desc_tmp  source_html_tmp
     unset chs_name_douban  eng_name_douban  douban_poster_url
 }
 
