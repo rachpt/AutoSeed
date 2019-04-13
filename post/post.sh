@@ -3,15 +3,17 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-03-16
+# Date: 2019-04-13
 #
 #---------------------------------------#
 # 将简介以及种子以post方式发布
 #---------------------------------------#
 # import functions
 source "$ROOT_PATH/get_desc/desc.sh"    # get source site
-source "$ROOT_PATH/post/parameter.sh"
-source "$ROOT_PATH/post/judge.sh"
+[[ `type -t from_desc_get_param` != "function" ]] && \
+  source "$ROOT_PATH/post/parameter.sh"
+[[ `type -t judge_torrent_func` != "function" ]] && \
+  source "$ROOT_PATH/post/judge.sh"
 #---------------------------------------#
 judge_before_upload() {
     up_status='yes'    # judge code
