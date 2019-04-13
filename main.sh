@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-03-13
+# Date: 2019-04-13
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -14,6 +14,7 @@ source "$ROOT_PATH/settings.sh"
 #---------------------------------------#
 # import extra functions
 source "$ROOT_PATH/get_desc/detail_page.sh"
+source "$ROOT_PATH/get_desc/customize.sh"
 #----------------lock func--------------#
 remove_lock() {
     \rm -f "$lock_File" "$qb_rt_queue"

@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-01-11
+# Date: 2019-04-13
 #
 #-------------------------------------#
 # 调函数，生成简介
@@ -56,7 +56,8 @@ if [ ! -s "$source_desc" ]; then
         [[ $completion -eq 100 ]] && {
         # import functions
         debug_func 'desc:info'        #----debug---
-        source "$ROOT_PATH/get_desc/info.sh"
+        [[ `type -t read_info_file` != "function" ]] && \
+          source "$ROOT_PATH/get_desc/info.sh"
         read_info_file; }             # get_desc/info.sh
     fi
     if [ -s "$source_desc" ]; then
@@ -70,21 +71,24 @@ if [ ! -s "$source_desc" ]; then
         match_douban_imdb "$dot_name"
         match_douban_imdb "$org_tr_name"
         debug_func 'desc:generate'    #----debug---
-        source "$ROOT_PATH/get_desc/generate.sh"
+        [[ `type -t generate_main_func` != "function" ]] && \
+          source "$ROOT_PATH/get_desc/generate.sh"
         generate_main_func            # get_desc/generate.sh
         #---screens---#
         if [[ $enable_byrbt = yes || $enable_tjupt = yes ]]; then
-            debug_func 'desc:screens' #----debug---
+          debug_func 'desc:screens' #----debug---
+          [[ `type -t deal_with_images` != "function" ]] && \
             source "$ROOT_PATH/get_desc/screens.sh"
-            deal_with_images          # get_desc/screens.sh
-        debug_func 'desc:out'         #----debug---
+          deal_with_images          # get_desc/screens.sh
+          debug_func 'desc:out'     #----debug---
         fi
     fi
 else
     # 保险起见，检查已经生成的简介
     if [[ $enable_byrbt = yes && $(grep -Eo "src=[\"\']http[^\'\"]+" \
       "$source_html"|sed "/bt\.byr\.cn/d") ]]; then
-        source "$ROOT_PATH/get_desc/screens.sh"
+        [[ `type -t deal_with_images` != "function" ]] && \
+          source "$ROOT_PATH/get_desc/screens.sh"
         deal_with_images              # get_desc/screens.sh
         debug_func 'desc-byr-pic-pass2'  #----debug---
     fi
