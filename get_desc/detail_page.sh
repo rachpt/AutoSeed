@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-03-16
+# Date: 2019-04-13
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -12,10 +12,34 @@
 # source_desc[html 用于 byrbt]，
 # 后续合并通过豆瓣生成的简介。
 #-------------------------------------#
+no_source_2_source() {
+   # 来自 byr
+   if [[ $source_site_URL =~ https?://byr\.cn ]]; then
+       source_site_URL='https://bt.byr.cn'
+       enable_byrbt='no'
+       s_site_uid='byrbt'
+   # 来自 cmct
+   elif [[ $source_site_URL =~ https?://hdcmct\.org ]]; then
+       enable_cmct='no'
+       s_site_uid='cmct'
+   # 来自 nanyangpt
+   elif [[ $source_site_URL =~ https?://nanyangpt\.com ]]; then
+       enable_nanyangpt='no'
+       s_site_uid='nanyangpt'
+   # 来自 npupt
+   elif [[ $source_site_URL =~ https?://.*npupt\.com ]]; then
+       source_site_URL='https://npupt.com'
+       enable_npupt='no'
+       s_site_uid='npupt'
+   # 来自 tjupt
+   elif [[ $source_site_URL =~ https?://.*tjupt\.org ]]; then
+       source_site_URL='https://tjupt.org'
+       enable_tjupt='no'
+       s_site_uid='tjupt'
+   fi
+}
 
-# 自定义发布规则
-source "$ROOT_PATH/get_desc/customize.sh"
-#-------------------------------------#
+#--------------prepare-func-----------#
 get_source_site() {
     # s_site_uid 用于qbittorrent 设置原种 ratio. qbittorrent.sh
     unset source_site_URL cookie_source_site unknown_site source_t_id s_site_uid
@@ -23,58 +47,34 @@ get_source_site() {
     # 获取种子原站点
     if [ "$(echo $tracker_info|grep -i 'hdsky')" ]; then
         source_site_URL='https://hdsky.me'
-        cookie_source_site="$cookie_hds"
         s_site_uid='hds'
     elif [ "$(echo $tracker_info|grep -i 'totheglory')" ]; then
         source_site_URL='https://totheglory.im'
-        cookie_source_site="$cookie_ttg"
         s_site_uid='ttg'
     elif [ "$(echo $tracker_info|grep -i 'hdchina')" ]; then
         source_site_URL='https://hdchina.org'
-        cookie_source_site="$cookie_hdc"
         s_site_uid='hdc'
     elif [ "$(echo $tracker_info|grep -i 'tp.m-team.cc')" ]; then
         source_site_URL='https://tp.m-team.cc'
-        cookie_source_site="$cookie_mt"
         s_site_uid='mt'
     elif [ "$(echo $tracker_info|grep -i 'hdcmct.org')" ]; then
         source_site_URL='https://hdcmct.org'
-        cookie_source_site="$cookie_cmct"
         s_site_uid='cmct'
     #elif [ "$(echo $tracker_info|grep -i 'new')" ]; then
     #    source_site_URL='https://new.tracker.org'
     else
-        unknown_site="$(echo "$tracker_info"|grep -Eo 'https?://[^/]*'| \
-          head -1|sed 's/tracker\.//')"
+        source_site_URL="$(echo "$tracker_info"|grep -Eo 'https?://[^/]*'| \
+          head -1|sed 's/tracker\.//;s/ssl\.//')"
+        # ssl IPT
     fi
-}
-
-#-------------------------------------#
-no_source_2_source() {
-   # 来自 byr
-   if [[ $source_site_URL =~ https?://byr\.cn ]]; then
-       source_site_URL='https://bt.byr.cn'
-       enable_byrbt='no'
-   # 来自 cmct
-   elif [[ $source_site_URL =~ https?://hdcmct\.org ]]; then
-       enable_cmct='no'
-   # 来自 nanyangpt
-   elif [[ $source_site_URL =~ https?://nanyangpt\.com ]]; then
-       enable_nanyangpt='no'
-   # 来自 npupt
-   elif [[ $source_site_URL =~ https?://.*npupt\.com ]]; then
-       source_site_URL='https://npupt.com'
-       enable_npupt='no'
-   # 来自 tjupt
-   elif [[ $source_site_URL =~ https?://.*tjupt\.org ]]; then
-       source_site_URL='https://tjupt.org'
-       enable_tjupt='no'
-   fi
+    no_source_2_source # 减少不必要的过程
+    # set cookie
+    cookie_source_site="$(eval echo '$'cookie_$s_site_uid)"
 }
 
 #-------------------------------------#
 set_source_site_cookie() {
-    #i 供二次编辑简介使用
+    # 供二次编辑简介使用
     if [ "$source_site_URL" = "https://hdsky.me" ]; then
         cookie_source_site="$cookie_hds"
     elif [ "$source_site_URL" = "https://totheglory.im" ]; then
@@ -90,48 +90,43 @@ set_source_site_cookie() {
 
 #-------------------------------------#
 form_source_site_get_tID() {
-if [ "$source_site_URL" ]; then
-    _get_s_id() {
-    ## TODO 搜索原种ID
-    if [ "$source_site_URL" = "https://totheglory.im" ]; then
-        # TTG
-        local s_search_URL="${source_site_URL}/browse.php"
+if [[ "$source_site_URL" && "$cookie_source_site" ]]; then
+  _get_s_id() {
+  ## TODO 搜索原种ID
+  if [ "$source_site_URL" = "https://totheglory.im" ]; then
+    # TTG
+    local s_search_URL="${source_site_URL}/browse.php"
 
-        source_t_id="$(http --verify=no --ignore-stdin --timeout=25 -b GET \
-        "$s_search_URL" c==M search_field=="$_search_w" "$cookie_source_site" "$user_agent"| \
-        grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
-    else
-        # 一般形式
-        local s_search_URL="${source_site_URL}/torrents.php"
+    source_t_id="$(http --verify=no --ignore-stdin --timeout=25 -b GET \
+    "$s_search_URL" c==M search_field=="$_search_w" "$cookie_source_site" "$user_agent"| \
+    grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
+  else
+    # 一般形式
+    local s_search_URL="${source_site_URL}/torrents.php"
 
-        source_t_id="$(http --verify=no --ignore-stdin --timeout=25 -b GET \
-        "$s_search_URL" search=="$_search_w" "$cookie_source_site" "$user_agent"| \
-        grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
-    fi
-    }
-    local _search_w="$dot_name"
-    _get_s_id
+    source_t_id="$(http --verify=no --ignore-stdin --timeout=25 -b GET \
+    "$s_search_URL" search=="$_search_w" "$cookie_source_site" "$user_agent"| \
+    grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
+  fi
+  }
+  local _search_w="$dot_name"
+  _get_s_id
 
-    #---deal with wrong year---#
-    if [ ! "$source_t_id" ]; then
-        _search_w="$(echo "$dot_name"|sed "s/[12][089][0-9][0-9]//g")"
-        _get_s_id
-    fi
-    # 判断cookie是否有效，写入debug
-    [[ $source_t_id ]] && debug_func "get_desc:source-t_id[$source_t_id]" || {
-      [[ "$(http --verify=no --ignore-stdin -b "$source_site_URL" \
-      "$cookie_source_site" "$user_agent"|grep 'name="username"')" ]] && \
-      echo "[$source_site_URL]invalid cookie!!!" >> "$log_Path"
-      debug_func "get_desc:[$source_site_URL]invalid cookie!!!" # 无效 cookie
-    }
-    unset _search_w
-    unset -f _get_s_id
-else
-    # 用于简介
-    source_site_URL="$unknown_site"
-    unset unknown_site
+  #---deal with wrong year---#
+  if [ ! "$source_t_id" ]; then
+      _search_w="$(echo "$dot_name"|sed "s/[12][089][0-9][0-9]//g")"
+      _get_s_id
+  fi
+  # 判断cookie是否有效，写入debug
+  [[ $source_t_id ]] && debug_func "get_desc:source-t_id[$source_t_id]" || {
+    [[ "$(http --verify=no --ignore-stdin -b "$source_site_URL" \
+    "$cookie_source_site" "$user_agent"|grep 'name="username"')" ]] && \
+    echo "[$source_site_URL]invalid cookie!!!" >> "$log_Path"
+    debug_func "get_desc:[$source_site_URL]invalid cookie!!!" # 无效 cookie
+  }
+  unset _search_w
+  unset -f _get_s_id
 fi
-no_source_2_source # 减少不必要的过程
 }
 
 #--------------main-func--------------#
