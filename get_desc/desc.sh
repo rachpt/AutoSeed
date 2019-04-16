@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-13
+# Date: 2019-04-16
 #
 #-------------------------------------#
 # 调函数，生成简介
@@ -66,21 +66,24 @@ if [ ! -s "$source_desc" ]; then
         echo -e "${org_tr_name}\n${trackers[$s_site_uid]}\n`eval echo \
           '$'ratio_$s_site_uid`" >> "$qb_rt_queue"
         # import functions to generate desc
+        #------------match imdb/douban url----------#
         debug_func 'desc:match'       #----debug---
-        source "$ROOT_PATH/get_desc/match.sh"
+        [[ `type -t match_douban_imdb` != "function" ]] && \
+          source "$ROOT_PATH/get_desc/match.sh"
         match_douban_imdb "$dot_name"
         match_douban_imdb "$org_tr_name"
+        #-----------use python/api gen desc---------#
         debug_func 'desc:generate'    #----debug---
         [[ `type -t generate_main_func` != "function" ]] && \
           source "$ROOT_PATH/get_desc/generate.sh"
         generate_main_func            # get_desc/generate.sh
-        #---screens---#
+        #-----------------screens-------------------#
         if [[ $enable_byrbt = yes || $enable_tjupt = yes ]]; then
-          debug_func 'desc:screens' #----debug---
+          debug_func 'desc:screens'   #----debug---
           [[ `type -t deal_with_images` != "function" ]] && \
             source "$ROOT_PATH/get_desc/screens.sh"
-          deal_with_images          # get_desc/screens.sh
-          debug_func 'desc:out'     #----debug---
+          deal_with_images            # get_desc/screens.sh
+          debug_func 'desc:out'       #----debug---
         fi
     fi
 else
