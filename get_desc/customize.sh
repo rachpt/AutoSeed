@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-28
+# Date: 2019-04-16
 #
 #-------------------------------------#
 # 本文件对特定资源发布站点进行特殊设置，
@@ -25,31 +25,31 @@ my_dupe_rules() {
       _one_name="$(echo "$_one_name"|sed 'y/。，？；：‘“、（）｀～！＠＃％＊ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ/.,?;:\"\",()`~!@#%*abcdefghijklmnopqrstuvwxyz/')"
       [[ $_name =~ .*$_one_name.* ]] && {
         _site="$(echo "$_line"|awk -F '+' '{print NF}')" 
-        ((_site>2)) && {
+        ((_site>1)) && {
          [[ $(echo "$_line"|awk -F '+' '{print $1}') =~ 1|yes ]] && enable_hudbt='yes'
          [[ $(echo "$_line"|awk -F '+' '{print $1}') =~ 0|no ]] && enable_hudbt='no'
         }
-        ((_site>3)) && {
+        ((_site>2)) && {
          [[ $(echo "$_line"|awk -F '+' '{print $2}') =~ 1|yes ]] && enable_whu='yes'
          [[ $(echo "$_line"|awk -F '+' '{print $2}') =~ 0|no ]] && enable_whu='no'
         }
-        ((_site>4)) && {
+        ((_site>3)) && {
          [[ $(echo "$_line"|awk -F '+' '{print $3}') =~ 1|yes ]] && enable_npupt='yes'
          [[ $(echo "$_line"|awk -F '+' '{print $3}') =~ 0|no ]] && enable_npupt='no'
         }
-        ((_site>5)) && {
+        ((_site>4)) && {
          [[ $(echo "$_line"|awk -F '+' '{print $4}') =~ 1|yes ]] && enable_nanyangpt='yes'
          [[ $(echo "$_line"|awk -F '+' '{print $4}') =~ 0|no ]] && enable_nanyangpt='no'
         }
-        ((_site>6)) && {
+        ((_site>5)) && {
          [[ $(echo "$_line"|awk -F '+' '{print $5}') =~ 1|yes ]] && enable_byrbt='yes'
          [[ $(echo "$_line"|awk -F '+' '{print $5}') =~ 0|no ]] && enable_byrbt='no'
         }
-        ((_site>7)) && {
+        ((_site>6)) && {
          [[ $(echo "$_line"|awk -F '+' '{print $6}') =~ 1|yes ]] && enable_cmct='yes'
          [[ $(echo "$_line"|awk -F '+' '{print $6}') =~ 0|no ]] && enable_cmct='no'
         }
-        ((_site>8)) && {
+        ((_site>7)) && {
          [[ $(echo "$_line"|awk -F '+' '{print $7}') =~ 1|yes ]] && enable_tjupt='yes'
          [[ $(echo "$_line"|awk -F '+' '{print $7}') =~ 0|no ]] && enable_tjupt='no'
         }
