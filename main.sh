@@ -15,6 +15,7 @@ source "$ROOT_PATH/settings.sh"
 # import extra functions
 source "$ROOT_PATH/get_desc/detail_page.sh"
 source "$ROOT_PATH/get_desc/customize.sh"
+source "$ROOT_PATH/get_desc/extract.sh"
 #----------------lock func--------------#
 remove_lock() {
     \rm -f "$lock_File" "$qb_rt_queue"
@@ -168,8 +169,9 @@ else
     [[ $TR_TORRENT_NAME ]] && sleep 2 && \
         debug_func 'main:run_from_tr'  #----debug---
 fi
-[[ $Torrent_Name && $Tr_Path ]] && \
-    echo -e "${Torrent_Name}\n${Tr_Path}" >> "$queue"
+[[ $Torrent_Name && $Tr_Path ]] && {
+    extract_rar_files # get_desc/extract.sh
+    echo -e "${Torrent_Name}\n${Tr_Path}" >> "$queue"; }
 unset Torrent_Name Tr_Path
 #---------------------------------------#
 [ "$Disable_AutoSeed" = "yes" ] && exit
