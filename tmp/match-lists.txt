@@ -1,13 +1,34 @@
 # 说明： '井' 号后面部分没有效果，空格空行不影响结果，大小写不敏感。
-# 奇数行为电影电视剧名，豆瓣中文英文名， '.'和 空格 不影响结果。
-# 偶数行为imdb或则豆瓣链接，除了全连接(https?)，imdb 支持 tt1234567 形式。
+# 奇数行(先)为电影电视剧名，豆瓣中文英文名， '.'和 空格 不影响结果。
+# 偶数行(接着)为imdb或则豆瓣链接，全连接(https?)形式。
 
 # 示例：
 # Einstein and Einstein
 # https://movie.douban.com/subject/25716096/ 
 
-# Cinderella.Chef                  # 萌妻食神
-# https://douban.com/subject/30395527/    # 最好使用带movie形式链接
+Cinderella.Chef # 萌妻食神
+https://douban.com/subject/30395527/
 
-# CindeGreat.Journey.Of.Teenagers  # 少年歌行
-# https://douban.com/subject/30345127/
+Great.Journey.Of.Teenagers # 少年歌行
+https://douban.com/subject/30345127/
+
+Douro.Mainland # 斗罗大陆
+https://douban.com/subject/27040807/
+
+I'M.JOYBO.Words.From.My.Heart.s02 # 我是江小白第二季
+https://movie.douban.com/subject/30156271/
+
+Set Sail.2019 # 启航
+https://douban.com/subject/30228393/
+
+The.91th.Annual.Academy.Awards.2019 # 第91届奥斯卡金像奖颁奖典礼
+https://movie.douban.com/subject/30395844/
+
+Martial.Universe.2019 # 武动乾坤
+https://movie.douban.com/subject/30223578/
+
+Relying.on.Heaven.to.Slaughter.Dragons.E # 倚天屠龙记
+https://movie.douban.com/subject/25865815/
+
+Game.of.Thrones.S08
+https://movie.douban.com/subject/26584183/

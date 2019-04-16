@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-13
+# Date: 2019-04-16
 #
 #---------------------------------------#
 # 将简介以及种子以post方式发布
@@ -14,6 +14,8 @@ source "$ROOT_PATH/get_desc/desc.sh"    # get source site
   source "$ROOT_PATH/post/parameter.sh"
 [[ `type -t judge_torrent_func` != "function" ]] && \
   source "$ROOT_PATH/post/judge.sh"
+[[ `type -t match_douban_imdb` != "function" ]] && \
+    source "$ROOT_PATH/get_desc/match.sh"
 #---------------------------------------#
 judge_before_upload() {
     up_status='yes'    # judge code
@@ -93,6 +95,9 @@ unset_tempfiles() {
 my_dupe_rules            # get_desc/customize.sh
 # 获得发布所需参数
 from_desc_get_param      # $ROOT_PATH/post/parameter.sh
+# 美剧imdb链接修正
+match_douban_imdb "$dot_name" 'series'
+match_douban_imdb "$org_tr_name" 'series'
 
 if [ "$enable_whu" = 'yes' ]; then
     source "$ROOT_PATH/post/whu.sh"
