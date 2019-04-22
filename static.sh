@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-08
+# Date: 2019-04-22
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -30,6 +30,8 @@ python3='python3'
 mediainfo='mediainfo'
 #---path of ffmpeg---#
 ffmpeg='ffmpeg'
+#---path of dottorrent---#
+dottorrent='dottorrent' # example /home/rachpt/.local/bin/dottorrent
 #---
 user_agent='User-Agent:Mozilla/5.0(X11;Linux x86_64;rv:63.0)Gecko/20100101 Firefox/63.0'
 #--------------------------------------#
@@ -130,7 +132,7 @@ source "$ROOT_PATH/transmission.sh"
 unset _site use_qbt use_trs # clean
 for _site in hudbt whu nanyangpt npupt byrbt cmct tjupt; do
   [[ "$(eval echo '$'enable_$_site)" = yes ]] && \
-    case $(eval '$'client_$_site) in
+    case $(eval echo '$'client_$_site) in
       qbittorrent)
           use_qbt='yes' ;;
       transmission)
