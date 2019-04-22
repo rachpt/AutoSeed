@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-03-14
+# Date: 2019-04-22
 #-----------------------------#
 #
 # Auto clean old files/folders in 
@@ -38,11 +38,11 @@ comparer_file_and_delete() {
   IFS_OLD=$IFS; IFS=$'\n'; local f _qb_names _tr_names old_status
   for f in $(ls -1 "$FILE_PATH"); do
     IFS=$IFS_OLD
-    old_status=$(is_old_file "$i") 
+    old_status=$(is_old_file "$f") 
     if [[ $old_status -eq 1 ]]; then
        # 删除不在qb tr中的文件
        local delete_commit
-       [[ $use_trs = yes ]] && qb_is_seeding "$f"
+       [[ $use_trs = yes ]] && qb_is_seeding "$f" || delete_commit='yes'
        [[ $use_qbt = yes && $delete_commit = yes ]] && tr_is_seeding "$f"
        [[ $use_qbt != yes && $use_trs != yes ]] && delete_commit='no'
        if [[ "$f" && $delete_commit = yes ]]; then
@@ -68,7 +68,7 @@ disk_is_over_use() {
   disk_check
   if [[ "$disk_over" -eq 1 && $use_trs = yes ]]; then
     for i in $($tr_remote -l|grep -Eo '[0-9]+.+100%'|grep -Eo '^[0-9]+'); do
-      $tr_remote -t $i --remove-and-delete >> "$log_Path" 2>&1
+      $tr_remote -t "$i" --remove-and-delete >> "$log_Path" 2>&1
       debug_func "clean::reach-limit[$i]"  #----debug---
       sleep 10 && disk_check
       [[ "$disk_over" -eq 0 ]] && break
@@ -104,7 +104,7 @@ clean_dir() {
 clean_frequence() {
   # 限制清理频率
   local time_threshold time_pass
-  time_threshold=$(( 60 * 60 * 12))  # 12 hours
+  time_threshold=$(( 60 * 60 * 12))  # 12 hours to seconds
   # use $(( )) to calculate number
   time_pass=$(($(date '+%s') - $(stat -c '%Y' "$ROOT_PATH/clean/dir")))
   [[ $time_pass -gt $time_threshold ]] && {
