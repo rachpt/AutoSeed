@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-16
+# Date: 2019-04-22
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -66,9 +66,9 @@ generate_desc() {
   do
     IFS=$IFS_OLD
     torrent_Path="${flexget_path}/$tr_i"
-    # test include rar torrent
-    $tr_show "$torrent_Path"|grep -B 999 FILES|grep -Eq '.*\.rar |.*\.r[0-9]+ '
-    [[ "$?" -eq 0 ]] && \rm "$torrent_Path" && break # delete rar torrent
+    # test rar included torrent
+    $tr_show "$torrent_Path"|grep -A 999 FILES|grep -Eq '.*\.rar |.*\.r[0-9]+ '
+    [[ "$?" -eq 0 ]] && \rm -f "$torrent_Path" && break # delete rar torrent
     # org_tr_name 用于和 transmission/qb 中的种子名进行比较，
     org_tr_name="$($tr_show "$torrent_Path"|grep Name|head -1|sed -r 's/Name:[ ]+//')"
     one_TR_Name="$org_tr_name"
@@ -173,6 +173,7 @@ else
         debug_func 'main:run_from_tr'  #----debug---
 fi
 [[ $Torrent_Name && $Tr_Path ]] && {
+    hold_on # main.sh, sleep some time
     extract_rar_files # get_desc/extract.sh
     echo -e "${Torrent_Name}\n${Tr_Path}" >> "$queue"; }
 unset Torrent_Name Tr_Path
