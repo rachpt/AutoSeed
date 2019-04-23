@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-22
+# Date: 2019-04-23
 #-----------------------------#
 #
 # Auto clean old files/folders in 
@@ -42,8 +42,8 @@ comparer_file_and_delete() {
     if [[ $old_status -eq 1 ]]; then
        # 删除不在qb tr中的文件
        local delete_commit
-       [[ $use_trs = yes ]] && qb_is_seeding "$f" || delete_commit='yes'
-       [[ $use_qbt = yes && $delete_commit = yes ]] && tr_is_seeding "$f"
+       [[ $use_trs = yes ]] && tr_is_seeding "$f" || delete_commit='yes'
+       [[ $use_qbt = yes && $delete_commit = yes ]] && qb_is_seeding "$f"
        [[ $use_qbt != yes && $use_trs != yes ]] && delete_commit='no'
        if [[ "$f" && $delete_commit = yes ]]; then
          debug_func "clean:del-file:[$f]"  #----debug---
@@ -104,10 +104,11 @@ clean_dir() {
 clean_frequence() {
   # 限制清理频率
   local time_threshold time_pass
-  time_threshold=$(( 60 * 60 * 12))  # 12 hours to seconds
+  time_threshold=$((60 * 60 * 12))  # 12 hours to seconds
   # use $(( )) to calculate number
   time_pass=$(($(date '+%s') - $(stat -c '%Y' "$ROOT_PATH/clean/dir")))
   [[ $time_pass -gt $time_threshold ]] && {
+    debug_func "clean:use_qbt[$use_qbt]-use_trs[$use_trs]"
     sleep 20 # 延时
     clean_main
     # 更新dir时间
