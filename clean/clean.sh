@@ -39,15 +39,17 @@ comparer_file_and_delete() {
   for f in $(ls -1 "$FILE_PATH"); do
     IFS=$IFS_OLD
     old_status=$(is_old_file "$f") 
-    if [[ $old_status -eq 1 ]]; then
+    if [[ $old_status -eq 1 && "$f" ]]; then
        # 删除不在qb tr中的文件
        local delete_commit
+       # transmission 判断更容易，所以放前面。
        [[ $use_trs = yes ]] && tr_is_seeding "$f" || delete_commit='yes'
        [[ $use_qbt = yes && $delete_commit = yes ]] && qb_is_seeding "$f"
+       # 如果两个客户端都未使用，则不删文件。
        [[ $use_qbt != yes && $use_trs != yes ]] && delete_commit='no'
-       if [[ "$f" && $delete_commit = yes ]]; then
+       if [[ $delete_commit = yes ]]; then
          debug_func "clean:del-file:[$f]"  #----debug---
-         \rm -rf "$FILE_PATH/$f"
+         [[ "$f" && -e "$FILE_PATH/$f" ]] && \rm -rf "$FILE_PATH/$f"
          echo "[$(date '+%m-%d %H:%M:%S')]deleted Torrent[$f]" >> "$log_Path"
        fi
     fi
