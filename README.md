@@ -39,7 +39,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
   - mediainfo，用于本地生成info信息;
   - ffmpeg，用于本地生成缩略图(配合mediainfo);
   - 其他常用软件工具，sed，grep，awk等(详见 setting.sh，一般系统自带)；
-  - 默认使用`python3`本地解析豆瓣简介(作为最后的办法)，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖(requests,bs4,html2bbcode)；
+  - 默认先使用`python3`本地解析豆瓣简介，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖(requests,bs4,html2bbcode)；
   - curl，备用下载工具。
 
 - ubuntu 系安装
@@ -64,20 +64,21 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 1. clone 本 repo (或者下载 zip) 至本地，请使用最新的版本；
 2. 修改设置文件`setting.sh`(包括cookie、passkey，监控 torrent 文件路径等)；
 3. 添加 `main.sh` 脚本路径至 transmission 的 `script-torrent-done-filename`。具体可以参见 [这里](https://rachpt.github.io/2018/03/25/transmission-settings/) ；
-4. 若使用 qbittorrent **订阅源种**(非reseed)，则需要添加如 `/home/AutoSeed/main.sh "%N" "%D"` 所示代码至 完成时运行外部程序处；
-4. (推荐)将 `main.sh` 添加到  `crontab` 之类的程序周期运行（运行锁会解决各种冲突问题），以提前生成简介；
+4. 若使用 qbittorrent **订阅源种**(非reseed)，则需要添加如 `/home/AutoSeed/main.sh "%N" "%D"` 所示代码至 完成时运行外部程序处(目前只能使用一个客户端订阅源种)；
+4. (推荐)将 `main.sh` 添加到  `crontab` 周期运行（运行锁会解决各种冲突问题），以提前生成简介；
 5. 调试请看 test.sh 中的说明。
 
+详细请看[wiki](https://github.com/rachpt/AutoSeed/wiki)。
 
 *其他：*
 
-请使用 flexget 订阅下载，transmission 使用 [transmissionrpc](https://flexget.com/Plugins/transmission) 将源种传入，qbittorrent 参考使用方法4 。
+请使用 flexget 订阅下载，transmission 使用 [transmissionrpc](https://flexget.com/Plugins/transmission) 将源种传入，qbittorrent 使用 flexget 的 qbittorrent 模块。
 
  `crontab` 运行参考命令 `*/5 * * * * /home/AutoSeed/main.sh >/dev/null 2>&1`。
 
 ubuntu 用户注意使用 bash 运行而非系统默认的 dash!
 
-python 并非必须，只需将 `setting.sh` 中的`Use_Local_Gen='yes'`改为其他值，默认使用基于 [web](https://rhilip.github.io/PT-help/ptgen) 的生成方法，只有web方法失败时才会主动使用本地python生成。
+python 并非必须，只需将 `setting.sh` 中的`Use_Local_Gen='yes'`改为其他值，则使用基于 [web](https://rhilip.github.io/PT-help/ptgen) 的生成方法，当然本地解析失败时，也会尝试使用web方法生成。
 
 
 一个运行 log：
@@ -149,4 +150,5 @@ t_id: [55997]
 
 ## 实现流程
 
-![流程图](https://ws1.sinaimg.cn/large/675bda05ly1fyd32i63xvj20oy0sdted.jpg)
+https://www.processon.com/view/link/5c088855e4b0ca4b40c93a49
+
