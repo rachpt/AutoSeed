@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-22
+# Date: 2019-04-25
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -31,18 +31,19 @@ mediainfo='mediainfo'
 #---path of ffmpeg---#
 ffmpeg='ffmpeg'
 #---path of dottorrent---#
-dottorrent='dottorrent' # example /home/rachpt/.local/bin/dottorrent
+dottorrent='/home/rachpt/.local/bin/dottorrent'
 #---
 user_agent='User-Agent:Mozilla/5.0(X11;Linux x86_64;rv:63.0)Gecko/20100101 Firefox/63.0'
 #--------------------------------------#
 # 图片上传 API
-upload_poster_api_1='https://sm.ms/api/upload'
-upload_poster_api_2='https://i.endpot.com/api/upload'
-upload_poster_api_3='https://catbox.moe/user/api.php'
-upload_poster_api_4='https://apis.yum6.cn/api/5bd44dc94bcfc' #https://wiki.yum6.cn
-upload_poster_api_5='https://pic.xiaojianjian.net/webtools/picbed/upload.htm'
-upload_poster_api_6='http://upload.ouliu.net/'
-upload_poster_api_7='https://ooxx.ooo/upload'
+upload_poster_api_0='https://sm.ms/api/upload'
+upload_poster_api_1='https://i.endpot.com/api/upload'
+upload_poster_api_2='https://catbox.moe/user/api.php'
+upload_poster_api_3='https://apis.yum6.cn/api/5bd44dc94bcfc' #https://wiki.yum6.cn
+upload_poster_api_4='https://pic.xiaojianjian.net/webtools/picbed/upload.htm'
+upload_poster_api_5='http://upload.ouliu.net/'
+upload_poster_api_6='https://ooxx.ooo/upload'
+upload_poster_api_7='https://imgchr.com' # 路过图床，20/h 限制
 byrbt_upload_api='https://bt.byr.cn/ckfinder/core/connector/php/connector.php'
 #--------------------------------------#
 #---desc---#
@@ -151,53 +152,67 @@ unset _site # clean
 upload_image_com() {
   unset img_url_com    # clean
   local _file="$1"     # 参数：图片路径
-  local _rand_=$((RANDOM % 7)) # choose an api randomly
+  local _rand_=$((RANDOM % 8)) # choose an api randomly
   up_case_func() {
   case $_rand_ in
     0)
-      # endpot.com
+      # https://sm.ms
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
-        --verify=no "$upload_poster_api_2" image@"$_file" "$user_agent"|grep -Eo \
-        "\"link\".*\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" ;;
-    1)
-      # sm.ms
-      img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
-        "$upload_poster_api_1" smfile@"$_file" "$user_agent"|grep -Eo \
+        "$upload_poster_api_0" smfile@"$_file" "$user_agent"|grep -Eo \
         "\"url\".*\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" ;;
-    2)
-      # catbox.moe
+    1)
+      # https://i.endpot.com
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
-      "$upload_poster_api_3" fileToUpload@"$_file" reqtype='fileupload' \
+        --verify=no "$upload_poster_api_1" image@"$_file" "$user_agent"|grep -Eo \
+        "\"link\".*\"[^\"]+\""|awk -F "\"" '{print $4}'|sed 's/\\//g')" ;;
+    2)
+      # https://catbox.moe
+      img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
+      "$upload_poster_api_2" fileToUpload@"$_file" reqtype='fileupload' \
       "$user_agent"|grep -Eio 'http[:/a-z0-9\.]+'|sed 's/\\//g')" ;;
     3)
       # sina 图床，YoungxjApis
-      # 更多请看 https://www.youngxj.cn/565.html
+      # 更多请看: https://www.youngxj.cn/565.html
       local _tok='f07b711396f9a05bc7129c4507fb65c5'
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
-      "$upload_poster_api_4" "token==$_tok" file@"$_file" "$user_agent"| \
+      "$upload_poster_api_3" "token==$_tok" file@"$_file" "$user_agent"| \
       grep -Eio 'https?:[/\\a-z0-9\.]+'|sed 's/\\//g')" ;;
     4)
-      # sina 图床, 小贱贱api
+      # sina 图床, 小贱贱api: https://pic.xiaojianjian.net
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
-        "$upload_poster_api_5" file@"$_file" "$user_agent"|grep -Eio \
-        'https?:[/\\a-z0-9\.]+'|sed 's/\\//g;s/http:/https:/')" ;;
+        "$upload_poster_api_4" file@"$_file" "$user_agent"|grep -Eio \
+        'https?:[/\\a-z0-9\.]+'|sed 's/\\//g;s/http:/http:/')" ;;
+      # https 外链被封？
     5)
-      # http://upload.ouliu.net/ 图床
+      # http://upload.ouliu.net
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
-      "$upload_poster_api_6" ifile@"$_file" "$user_agent"|grep 'id="codedirect"'| \
+      "$upload_poster_api_5" ifile@"$_file" "$user_agent"|grep 'id="codedirect"'| \
       grep -Eio 'https?:[/\\a-z0-9\.]+'|sed 's/\\//g;s/http:/https:/'|head -1)" ;;
-    6)
-      # https://ooxx.ooo 图床
+    66)
+      # https://ooxx.ooo # 下线，2019-04-25
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
-        "$upload_poster_api_7" files[]@"$_file" "$user_agent"|grep -Eio '[0-9a-z/\.]+')"
+      "$upload_poster_api_6" files[]@"$_file" "$user_agent"|grep -Eio '[0-9a-z/\.]+')"
       [[ $img_url_com ]] && img_url_com="https://i.ooxx.ooo/$img_url_com" ;;
+    7)
+      # https://imgchr.com 路过图床
+      local _data _sessid _tok2
+      _data="$(http -v "$upload_poster_api_7" "$user_agent"|grep -Ei 'auth_token|Set-Cookie')"
+      _sessid="$(echo "$_data"|grep -Eio 'PHPSESSID=[0-9a-z]+')"
+      _tok2="$(echo "$_data"|grep -i 'auth_token'|grep -Eio '[0-9a-z]{30,}')"
+      # 恶心...
+      [[ $_tok2 && $_sessid ]] && \
+      img_url_com="$(http --pretty=format --verify=no --timeout=25 --ignore-stdin \
+      -bf POST "${upload_poster_api_7}/json" source@"$_file" auth_token="$_tok2" \
+      nsfw=0 timestamp=`date +%s`${RANDOM: -3} action='upload' type='file' "cookie:$_sessid" \
+      "$user_agent"|grep -i '"image"'|grep -Eio 'https?:[/\\a-z0-9\.]+')" ;;
 
   esac
   }
   up_case_func
+  # 遍历所有 api 直到上传图片成功
   local _count=1
-  while [[ ! $img_url_com && $_count -le 7 ]]; do
-    [[ $_rand_ -eq 6 ]] && _rand_=0 || _rand_=$((_rand_ + 1))
+  while [[ ! $img_url_com && $_count -le 8 ]]; do
+    [[ $_rand_ -eq 7 ]] && _rand_=0 || _rand_=$((_rand_ + 1))
     up_case_func
     ((_count++))
   done
