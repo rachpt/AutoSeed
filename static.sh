@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-25
+# Date: 2019-04-26
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -31,7 +31,7 @@ mediainfo='mediainfo'
 #---path of ffmpeg---#
 ffmpeg='ffmpeg'
 #---path of dottorrent---#
-dottorrent='/home/rachpt/.local/bin/dottorrent'
+dottorrent='dottorrent' # example /home/rachpt/.local/bin/dottorrent
 #---
 user_agent='User-Agent:Mozilla/5.0(X11;Linux x86_64;rv:63.0)Gecko/20100101 Firefox/63.0'
 #--------------------------------------#
@@ -44,6 +44,7 @@ upload_poster_api_4='https://pic.xiaojianjian.net/webtools/picbed/upload.htm'
 upload_poster_api_5='http://upload.ouliu.net/'
 upload_poster_api_6='https://ooxx.ooo/upload'
 upload_poster_api_7='https://imgchr.com' # 路过图床，20/h 限制
+upload_poster_api_8='https://whoimg.com' # 无名图床
 byrbt_upload_api='https://bt.byr.cn/ckfinder/core/connector/php/connector.php'
 #--------------------------------------#
 #---desc---#
@@ -152,7 +153,7 @@ unset _site # clean
 upload_image_com() {
   unset img_url_com    # clean
   local _file="$1"     # 参数：图片路径
-  local _rand_=$((RANDOM % 8)) # choose an api randomly
+  local _rand_=$((RANDOM % 9)) # choose an api randomly
   up_case_func() {
   case $_rand_ in
     0)
@@ -195,24 +196,36 @@ upload_image_com() {
       [[ $img_url_com ]] && img_url_com="https://i.ooxx.ooo/$img_url_com" ;;
     7)
       # https://imgchr.com 路过图床
-      local _data _sessid _tok2
+      unset _data _sessid _tok2; local _data _sessid _tok2
       _data="$(http -v "$upload_poster_api_7" "$user_agent"|grep -Ei 'auth_token|Set-Cookie')"
-      _sessid="$(echo "$_data"|grep -Eio 'PHPSESSID=[0-9a-z]+')"
-      _tok2="$(echo "$_data"|grep -i 'auth_token'|grep -Eio '[0-9a-z]{30,}')"
+      _sessid="$(echo "$_data"|grep -Eio 'PHPSESSID=[0-9a-z]+'|head -1)"
+      _tok2="$(echo "$_data"|grep -i 'auth_token'|head -1|grep -Eio '[0-9a-z]{30,}')"
       # 恶心...
       [[ $_tok2 && $_sessid ]] && \
       img_url_com="$(http --pretty=format --verify=no --timeout=25 --ignore-stdin \
       -bf POST "${upload_poster_api_7}/json" source@"$_file" auth_token="$_tok2" \
       nsfw=0 timestamp=`date +%s`${RANDOM: -3} action='upload' type='file' "cookie:$_sessid" \
-      "$user_agent"|grep -i '"image"'|grep -Eio 'https?:[/\\a-z0-9\.]+')" ;;
+      "$user_agent"|grep -i '"image":'|grep -Eio 'https?:[/\\a-z0-9\.]+')" ;;
+    8)
+      # https://whoimg.com 无名图床
+      unset _data _sessid _tok2; local _data _sessid _tok2
+      _data="$(http -v "$upload_poster_api_8" "$user_agent"|grep -Ei 'auth_token|Set-Cookie')"
+      _sessid="$(echo "$_data"|grep -Eio 'PHPSESSID=[0-9a-z]+'|head -1)"
+      _tok2="$(echo "$_data"|grep -i 'auth_token'|head -1|grep -Eio '[0-9a-z]{30,}')"
+      # 恶心...
+      [[ $_tok2 && $_sessid ]] && \
+      img_url_com="$(http --pretty=format --verify=no --timeout=25 --ignore-stdin \
+      -bf POST "${upload_poster_api_8}/json" source@"$_file" auth_token="$_tok2" \
+      nsfw=0 timestamp=`date +%s`${RANDOM: -3} action='upload' type='file' "cookie:$_sessid" \
+      "$user_agent"|grep -i '"image":'|grep -Eio 'https?:[/\\a-z0-9\.]+')" ;;
 
   esac
   }
   up_case_func
   # 遍历所有 api 直到上传图片成功
   local _count=1
-  while [[ ! $img_url_com && $_count -le 8 ]]; do
-    [[ $_rand_ -eq 7 ]] && _rand_=0 || _rand_=$((_rand_ + 1))
+  while [[ ! $img_url_com && $_count -le 9 ]]; do
+    [[ $_rand_ -eq 8 ]] && _rand_=0 || _rand_=$((_rand_ + 1))
     up_case_func
     ((_count++))
   done
