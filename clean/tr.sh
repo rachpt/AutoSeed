@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-24
+# Date: 2019-04-27
 #
 #-----------------------------#
 tr_delete_old() {
@@ -57,7 +57,7 @@ tr_is_seeding() {
     'NR>1{for(i=10;i<=NF;i++)print $i}')"
   [[ "$1" && "$_tr_names" ]] && {
     [[ "$_tr_names" =~ .*${1}.* ]] && delete_commit='no' || delete_commit='yes'
-  } || {
+  } || {  [[ "$_tr_names" ]] || \
     debug_func "clean.trs.failed.to.get.seeding.lists"
     delete_commit='no' # cancel delete file !!!
   }

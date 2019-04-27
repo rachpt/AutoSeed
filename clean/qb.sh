@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-24
+# Date: 2019-04-27
 #
 #---------------------------------------#
 qb_delete_old() {
@@ -33,14 +33,14 @@ qb_delete_old() {
 #---------------------------------------#
 qb_is_seeding() {
   # _qb_names in clean/clean.sh
-  [[ ! "$_qb_names" ]] && _qb_names="$(http --ignore-stdin --pretty=format -f \
-    POST "$_qb_lists" sort=added_on "$qb_Cookie"|grep '"name":'|uniq|sed -E \
-    's/.*"name":[ ]+"//;s/",$//')" 
+  [[ ! "$_qb_names" ]] && qbit_webui_cookie && \
+    _qb_names="$(http --ignore-stdin --pretty=format -f POST "$_qb_lists" sort=added_on \
+    "$qb_Cookie"|grep '"name":'|uniq|sed -E 's/.*"name":[ ]+"//;s/",$//')"
   [[ "$1" && "$_qb_names" ]] && {
     [[ "$_qb_names" =~ .*${1}.* ]] && delete_commit='no' || delete_commit='yes'
-  } || {
+  } || {  [[ "$_qb_names" ]] || \
     debug_func "clean.qbt.failed.to.get.seeding.lists"
-    delete_commit='no' # cancel delete file !!!
+    delete_commit='no' # concel delete file !!!
   }
 }
 #-----------------------------#
