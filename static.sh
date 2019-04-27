@@ -230,7 +230,7 @@ upload_image_com() {
     ((_count++))
   done
   unset -f up_case_func
-  debug_func "img:com-img-url[$img_url_com][$_rand_]"  #----debug---
+  debug_func "img:com-img-url[$img_url_com][$_rand_][$_count]"  #----debug---
 }
 # byr 图片上传
 upload_image_byrbt() {

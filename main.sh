@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-22
+# Date: 2019-04-27
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -146,15 +146,14 @@ time_out() {
 }
 hold_on() {
   # 依据cpu负载设置一个延时，解决系统IO问题
+  # ${var:-default} Use new value if undefined or null.
   local cpu_number cpu_load _time
   cpu_number="$(grep 'model name' /proc/cpuinfo|wc -l)"
-  cpu_load="$(echo $(uptime |awk -F 'average:' '{print $2}'| \
-      awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100/$cpu_number| \
-      bc|awk -F '.' '{print $1}')"
-  _time="$(echo $(uptime |awk -F 'average:' '{print $2}'| \
-      awk -F ',' '{print $1}'|sed 's/[ ]\+//g')*100/$cpu_number*0.4*$Speed|bc)"
-  sleep "$_time"
-  debug_func "main:hold-on[$_time]"  #----debug---
+  cpu_load="$(uptime|awk -F 'average:' '{print $2}'|awk \
+      -F ',' '{print $1}'|sed 's/ //g')"
+  _time="$(echo ${cpu_load:-0.6}*100/${cpu_number:-1}*0.4*${Speed:-1}|bc)"
+  sleep "${_time:-0}" # 默认值 0 秒
+  debug_func "main:hold-on[${_time:-0}]"  #----debug---
   unset Speed _time
 }
 
@@ -173,6 +172,7 @@ else
         debug_func 'main:run_from_tr'  #----debug---
 fi
 [[ $Torrent_Name && $Tr_Path ]] && {
+    [[ $Tr_Path =~ .*/$ ]] && Tr_Path=${Tr_Path%/} # move slash end
     hold_on # main.sh, sleep some time
     extract_rar_files # get_desc/extract.sh
     echo -e "${Torrent_Name}\n${Tr_Path}" >> "$queue"; }
@@ -184,6 +184,7 @@ unset Torrent_Name Tr_Path
 #debug_func "进程[$(ps -C 'main.sh' --no-headers|wc -l)]个" #----debug---
 [[ "$(ps -C 'main.sh' --no-headers|wc -l)" -gt 2 ]] && time_out
 #
+[[ $flexget_path =~ .*/$ ]] && flexget_path=${flexget_path%/} # move slash end
 is_locked            # 锁住进程，防止多开
 # 生成简介于发布循环不能异步运行，\
 # 否则有可能出现 .torrent 文件被改名\
