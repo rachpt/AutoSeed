@@ -3,19 +3,30 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-23
+# Date: 2019-04-28
 #-----------------------------#
 #
 # Auto clean old files/folders in 
 # watch-dir which are not seeding
 # on transmission and qbittorrent.
 #
+#-----------test--------------#
+# 测试说明：
+# `bash -x clean.sh test 1 0` 测试 qbittorrent
+# `bash -x clean.sh test 0 1` 测试 transmission
+# 测试不会删除数据，但是会删除已经停止了的种子
+# 测试会忽略清理频率限制(至少12小时一次)
+#-----------------------------#
 #---import settings---#
 if [ -z "$ROOT_PATH" ]; then
     ROOT_PATH="$(dirname "$(readlink -f "$0")")"
     ROOT_PATH="${ROOT_PATH%/*}"
     source "$ROOT_PATH/settings.sh"
 fi
+unset test_c
+[[ "$1" = test ]] && test_c=1 && {
+  [[ "$2" = 1 ]] && use_qbt='yes' || use_qbt='no'
+  [[ "$3" = 1 ]] && use_trs='yes' || use_trs='no'; }
 #-----------------------------#
 # import functions
 source  "$ROOT_PATH/clean/tr.sh"
@@ -24,18 +35,20 @@ source  "$ROOT_PATH/clean/qb.sh"
 # judge function, return a value
 is_old_file() {
   # need a parameter, return a 0/1 code
-  local file_modf=$(stat -c '%Y' "$FILE_PATH/$1")
-  local time_interval=$(expr $(date '+%s') - $file_modf)
-  if [ $time_interval -ge $TimeINTERVAL ]; then
+  local file_modf time_interval
+  file_modf=$(stat -c '%Y' "$FILE_PATH/$1")
+  time_interval=$(($(date '+%s') - ${file_modf:-0}))
+  if [[ $time_interval -ge ${TimeINTERVAL:-7200} ]]; then
       echo 1  # yes
   else
       echo 0  # no
   fi
 }
 #-----------------------------#
-# it's a call function
+# it's a called function
 comparer_file_and_delete() {
-  IFS_OLD=$IFS; IFS=$'\n'; local f _qb_names _tr_names old_status
+  # _qb_names _tr_names 在main中使用local限定，可以减少重复工作
+  IFS_OLD=$IFS; IFS=$'\n'; local f old_status
   for f in $(ls -1 "$FILE_PATH"); do
     IFS=$IFS_OLD
     old_status=$(is_old_file "$f") 
@@ -49,12 +62,12 @@ comparer_file_and_delete() {
        [[ $use_qbt != yes && $use_trs != yes ]] && delete_commit='no'
        if [[ $delete_commit = yes ]]; then
          debug_func "clean:del-file:[$f]"  #----debug---
-         [[ "$f" && -e "$FILE_PATH/$f" ]] && \rm -rf "$FILE_PATH/$f"
+         [[ "$f" && -e "$FILE_PATH/$f" && ! $test_c ]] && \rm -rf "$FILE_PATH/$f"
          echo "[$(date '+%m-%d %H:%M:%S')]deleted Torrent[$f]" >> "$log_Path"
        fi
     fi
   done
-  unset f _qb_names _tr_names old_status
+  unset f old_status
 }
 #-----------------------------#
 # judge function, return a value
@@ -64,7 +77,7 @@ disk_check() {
   # bc true = 1, false = 0
 }
 #-----------------------------#
-# it's a call function
+# it's a called function
 disk_is_over_use() {
   local disk_over disk_avail i
   disk_check
@@ -82,7 +95,7 @@ disk_is_over_use() {
 }
 
 #-----------------------------#
-# 清理路径列队
+# 清理路径列队，用于更新 dir 里面的值
 clean_dir() {
   if [ ! -s "$ROOT_PATH/clean/dir" ]; then
     # add to the first line
@@ -103,23 +116,24 @@ clean_dir() {
   unset line add_to_dir
 }
 
+#----------call-func----------#
 clean_frequence() {
   # 限制清理频率
   local time_threshold time_pass
-  time_threshold=$((60 * 60 * 12))  # 12 hours to seconds
+  [[ $test_c ]] && time_threshold=1 || time_threshold=$((60 * 60 * 12))  # 12 hours to seconds
   # use $(( )) to calculate number
   time_pass=$(($(date '+%s') - $(stat -c '%Y' "$ROOT_PATH/clean/dir")))
   [[ $time_pass -gt $time_threshold ]] && {
     debug_func "clean:use_qbt[$use_qbt]-use_trs[$use_trs]"
-    sleep 20 # 延时
+    [[ $test_c ]] || sleep 20 # 延时
     clean_main
     # 更新dir时间
     touch -m "$ROOT_PATH/clean/dir"; }
 }
 
-#-----------------------------#
+#----------main-loop----------#
 clean_main() {
-  local one_line
+  local one_line _qb_names _tr_names # *_names为客户端做种列表
   [[ $use_qbt = yes ]] && qb_delete_old  # will not delete file
   [[ $use_trs = yes ]] && tr_delete_old  # will not delete file
   [ -s "$ROOT_PATH/clean/dir" ] && \
@@ -128,7 +142,7 @@ clean_main() {
     comparer_file_and_delete   # make sure new file will not be deleted
     disk_is_over_use           # make sure free space
   done
-  unset one_line
+  unset one_line _qb_names _tr_names
   echo "+++++++++++++[clean]+++++++++++++" >> "$log_Path"
 }
 
