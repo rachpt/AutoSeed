@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-26
+# Date: 2019-04-28
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -46,8 +46,8 @@ upload_poster_api_6='https://ooxx.ooo/upload'
 upload_poster_api_7='https://imgchr.com' # 路过图床，20/h 限制
 upload_poster_api_8='https://whoimg.com' # 无名图床
 byrbt_upload_api='https://bt.byr.cn/ckfinder/core/connector/php/connector.php'
-#--------------------------------------#
-#---desc---#
+#-------------desc headers-------------#
+set_desc_headers() {
 failed_to_get_des='[size=6][color=Magenta][em11] 获取简介失败！！！[/color][/size]'
 descrCom_simple="[quote] [b]这是一个自动发布的种子[/b] [em2]
 [*]所有信息以种子文件名为准，标题、简介信息仅供参考，若发现有误请以［举报］或［留言］的形式通知工作人员审查编辑。
@@ -83,6 +83,7 @@ descrCom_complex_html="<br />
 <span style=\"inline-block:block;background-color:steelblue;padding:10px;border:dashed silver 1px;border-radius:3px;box-shadow: 2px 2px 5px gray;width:110px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2em auto;\"><strong>使用 Shell(bash) 脚本实现，开源在：<a href=\"https://github.com/rachpt/AutoSeed\">rachpt/AutoSeed</a><img alt=\"[em108]\" src=\"https://bt.byr.cn/pic/smilies/108.gif\" />，欢迎star。</strong> </span><br />
 <br />
 <br />"
+}
 #
 #--------------------------------------#
 # declare -A 定义关联数组 类似字典键值对
@@ -232,6 +233,7 @@ upload_image_com() {
   unset -f up_case_func
   debug_func "img:com-img-url[$img_url_com][$_rand_][$_count]"  #----debug---
 }
+#--------------------------------------#
 # byr 图片上传
 upload_image_byrbt() {
   unset img_url_byr  # clean
