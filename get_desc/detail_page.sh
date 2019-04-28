@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-13
+# Date: 2019-04-28
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -64,8 +64,10 @@ get_source_site() {
     #    source_site_URL='https://new.tracker.org'
     else
         source_site_URL="$(echo "$tracker_info"|grep -Eo 'https?://[^/]*'| \
-          head -1|sed 's/tracker\.//;s/ssl\.//')"
-        # ssl IPT
+          head -1|sed 's/ssl.empirehost.me/iptorrents.com/;
+          s/tracker\.//;s/routing.bgp.technology/iptorrents.com/;
+          s/localhost.stackoverflow.tech/iptorrents.com/')"
+        # IPT trackers
     fi
     no_source_2_source # 减少不必要的过程
     # set cookie
@@ -131,7 +133,7 @@ fi
 
 #--------------main-func--------------#
 form_source_site_get_Desc() {
-  echo "got source_site: [$s_site_uid]" >> "$log_Path"
+  [[ $s_site_uid ]] && echo "got source_site: [$s_site_uid]" >> "$log_Path"
   unset imdb_url douban_url extra_subt # 防止上次结果影响到下一次
   form_source_site_get_tID
   # source_t_id will be unset in generate.sh
