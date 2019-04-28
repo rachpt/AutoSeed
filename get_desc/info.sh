@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-27
+# Date: 2019-04-28
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -58,11 +58,11 @@ generate_info_local() {
   debug_func "info:max-file-path[$max_size_file]"  #----debug---
   # 本地简介大小为零，-s 大小不为零，! 取反
   if [[ ! -s "$source_desc" ]]; then
-    info_gen_desc="$($mediainfo "$max_size_file"|sed -i \
-      '/Unique/d;/Encoding settings/d;/Complete name/ {s%/.*/%%};/Writing library/d;/Writing application/d')"
+    info_gen_desc="$($mediainfo "$max_size_file"|sed "s%${one_TR_Dir}/%%"|sed \
+      '/Unique/d;/Encoding settings/d;/Writing library/d;/Writing application/d')"
     [[ $enable_byrbt == yes ]] && \
-    info_gen_html="$($mediainfo --Output=HTML "$max_size_file"|sed -i \
-      '/Complete name/ {s%/.*/%%};/html>/d;/body>/d;/head>/d;/<META/d')"
+    info_gen_html="$($mediainfo --Output=HTML "$max_size_file"|sed \
+    "s%${one_TR_Dir}/%%"|sed '/html>/d;/body>/d;/head>/d;/<META/d')"
   else
     info_gen_desc="$(\cat "$source_desc")"
     [[ $enable_byrbt == yes ]] && \
