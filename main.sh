@@ -122,6 +122,7 @@ main_loop() {
   if [ "$clean_commit_main" = 'yes' ]; then
       debug_func 'main:clean'  #----debug---
       source "$ROOT_PATH/clean/clean.sh"
+      echo ''   >> "$log_Path" # new line
   fi
 }
 
@@ -152,8 +153,9 @@ hold_on() {
   cpu_load="$(uptime|awk -F 'average:' '{print $2}'|awk \
       -F ',' '{print $1}'|sed 's/ //g')"
   _time="$(echo ${cpu_load:-0.6}*100/${cpu_number:-1}*0.4*${Speed:-1}|bc)"
+  [[ ! "$test_func_probe" ]] && {
   sleep "${_time:-0}" # 默认值 0 秒
-  debug_func "main:hold-on[${_time:-0}]"  #----debug---
+  debug_func "main:hold-on[${_time:-0}]"; }  #----debug--- 
   unset Speed _time
 }
 
@@ -205,7 +207,6 @@ while true; do
         debug_func 'main:queue-in'      #----debug---
         main_loop
     fi
-    [ ! "$test_func_probe" ] && \
     sed -i '1,2d' "$queue"              # delete record
     ((main_lp_counter++))               # C 形式的增1
 done
