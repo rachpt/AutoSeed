@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-16
+# Date: 2019-04-28
 #
 #---------------------------------------#
 # 将简介以及种子以post方式发布
@@ -38,12 +38,11 @@ judge_before_upload() {
     if [[ $up_status = yes ]]; then
         #---log---#
         echo "-----------[post data]-----------" >> "$log_Path"
-        echo -e "name=${dot_name}\
-            \nsmall_descr=${chinese_title}\
-            \nimdburl=${imdb_url}\
-            \nuplver=${anonymous}\
-            \n${postUrl%/*}\
-            \n${source_site_URL}"                >> "$log_Path"
+        echo "name=${dot_name}"                  >> "$log_Path"
+        echo "small_descr=${chinese_title}"      >> "$log_Path"
+        echo "imdburl=${imdb_url}"               >> "$log_Path"
+        echo "uplver=${anonymous}"               >> "$log_Path"
+        echo "${postUrl%/*}"                     >> "$log_Path"
     fi
 }
 
@@ -84,17 +83,17 @@ reseed_torrent() {
 #---------------------------------------#
 unset_tempfiles() {
     [ ! "$test_func_probe" ] && \
-    \rm -f "$source_desc" "$source_html" "$source_desc2tjupt"
+      \rm -f "$source_desc" "$source_html" "$source_desc2tjupt"
     unset source_desc source_html source_desc2tjupt
-    unset douban_poster_url source_site_URL source_t_id imdb_url
+    unset douban_poster_url source_site_URL source_t_id imdb_url douban_url
     echo "----------[deleted tmp]----------"     >> "$log_Path"
 }
 
 #-----import and call functions---------#
-# 导入自定义规则
-my_dupe_rules            # get_desc/customize.sh
 # 获得发布所需参数
 from_desc_get_param      # $ROOT_PATH/post/parameter.sh
+# 简介头
+set_desc_headers         # static.sh
 # 美剧imdb链接修正
 match_douban_imdb "$dot_name" 'series'
 match_douban_imdb "$org_tr_name" 'series'
@@ -152,3 +151,4 @@ fi
 unset_tempfiles
 
 #---------------------------------------#
+
