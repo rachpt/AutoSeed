@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-28
+# Date: 2019-04-29
 #
 #-------------------------------------#
 # 通过之前生成的 desc 简介文档，提取其中的各种参数。
@@ -22,7 +22,8 @@ from_desc_get_param() {
   local pl_name_tmp="autoseed.$(date +%s%N).torrent"
   mv "$torrent_Path" "${flexget_path}/${pl_name_tmp}"
   torrent_Path="${flexget_path}/${pl_name_tmp}"
-  [[ -f "$ROOT_PATH/post/xseed" && ! "$test_func_probe" ]] && "$ROOT_PATH/post/xseed" -ec \
+  # -e 直接修改该文件，-n 不改变hash，-c 改 comment。
+  [[ -f "$ROOT_PATH/post/xseed" && ! "$test_func_probe" ]] && "$ROOT_PATH/post/xseed" -enc \
   'Powered by rachpt/AutoSeed. https://github.com/rachpt/AutoSeed' "$torrent_Path" 
   [[ $? -ne 0 ]] && debug_func "para:xseed[bencode unstall]!!" #----debug---
   #---name for post---#
