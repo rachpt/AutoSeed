@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-28
+# Date: 2019-04-30
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -30,6 +30,8 @@ python3='python3'
 mediainfo='mediainfo'
 #---path of ffmpeg---#
 ffmpeg='ffmpeg'
+#---path of mtn---#
+mtn='mtn'
 #---path of dottorrent---#
 dottorrent='dottorrent' # example /home/rachpt/.local/bin/dottorrent
 #---
