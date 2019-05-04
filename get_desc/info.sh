@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-30
+# Date: 2019-05-04
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -63,11 +63,13 @@ gen_thumbnail_with_mtn() {
 # 读取主文件以获得info，提前生成简介将失效
 generate_info_local() {
   local main_file_dir max_size_file info_gen_desc info_gen_html
-  local _ext_desc="[b]以下是[url=https://github.com/rachpt/AutoSeed] \
-AutoSeed [/url]自动完成的截图，不喜勿看。[/b]"
-  local _ext_html="<br /><br /><stong>以下是<a \
-    href=\"https://github.com/rachpt/AutoSeed\"> AutoSeed </a>\
-    自动完成的截图，不喜勿看。</strong><br />"
+  local _ext_desc="[b]以下是[url=https://github.com/rachpt/AutoSeed] [img]\
+https://s2.ax1x.com/2019/05/04/Ea3qbQ.png[/img] [/url]自动完成的截图，不喜勿看。[/b]"
+  local _ext_html="<br /><br /><stong>以下是 <a \
+href=\"https://github.com/rachpt/AutoSeed\"><img alt=\"AutoSeed\" \
+src=\"https://bt.byr.cn/ckfinder/userfiles/images/autoseed.png\" \
+style=\"width: 64px; height: 22px;\" /></a> \
+自动完成的截图，不喜勿看。</strong><br />"
   # 种子文件绝对路径
   main_file_dir="${one_TR_Dir}/${one_TR_Name}"
   debug_func "info:folder-dir[$main_file_dir]"  #----debug---
@@ -104,7 +106,7 @@ AutoSeed [/url]自动完成的截图，不喜勿看。[/b]"
 
   # 存档
   [[ "$img_url_com" ]] && \
-    echo "${info_gen_desc}\n\n${_ext_desc}\n${max_size_file##*/}
+    echo -e "${info_gen_desc}\n\n${_ext_desc}\n${max_size_file##*/}
 [img]$img_url_com[/img]" > "$source_desc"
   # byrbt desc to html
   [[ $enable_byrbt == yes ]] && \
@@ -154,8 +156,8 @@ read_info_file() {
     fi
     # gen from main file and gen screens
     generate_info_local
-    fi
-    debug_func 'info:exit'  #----debug---
+  fi
+  debug_func 'info:exit'  #----debug---
 }
 
 #-------------------------------------#
