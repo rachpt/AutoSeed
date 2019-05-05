@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-04
+# Date: 2019-05-05
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -57,6 +57,11 @@ gen_thumbnail_with_mtn() {
     [[ "$(echo "$screen_file"|wc -l)" -gt 1 ]] && \
       debug_func "info-mtn-生成了多张!!但是只会使用一张"
     screen_file="$(echo "$screen_file"|head -1)" # 取第一张
+    # 文件名包含特殊字符
+    [[ $screen_file =~ ^[-/0-9a-zA-Z\._]+$ ]] || {
+      local screen_file_old="$screen_file" # 临时旧文件名
+      screen_file="${ROOT_PATH}/tmp/autoseed-$(date '+%s%N').jpg"
+      \mv -f "$screen_file_old" "$screen_file"; }
   } || { debug_func "info:mtn-have-failed!!!"; }
 }
 #-------------------------------------#
