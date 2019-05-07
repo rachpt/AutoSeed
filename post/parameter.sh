@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-29
+# Date: 2019-05-07
 #
 #-------------------------------------#
 # 通过之前生成的 desc 简介文档，提取其中的各种参数。
@@ -16,6 +16,26 @@ unset_all_parameter() {
   unset is_bd is_hdtv is_webdl is_4k is_1080p is_720p is_other file_type
   unset is_package is_264 is_265 is_dts is_ac3 is_aac is_flac animation theater
 }
+#-------------------------------------#
+# 处理不规范的打包(伪complete)
+complete_episode() {
+  local _f_data _total _real _ep
+  _real="$(grep -E '^.集　　数　.*$' "$source_desc"|grep -Eo '[0-9]+')"
+  _f_data="$($tr_show "$torrent_Path"|sed '1,/FILES/d;/^ *$/d'|grep -Eo \
+    'E[0-9]{1,2}'|sed 's/E0*//')" # 超过一百集的电视剧应该木有吧？
+  _total="$(echo "$_f_data"|wc -l)"
+  # 初略判断，如果获取失败，使用默认值 10,6
+  if [[ ${_real:-10} -gt ${_total:-6} ]]; then
+    _ep="$(echo "$_f_data"|awk 'BEGIN{min=max=1}{min=min<$1?min:$1;max=max>$1?max:$1}END{if (min != max) printf("E%02d-E%02d",min,max); else printf("E%02d", min)}')"
+    [[ $_ep ]] && \
+      dot_name="$(echo "$dot_name"|sed "s/Complete/$_ep/i")" || \
+      debug_func "parameter:episode-[$_real]-[$_total]-[$ep]"  #----debug---
+      # noDot_name 后面有处理
+    is_package='no' # 不是合集
+  fi
+  unset _f_data _total _real _ep
+}
+#---------------main------------------#
 from_desc_get_param() {
   unset_all_parameter
   # httpie 对文件名有要求，如包含特殊字符，可能 POST 失败，只改torrent文件名。
@@ -26,9 +46,6 @@ from_desc_get_param() {
   [[ -f "$ROOT_PATH/post/xseed" && ! "$test_func_probe" ]] && "$ROOT_PATH/post/xseed" -enc \
   'Powered by rachpt/AutoSeed. https://github.com/rachpt/AutoSeed' "$torrent_Path" 
   [[ $? -ne 0 ]] && debug_func "para:xseed[bencode unstall]!!" #----debug---
-  #---name for post---#
-  noDot_name="$(echo "$dot_name"|sed -E \
-    's/\./ /g;s/ DD2 0/ DD2.0/i;s/ H 26/ H.26/i;s/([^0-9]5) 1/\1.1/;s/([^0-9]7) 1/\1.1/')"
 
   #----------操作 desc 简介文件--------
   # 获取国家，取第一个
@@ -137,6 +154,7 @@ from_desc_get_param() {
   case "$dot_name" in
       *[Cc][Oo][Mm][Pp][Ll][Ee][Tt][Ee]*)
           is_package='yes'
+          complete_episode  # 处理伪合集
           ;;
       *)
           if [[ $season =~ [sS][0-9]+(-[sS][0-9]+)? ]]; then
@@ -186,7 +204,9 @@ from_desc_get_param() {
   esac
 
   #-------------------------------------------------------------#
-
+  #---name for post---#
+  noDot_name="$(echo "$dot_name"|sed -E \
+    's/\./ /g;s/ DD2 0/ DD2.0/i;s/ H 26/ H.26/i;s/([^0-9]5) 1/\1.1/;s/([^0-9]7) 1/\1.1/')"
 }
 
 #-------------------------------#
