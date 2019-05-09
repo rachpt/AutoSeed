@@ -82,10 +82,10 @@ style=\"width: 64px; height: 22px;\" /></a> \
   _file_l="$(find "$main_file_dir" -type f -exec stat -c "%Y-%s %n" {} \;)"
   # 86400s 1天，在修改时间1天中找体积最大的文件
   max_size_file="$(echo "$_file_l"|awk -F - -v t=`date +%s` '{if ($1>(t-86400)) print}' \
-    |sed -E 's/^[0-9]+-//'|sort -nr|head -1|sed -E 's/^[0-9 ]+//')"
+    |sed -E 's/^[0-9]+-//'|sort -nr|sed -E 's/^[0-9 ]+//;q')"
   # 如果没有符合要求的文件，则选一个体积最大的文件
   [[ "$max_size_file" ]] || \
-  max_size_file="$(echo "$_file_l"|sort -nr|head -1|sed -E 's/^[0-9 ]+//')"
+  max_size_file="$(echo "$_file_l"|sed -E 's/^[0-9]+-//'|sort -nr|sed -E 's/^[0-9 ]+//;q')"
   debug_func "info:max-file-path[$max_size_file]"  #----debug---
   #---本地简介大小为零，-s 大小不为零，! 取反---#
   if [[ ! -s "$source_desc" ]]; then
