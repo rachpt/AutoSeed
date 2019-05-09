@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-07
+# Date: 2019-05-09
 #
 #-------------------------------------#
 # 通过之前生成的 desc 简介文档，提取其中的各种参数。
@@ -26,10 +26,12 @@ complete_episode() {
   _total="$(echo "$_f_data"|wc -l)"
   # 初略判断，如果获取失败，使用默认值 10,6
   if [[ ${_real:-10} -gt ${_total:-6} ]]; then
-    _ep="$(echo "$_f_data"|awk 'BEGIN{min=max=1}{min=min<$1?min:$1;max=max>$1?max:$1}END{if (min != max) printf("E%02d-E%02d",min,max); else printf("E%02d", min)}')"
-    [[ $_ep ]] && \
-      dot_name="$(echo "$dot_name"|sed "s/Complete/$_ep/i")" || \
-      debug_func "parameter:episode-[$_real]-[$_total]-[$ep]"  #----debug---
+    _ep="$(echo "$_f_data"|awk '{if (NR==1) min=max=$1; else
+    {min=min<$1?min:$1; max=max>$1?max:$1} }END{
+    if (min!= max) printf("E%02d-E%02d",min,max); else printf("E%02d", min)}')"
+    [[ $_ep ]] && { season="$_ep" && \
+      dot_name="$(echo "$dot_name"|sed "s/Complete/$_ep/i")"i; } || \
+      debug_func "parameter:episode-[$_real]-[$_total]-[$_ep]"  #----debug---
       # noDot_name 后面有处理
     is_package='no' # 不是合集
   fi
