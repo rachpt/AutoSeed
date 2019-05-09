@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-05
+# Date: 2019-05-09
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -67,7 +67,7 @@ gen_thumbnail_with_mtn() {
 #-------------------------------------#
 # 读取主文件以获得info，提前生成简介将失效
 generate_info_local() {
-  local main_file_dir max_size_file info_gen_desc info_gen_html
+  local main_file_dir _file_l max_size_file info_gen_desc info_gen_html
   local _ext_desc="[b]以下是[url=https://github.com/rachpt/AutoSeed] [img]\
 https://s2.ax1x.com/2019/05/04/Ea3qbQ.png[/img] [/url]自动完成的截图，不喜勿看。[/b]"
   local _ext_html="<br /><br /><stong>以下是 <a \
@@ -78,11 +78,16 @@ style=\"width: 64px; height: 22px;\" /></a> \
   # 种子文件绝对路径
   main_file_dir="${one_TR_Dir}/${one_TR_Name}"
   debug_func "info:folder-dir[$main_file_dir]"  #----debug---
-  # 使用 mediainfo 生成种子中体积最大文件的 iNFO
-  max_size_file="$(\find "$main_file_dir" -type f -exec stat -c "%s %n" {} \;| \
-      sort -nr|head -1|sed -E 's/^[0-9 ]+//')"
+  #---使用 mediainfo 生成种子中体积最大文件的 iNFO---#
+  _file_l="$(find "$main_file_dir" -type f -exec stat -c "%Y-%s %n" {} \;)"
+  # 86400s 1天，在修改时间1天中找体积最大的文件
+  max_size_file="$(echo "$_file_l"|awk -F - -v t=`date +%s` '{if ($1>(t-86400)) print}' \
+    |sed -E 's/^[0-9]+-//'|sort -nr|head -1|sed -E 's/^[0-9 ]+//')"
+  # 如果没有符合要求的文件，则选一个体积最大的文件
+  [[ "$max_size_file" ]] || \
+  max_size_file="$(echo "$_file_l"|sort -nr|head -1|sed -E 's/^[0-9 ]+//')"
   debug_func "info:max-file-path[$max_size_file]"  #----debug---
-  # 本地简介大小为零，-s 大小不为零，! 取反
+  #---本地简介大小为零，-s 大小不为零，! 取反---#
   if [[ ! -s "$source_desc" ]]; then
     info_gen_desc="$($mediainfo "$max_size_file"|sed "s%${one_TR_Dir}/%%"|sed \
       '/Unique/d;/Encoding settings/d;/Writing library/d;/Writing application/d')"
