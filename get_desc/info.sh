@@ -80,8 +80,8 @@ style=\"width: 64px; height: 22px;\" /></a> \
   debug_func "info:folder-dir[$main_file_dir]"  #----debug---
   #---使用 mediainfo 生成种子中体积最大文件的 iNFO---#
   _file_l="$(find "$main_file_dir" -type f -exec stat -c "%Y-%s %n" {} \;)"
-  # 86400s 1天，在修改时间1天中找体积最大的文件
-  max_size_file="$(echo "$_file_l"|awk -F - -v t=`date +%s` '{if ($1>(t-86400)) print}' \
+  # 43200s 12小时，在修改时间12小时中找体积最大的文件
+  max_size_file="$(echo "$_file_l"|awk -F - -v t=`date +%s` '{if ($1>(t-43200)) print}' \
     |sed -E 's/^[0-9]+-//'|sort -nr|sed -E 's/^[0-9 ]+//;q')"
   # 如果没有符合要求的文件，则选一个体积最大的文件
   [[ "$max_size_file" ]] || \
