@@ -129,6 +129,7 @@ get_search_keys() {
 #-------------------------------------#
 form_source_site_get_tID() {
 if [[ "$source_site_URL" && "$cookie_source_site" ]]; then
+  local _search_w
   _get_s_id() {
   ## TODO 搜索原种ID
   if [ "$source_site_URL" = "https://totheglory.im" ]; then
@@ -147,12 +148,19 @@ if [[ "$source_site_URL" && "$cookie_source_site" ]]; then
     grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
   fi
   }
-  local _search_w="$(get_search_keys "$dot_name")"
+  # First try
+  _search_w="$dot_name"
   _get_s_id
+
+  # Second try
+  if [ ! "$source_t_id" ]; then
+      _search_w="$(get_search_keys "$dot_name")"
+      _get_s_id
+  fi
 
   #---deal with wrong year---#
   if [ ! "$source_t_id" ]; then
-      _search_w="$(echo "$_search_w"|sed "s/[12][089][0-9][0-9]//g")"
+      _search_w="$(echo "$_search_w"|sed "s/+[12][089][0-9][0-9]//g")"
       _get_s_id
   fi
   # 判断cookie是否有效，写入debug
@@ -161,7 +169,7 @@ if [[ "$source_site_URL" && "$cookie_source_site" ]]; then
     "$cookie_source_site" "$user_agent"|grep 'name="username"')" ]] && \
     echo "[ $source_site_URL ] Invalid cookie!!!" >> "$log_Path"  && \
     debug_func "get_desc:[ $source_site_URL ] Invalid cookie!!!" # 无效 cookie
-    debug_func "get_desc:[$_search_w]为搜索到原种id！"
+    debug_func "get_desc:[$_search_w]未搜索到原种id！"
   }
   unset _search_w
   unset -f _get_s_id

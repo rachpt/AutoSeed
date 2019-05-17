@@ -144,13 +144,13 @@ print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=F
       local _s_key
       [[ $imdb_url ]] && _s_key="site=douban&sid=$imdb_url" || _s_key="url=$search_url"
       desc_json="$(http --pretty=format --ignore-stdin --timeout=46 GET \
-        "https://api.rhilip.info/tool/movieinfo/gen?${_s_key}")"
+        "https://api.nas.ink/infogen?${_s_key}")"
       _get="$(echo "$desc_json"|grep -Eq '"format".+".+",' && echo yes || echo no)"
       debug_func "generate-code-api:[$_get]" #----debug---
     fi
 
     gen_desc_bbcode="$(echo "$desc_json"|grep 'format'| \
-        awk -F '"' '{print $4}'|sed 's#\\n#\n#g;s/img3/img1/')"
+        awk -F '"' '{print $4}'|sed 's#\\n#\n#g;s/img3/img1/;s/\[center\]//;s%\[/center\]%%')"
 
     douban_poster_url="$(echo "$desc_json"|grep '"poster":'| \
         head -1|awk -F '"' '{print $4}'|sed 's/img3/img1/')"
