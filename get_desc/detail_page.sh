@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-28
+# Date: 2019-05-17
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -91,6 +91,42 @@ set_source_site_cookie() {
 }
 
 #-------------------------------------#
+get_search_keys() {
+  local name season season_db year num
+  # 剧集季数
+  season="$(echo "$1"|grep -Eio '[ \.]s0?(10|20|[1-9]+).?(ep?[0-9]+)?[ \.]')"
+  [[ $season ]] && season_db="$(echo "$season"|sed -E \
+    's/s0?(10|20|[1-9]+).?(ep?[0-9]+)?[ \.]/Season.\1/i')"
+  # 年份
+  year="$(echo "$1"|grep -Eo '[12][098][0-9]{2}'|tail -1)"
+  num="$(echo "$1"|grep -Eo '[12][098][0-9]{2}'|wc -l)" # 统计year个数
+  # 删除分辨率
+  name="$(echo "$1"|sed -E 's/(1080[pi]|720p|4k|2160p).*//i')"
+  # 删除介质
+  name="$(echo "$name"|sed -E 's/(hdtv|blu-?ray|web-?(dl)?|bdrip|dvdrip|webrip).*//i')"
+  # 删除季数
+  name="$(echo "$name"|sed -E 's/[ \.]s0?(10|20|[1-9]+).?(ep?[0-9]+)?[ \.].*//i')"
+  name="$(echo "$name"|sed -E 's/[ \.]ep?[0-9]{1,2}(-e?p?[0-9]{1,2})?[ \.].*//i')"
+  # 删除合集
+  name="$(echo "$name"|sed -E 's/[ \.]Complete[\. ].*//i')"
+  # 删除年份
+  [[ $num -ge 1 ]] && name="$(echo "$name"|sed -E 's/[ \.][12][098][0-9]{2}[ \.]/./g')"
+  # 删除连续点和空格
+  name="$(echo "$name"|sed -E 's/[ \.]+/./g')"
+  # 返回
+  [[ "$2" = db ]] && echo "$name" || \
+  if [[ $year ]]; then
+    if [[ $season ]]; then
+      echo "${name}+${year}+${season}"
+    else
+      echo "${name}+${year}"
+    fi
+  else
+    echo "${name}"
+  fi
+}
+
+#-------------------------------------#
 form_source_site_get_tID() {
 if [[ "$source_site_URL" && "$cookie_source_site" ]]; then
   _get_s_id() {
@@ -111,20 +147,21 @@ if [[ "$source_site_URL" && "$cookie_source_site" ]]; then
     grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
   fi
   }
-  local _search_w="$dot_name"
+  local _search_w="$(get_search_keys "$dot_name")"
   _get_s_id
 
   #---deal with wrong year---#
   if [ ! "$source_t_id" ]; then
-      _search_w="$(echo "$dot_name"|sed "s/[12][089][0-9][0-9]//g")"
+      _search_w="$(echo "$_search_w"|sed "s/[12][089][0-9][0-9]//g")"
       _get_s_id
   fi
   # 判断cookie是否有效，写入debug
   [[ $source_t_id ]] && debug_func "get_desc:source-t_id[$source_t_id]" || {
     [[ "$(http --verify=no --ignore-stdin -b "$source_site_URL" \
     "$cookie_source_site" "$user_agent"|grep 'name="username"')" ]] && \
-    echo "[$source_site_URL]invalid cookie!!!" >> "$log_Path"
-    debug_func "get_desc:[$source_site_URL]invalid cookie!!!" # 无效 cookie
+    echo "[ $source_site_URL ] Invalid cookie!!!" >> "$log_Path"  && \
+    debug_func "get_desc:[ $source_site_URL ] Invalid cookie!!!" # 无效 cookie
+    debug_func "get_desc:[$_search_w]为搜索到原种id！"
   }
   unset _search_w
   unset -f _get_s_id

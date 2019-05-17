@@ -3,49 +3,31 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-13
+# Date: 2019-05-17
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
-# 首先通过 @Rhilip 提供的API获得简介，失败则通过 python
+# 通过 @Rhilip 提供的API获得简介，或则本地 python 解析,
 # 本地生成豆瓣简介(需要设置允许)。
 #-------------------------------------#
 
-# 通过 豆瓣 API 搜索资源豆瓣ID，用于后续简介获取
+# 通过 豆瓣 suggest 搜索资源豆瓣ID，用于后续简介获取
 get_douban_url_by_keywords() {
-  # function
   search_doubanurl() {
-  local name season year num
-  # 剧集季数
-  season="$(echo "$1"|grep -Eio '[ \.]s0?(10|20|[1-9]+).?(ep?[0-9]+)?[ \.]')"
-  [[ $season ]] && season="$(echo "$season"|sed -E \
-    's/s0?(10|20|[1-9]+).?(ep?[0-9]+)?[ \.]/Season.\1/i')"
-  # 年份
-  year="$(echo "$1"|grep -Eo '[12][098][0-9]{2}'|tail -1)"
-  num="$(echo "$1"|grep -Eo '[12][098][0-9]{2}'|wc -l)" # 统计year个数
-  # 删除分辨率
-  name="$(echo "$1"|sed -E 's/(1080[pi]|720p|4k|2160p).*//i')"
-  # 删除介质
-  name="$(echo "$name"|sed -E 's/(hdtv|blu-?ray|web-?dl|bdrip|dvdrip|webrip).*//i')"
-  # 删除季数
-  name="$(echo "$name"|sed -E 's/[ \.]s0?(10|20|[1-9]+).?(ep?[0-9]+)?[ \.].*//i')"
-  name="$(echo "$name"|sed -E 's/[ \.]ep?[0-9]{1,2}(-e?p?[0-9]{1,2})?[ \.].*//i')"
-  # 删除合集
-  name="$(echo "$name"|sed -E 's/[ \.]Complete[\. ].*//i')"
-  # 删除年份
-  [[ $num -ge 1 ]] && name="$(echo "$name"|sed -E 's/[ \.][12][098][0-9]{2}[ \.]/./g')"
-  # 删除连续点和空格
-  name="$(echo "$name"|sed -E 's/[ \.]+/./g')"
-  # 搜索
+  local _key _year
+  _key="$(get_search_keys "$1" 'db')"  # get_desc/detail_page.sh
+  _year="$(echo "$1"|grep -Eo '[12][098][0-9]{2}'|tail -1)"
+  [[ "$_year" ]] || _year=`date +%Y` # 默认当前年份
   search_url="$(http --verify=no --pretty=format --ignore-stdin --timeout=25 \
-    -b GET 'https://api.douban.com/v2/movie/search' q=="${name}${season}.${year}" \
-   "$user_agent"|grep -E '(movie.)?douban.com/subject/'|head -1|awk -F '"' '{print $4}')"
+    -b GET 'https://movie.douban.com/j/subject_suggest' q=="$_key" "$user_agent"| \
+    grep -B 1 "$_year"|grep -Eio \
+    'https?://(movie.)?douban.com/subject/[0-9]+'|head -1)"
   # 去掉可能不准确的年份再试
   [[ "$search_url" ]] || \
-   search_url="$(http --verify=no --pretty=format --ignore-stdin --timeout=25 \
-   -b GET 'https://api.douban.com/v2/movie/search' q=="${name}${season}" \
-   "$user_agent"|grep -E '(movie.)?douban.com/subject/'|head -1|awk -F '"' '{print $4}')"
-  debug_func "豆瓣关键词:[${name}|${season}|.${year}]"  #----debug---
+  search_url="$(http --verify=no --pretty=format --ignore-stdin --timeout=25 \
+    -b GET 'https://movie.douban.com/j/subject_suggest' q=="$_key" "$user_agent"| \
+    grep -Eio 'https?://(movie.)?douban.com/subject/[0-9]+'|head -1)"
+  debug_func "豆瓣关键词:[${_key}+${_year}]"  #----debug---
   }
   # the first time try
   search_doubanurl "$org_tr_name"
