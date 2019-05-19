@@ -2,20 +2,20 @@
 
 An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a python version [HERE](https://github.com/Rhilip/Pt-Autoseed).
 
-目前适用于 从 HDSky / TTG / HDChina / CMCT / M-Team 等站点自动转载 电影、剧集、纪录片 [针对 iPad 资源特别优化] 至 HUDBT / WHUPT / NPUBITS / NanYangPT / BYRBT / 北洋园 PT 站。
+目前适用于 从 HDSky / TTG / HDC / CMCT / MTeam 等站点自动转载 电影、剧集、纪录片 [针对 iPad 资源特别优化] 至 HUDBT / WHU / npupt / NanYangPT / BYRBT / 北洋园 PT 站。
 
 [![release](https://img.shields.io/badge/Version-3.1-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v3.1)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
-|  源站点（from）   |      支持站点（to）      | 时间（time） |
-| :---------------: | :-----------------------: | :----------: |
-| https://hdsky.me/ | https://hudbt.hust.edu.cn |  2018-05-19  |
-| https://totheglory.im/ | https://whu.pt |  2018-05-21  |
-| https://hdchina.org | https://npupt.com |  2018-06-07 |
-| https://hdcmct.org | https://nanyangpt.com | 2018-06-07 |
-| https://tp.m-team.cc | https://bt.byr.cn | 2018-06-17 |
-|                   | https://hdcmct.org  | 2018-07-28 |
-|                   | https://tjupt.org  | 2018-08-28 |
-|      不限\*       |                    | 2018-10-23 |
+|  源站点（from）  | 支持站点（to） | 时间（time） |
+| :--------------: | :------------: | :----------: |
+| hdsky | hudbt |  2018-05-19  |
+| ttg  | whu |  2018-05-21  |
+| hdc | npupt |  2018-06-07 |
+| cmct | nanyangpt | 2018-06-07 |
+| mteam | byrbt | 2018-06-17 |
+|       | cmct  | 2018-07-28 |
+|       | tjupt | 2018-08-28 |
+| 不限\*  |     | 2018-10-23 |
 
 \* 源站点表示支持抓取其部分简介用于发布，没有则本地生成简介.
 
