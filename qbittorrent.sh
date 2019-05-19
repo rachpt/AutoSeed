@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-03-15
+# Date: 2019-05-19
 #
 #--------------------------------------#
 qb_login="${qb_HOST}:$qb_PORT/api/v2/auth/login"
@@ -189,8 +189,8 @@ qb_get_torrent_completion() {
     "$qb_Cookie"|sed -E '/^[ ]*[},]+$/d;s/^[ ]+//;s/[ ]+[{]+//;s/[},]+//g'| \
     grep -B17 -A15 'name":'|sed -E \
     '/"completed":/{s/"//g};/"name":/{s/"//g};/"save_path":/{s/"//g};/"size":/{s/"//g};'|sed '/"/d')" 
-  # match one!
-  pos=$(echo "$data"|sed -n "/name.*$org_tr_name/="|tail -1)
+  # match the torrent recently added.
+  pos=$(echo "$data"|sed -n "/name.*$org_tr_name/="|head -1)
   [[ $pos ]] && {
    compl_one="$(echo "$data"|head -n $(($pos - 1))|tail -1|grep -Eo '[0-9]{4,}')"
    size_one="$(echo "$data"|head -n $(($pos + 2))|tail -1|grep -Eo '[0-9]{4,}')"
