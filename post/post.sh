@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-28
+# Date: 2019-05-19
 #
 #---------------------------------------#
 # 将简介以及种子以post方式发布
@@ -93,7 +93,7 @@ unset_tempfiles() {
 # 获得发布所需参数
 from_desc_get_param      # $ROOT_PATH/post/parameter.sh
 # 简介头
-set_desc_headers         # static.sh
+[[ $No_Headers = yes ]] || set_desc_headers # static.sh
 # 美剧imdb链接修正
 match_douban_imdb "$dot_name" 'series'
 match_douban_imdb "$org_tr_name" 'series'

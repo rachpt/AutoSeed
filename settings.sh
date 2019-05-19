@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-03-12
+# Date: 2019-05-19
 #
 # Environmental requirements:
 # - transmission-[remote,daemon or gtk] or qbittorrent
@@ -25,6 +25,8 @@ Disable_AutoSeed='no'
 Speed=0.6
 # set 'yes' allow say thanks 
 Allow_Say_Thanks='yes'
+# no headers
+No_Headers='yes'
 # set 'yes', will uselocal python gen while web method failed 
 Use_Local_Gen='yes'
 #

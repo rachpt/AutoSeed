@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-06
+# Date: 2019-05-19
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -51,8 +51,8 @@ upload_poster_api_9='https://upload.cc'
 upload_poster_api_10='https://imgbb.com'
 byrbt_upload_api='https://bt.byr.cn/ckfinder/core/connector/php/connector.php'
 #-------------desc headers-------------#
-set_desc_headers() {
 failed_to_get_des='[size=6][color=Magenta][em11] 获取简介失败！！！[/color][/size]'
+set_desc_headers() {
 descrCom_simple="[quote] [b]这是一个自动发布的种子[/b] [em2]
 [*]所有信息以种子文件名为准，标题、简介信息仅供参考，若发现有误请以［举报］或［留言］的形式通知工作人员审查编辑。
 [*]最长保种［${MAX_SEED_TIME}］天，保种分享率［&ratio_in_desc&］，断种恕不补种。
@@ -182,7 +182,7 @@ upload_image_com() {
       local _tok='f07b711396f9a05bc7129c4507fb65c5'
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
       "$upload_poster_api_3" "token==$_tok" file@"$_file" "$user_agent"| \
-      grep -Eio 'https?:[/\\a-z0-9\.]+'|sed 's/\\//g')" ;;
+      grep -Eio 'https?:[/\\a-z0-9\.]+'|sed 's/\\//g;s/cdn.sinaimg.cn.52ecy.cn/tva1.sinaimg.cn/')" ;;
     4)
       # sina 图床, 小贱贱api: https://pic.xiaojianjian.net
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
