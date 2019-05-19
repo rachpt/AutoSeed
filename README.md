@@ -2,16 +2,16 @@
 
 An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a python version [HERE](https://github.com/Rhilip/Pt-Autoseed).
 
-目前适用于 从 HDSky / TTG / HDC / CMCT / MTeam 等站点自动转载 电影、剧集、纪录片 [针对 iPad 资源特别优化] 至 HUDBT / WHU / npupt / NanYangPT / BYRBT / 北洋园 PT 站。
+目前适用于 从 HDS / TTG / HDC / CMCT / MTeam 等站点自动转载 电影、剧集、纪录片 [针对 iPad 资源特别优化] 至 HUDBT / WHU / NPUPT / NYPT / BYRBT / TJUPT。
 
 [![release](https://img.shields.io/badge/Version-3.1-brightgreen.svg)](https://github.com/rachpt/AutoSeed/releases/tag/v3.1)  [![GitHub license](https://img.shields.io/badge/license-AGPL-blue.svg)](https://raw.githubusercontent.com/rachpt/AutoSeed/master/LICENSE)
 
 |  源站点（from）  | 支持站点（to） | 时间（time） |
 | :--------------: | :------------: | :----------: |
-| hdsky | hudbt |  2018-05-19  |
+| hds | hudbt |  2018-05-19  |
 | ttg  | whu |  2018-05-21  |
 | hdc | npupt |  2018-06-07 |
-| cmct | nanyangpt | 2018-06-07 |
+| cmct | nypt | 2018-06-07 |
 | mteam | byrbt | 2018-06-17 |
 |       | cmct  | 2018-07-28 |
 |       | tjupt | 2018-08-28 |
@@ -80,48 +80,6 @@ ubuntu 用户注意使用 bash 运行而非系统默认的 dash!
 
 python 并非必须，只需将 `setting.sh` 中的`Use_Local_Gen='yes'`改为其他值，则使用基于 [web](https://rhilip.github.io/PT-help/ptgen) 的生成方法，当然本地解析失败时，也会尝试使用web方法生成。
 
-
-一个运行 log：
-
-```sh
-+++++++++++++[start]+++++++++++++
-[2018-06-10 22:51:41] 准备发布 [Pacific.Rim.Uprising.2018.BluRay.iPad.720p.AAC.x264-HDSPad]
-2:tt2557478
-+++++++++++[post data]+++++++++++
-name=Pacific.Rim.Uprising.2018.BluRay.iPad.720p.AAC.x264-HDSPad
-small_descr=Pacific Rim: Uprising 
-imdburl=tt2557478
-uplver=no
-https://hudbt.hust.edu.cn
-https://hdsky.me
-t_id: [138967]
-+++++++++++++[added]+++++++++++++
-Dupe! [https://pt.whu.edu.cn]
-+++++++++++[post data]+++++++++++
-name=Pacific.Rim.Uprising.2018.BluRay.iPad.720p.AAC.x264-HDSPad
-small_descr=Pacific Rim: Uprising 
-imdburl=tt2557478
-uplver=no
-https://npupt.com
-https://hdsky.me
-t_id: [133088]
-+++++++++++++[added]+++++++++++++
-+++++++++++[post data]+++++++++++
-name=Pacific.Rim.Uprising.2018.BluRay.iPad.720p.AAC.x264-HDSPad
-small_descr=Pacific Rim: Uprising 
-imdburl=tt2557478
-uplver=no
-https://nanyangpt.com
-https://hdsky.me
-t_id: [55997]
-+++++++++++++[added]+++++++++++++
-++++++++++[deleted tmp]++++++++++
-+++++++++++++++++++++++++++++++++
-[2018-06-10 22:52:09] 发布了：[Pacific.Rim.Uprising.2018.BluRay.iPad.720p.AAC.x264-HDSPad]
-+++++++++++++[clean]+++++++++++++
-++++++++++++++[end]+++++++++++++
-
-```
 
 ## 更新日志
 
