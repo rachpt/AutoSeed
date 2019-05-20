@@ -233,6 +233,9 @@ form_source_site_get_Desc() {
       start_line=$(sed -n '/资料参数/=;/参数信息/=;/General Information/=' "$source_full"|head -1)
       end_line=$(sed -n '/下载信息/=;/郑重声明/=' "$source_full"|head -1) # 第一个
 
+    else
+      extra_subt="$(grep -E "副标题" "$source_full"|sed -E 's/.*">//;s%</.*>%%g;s/\[//g;s/\]//g')"
+
     fi
     # 裁剪简介获取 iNFO 以及 screens
     if [[ $start_line && $end_line && $start_line -lt $end_line ]]; then

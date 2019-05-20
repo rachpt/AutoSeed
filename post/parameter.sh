@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-19
+# Date: 2019-05-20
 #
 #-------------------------------------#
 # 通过之前生成的 desc 简介文档，提取其中的各种参数。
@@ -84,26 +84,6 @@ from_desc_get_param() {
   # 语言
   language="$(grep -E '^.语　　言　.*$' "$source_desc"| \
       sed -r 's/.语　　言　//'|sed -r 's#[ ]+##g')"
-  # 添加额外信息  ---1
-  chs_included="$(grep '&extra_comment&' "$source_desc"|sed 's/&extra_comment&//')"
-  # 中文字幕  ---2
-  [[ ! $chs_included && "$(grep -i "CH[ST]" "$source_desc")" ]] && \
-      chs_included='中文字幕 '
-  # 剧集集数信息  ---3
-  [[ ! $chs_included && $serials = yes ]] && chs_included="$season"
-  # 删除
-  sed -i '/&extra_comment&/d' "$source_desc"
-
-  # 中文名
-  chinese_title="$(grep '&shc_name_douban&' "$source_desc"| \
-      sed 's/&shc_name_douban&//')"
-
-  # 英文名
-  foreign_title="$(grep '&eng_name_douban&' "$source_desc"| \
-      sed 's/&eng_name_douban&//')"
-
-  # 删除 简介中的中英文名
-  #sed -i '/&shc_name_douban&/d;/&eng_name_douban&/d' "$source_desc"
 
   imdb_url="$(grep -Eo 'tt[0-9]{7,8}' "$source_desc"|head -1)"
   douban_url="$(grep -Eo 'https?://movie\.douban\.com/subject/[0-9]{7,8}/?' \
@@ -209,6 +189,27 @@ from_desc_get_param() {
   #---name for post---#
   noDot_name="$(echo "$dot_name"|sed -E \
     's/\./ /g;s/ DD2 0/ DD2.0/i;s/ H 26/ H.26/i;s/([^0-9]5) 1/\1.1/;s/([^0-9]7) 1/\1.1/')"
+
+  # 添加额外信息  ---1
+  chs_included="$(grep '&extra_comment&' "$source_desc"|sed 's/&extra_comment&//')"
+  # 中文字幕  ---2
+  [[ ! $chs_included && "$(grep -i "CH[ST]" "$source_desc")" ]] && \
+      chs_included='中文字幕 '
+  # 剧集集数信息  ---3
+  [[ ! $chs_included && $serials = yes ]] && chs_included="$season"
+  # 删除
+  sed -i '/&extra_comment&/d' "$source_desc"
+
+  # 中文名
+  chinese_title="$(grep '&shc_name_douban&' "$source_desc"| \
+      sed 's/&shc_name_douban&//')"
+
+  # 英文名
+  foreign_title="$(grep '&eng_name_douban&' "$source_desc"| \
+      sed 's/&eng_name_douban&//')"
+
+  # 删除 简介中的中英文名
+  #sed -i '/&shc_name_douban&/d;/&eng_name_douban&/d' "$source_desc"
 }
 
 #-------------------------------#
