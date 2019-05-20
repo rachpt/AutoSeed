@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-19
+# Date: 2019-05-20
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -36,6 +36,10 @@ mtn='mtn'
 dottorrent='dottorrent' # example /home/rachpt/.local/bin/dottorrent
 #---
 user_agent='User-Agent:Mozilla/5.0(X11;Linux x86_64;rv:63.0)Gecko/20100101 Firefox/63.0'
+#--------------------------------------#
+# 豆瓣 api
+db_api_1='https://api.rhilip.info/tool/movieinfo/gen'
+db_api_2='https://api.nas.ink/infogen'
 #--------------------------------------#
 # 图片上传 API
 upload_poster_api_0='https://sm.ms/api/upload'

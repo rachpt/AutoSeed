@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-17
+# Date: 2019-05-20
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -131,7 +131,7 @@ from_douban_get_desc() {
   debug_func "generate-search-url:[$search_url]" #----debug---
   # 使用 API 或者 python 本地解析豆瓣简介
   if [ "$search_url" ]; then
-    local desc_json _get
+    local desc_json _get i _sk
     unset gen_desc_bbcode douban_poster_url chs_name_douban eng_name_douban
     if [[ $Use_Local_Gen = yes ]]; then
       desc_json="$("$python3" -c "import sys;sys.path.append(\"${ROOT_PATH}/get_desc/\"); \
@@ -140,14 +140,17 @@ print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=F
     fi
     _get="$(echo "$desc_json"|grep -Eq '"format".+".+",' && echo yes || echo no)"
     debug_func "generate-code-local:[$_get]" #----debug---
-    if [[ $_get = no ]]; then
-      local _s_key
-      [[ $imdb_url ]] && _s_key="site=douban&sid=$imdb_url" || _s_key="url=$search_url"
-      desc_json="$(http --pretty=format --ignore-stdin --timeout=46 GET \
-        "https://api.nas.ink/infogen?${_s_key}")"
+    for ((i=1;i<=2;i++)); do
+     if [[ $_get = no ]]; then
+      [[ $imdb_url ]] && _sk="site=douban&sid=$imdb_url" || _sk="url=$search_url"
+      desc_json="$(http --pretty=format --ignore-stdin --timeout=36 --verify=no \
+        GET "`eval echo '$'db_api_$i`?${_sk}")"
       _get="$(echo "$desc_json"|grep -Eq '"format".+".+",' && echo yes || echo no)"
-      debug_func "generate-code-api:[$_get]" #----debug---
-    fi
+      debug_func "generate-code-api-$i:[$_get]" #----debug---
+     else
+      break
+     fi
+    done
 
     gen_desc_bbcode="$(echo "$desc_json"|grep 'format'| \
         awk -F '"' '{print $4}'|sed 's#\\n#\n#g;s/img3/img1/;s/\[center\]//;s%\[/center\]%%')"

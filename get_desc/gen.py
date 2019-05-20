@@ -133,7 +133,7 @@ class Gen(object):
     def _gen_douban(self):
         douban_link = "https://movie.douban.com/subject/{}/".format(self.sid)
         douban_page = get_page(douban_link, bs_=True)
-        douban_api_json = get_page('https://api.douban.com/v2/movie/{}'.format(self.sid), json_=True)
+        douban_api_json = get_page('https://api.douban.com/v2/movie/{}?apikey=0df993c66c0c636e29ecbb5344252a4a'.format(self.sid), json_=True)
 
         if "msg" in douban_api_json:
             self.ret["error"] = douban_api_json["msg"]
@@ -249,7 +249,7 @@ class Gen(object):
             self.ret.update(data)
 
     def _gen_imdb(self):
-        douban_imdb_api = get_page("https://api.douban.com/v2/movie/imdb/{}".format(self.sid), json_=True)
+        douban_imdb_api = get_page("https://api.douban.com/v2/movie/imdb/{}?apikey=0df993c66c0c636e29ecbb5344252a4a".format(self.sid), json_=True)
         if douban_imdb_api.get("alt"):
             # 根据tt号先在豆瓣搜索，如果有则直接使用豆瓣解析结果
             self.pat(douban_imdb_api["alt"])
