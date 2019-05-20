@@ -98,8 +98,8 @@ get_search_keys() {
   [[ $season ]] && season_db="$(echo "$season"|sed -E \
     's/s0?(10|20|[1-9]+).?(ep?[0-9]+)?[ \.]/Season.\1/i')"
   # 年份
-  year="$(echo "$1"|grep -Eo '[12][098][0-9]{2}'|tail -1)"
-  num="$(echo "$1"|grep -Eo '[12][098][0-9]{2}'|wc -l)" # 统计year个数
+  year="$(echo "$1"|sed 's/1080//;s/2160//'|grep -Eo '[12][098][0-9]{2}'|tail -1)"
+  num="$(echo "$1"|sed 's/1080//;s/2160//'|grep -Eo '[12][098][0-9]{2}'|wc -l)" # 统计year个数
   # 删除分辨率
   name="$(echo "$1"|sed -E 's/(1080[pi]|720p|4k|2160p).*//i')"
   # 删除介质
@@ -110,7 +110,7 @@ get_search_keys() {
   # 删除合集
   name="$(echo "$name"|sed -E 's/[ \.]Complete[\. ].*//i')"
   # 删除年份
-  [[ $num -ge 1 ]] && name="$(echo "$name"|sed -E 's/[ \.][12][098][0-9]{2}[ \.]/./g')"
+  [[ $num -ge 1 ]] && name="$(echo "$name"|sed -E 's/[ \.][12][098][0-9]{2}[ \.]*/./g')"
   # 删除连续点和空格
   name="$(echo "$name"|sed -E 's/[ \.]+/./g')"
   # 返回

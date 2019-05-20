@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-19
+# Date: 2019-05-20
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -69,19 +69,20 @@ gen_thumbnail_with_mtn() {
 generate_info_local() {
   local main_file_dir _file_l max_size_file info_gen_desc info_gen_html
   local _ext_desc _ext_html
-  [[ $No_Headers = yes ]] && {
+  # ; } || { , the semicolon is essential!
+  [[ $No_Headers != yes ]] && {
   _ext_desc="[b]以下是[url=https://github.com/rachpt/AutoSeed] [img]\
 https://s2.ax1x.com/2019/05/04/Ea3qbQ.png[/img] [/url]自动完成的截图，不喜勿看。[/b]"
   _ext_html="<br /><br /><stong>以下是 <a \
 href=\"https://github.com/rachpt/AutoSeed\"><img alt=\"AutoSeed\" \
 src=\"https://bt.byr.cn/ckfinder/userfiles/images/autoseed.png\" \
 style=\"width: 64px; height: 22px;\" /></a> \
-自动完成的截图，不喜勿看。</strong><br />" } || {
+自动完成的截图，不喜勿看。</strong><br />"; } || {
   _ext_desc="[b]以下是 [img]\
 https://s2.ax1x.com/2019/05/04/Ea3qbQ.png[/img] 自动完成的截图，不喜勿看。[/b]"
   _ext_html="<br /><br /><stong>以下是 <img alt=\"AutoSeed\" \
 src=\"https://bt.byr.cn/ckfinder/userfiles/images/autoseed.png\" \
-style=\"width: 64px; height: 22px;\" /> 自动完成的截图，不喜勿看。</strong><br />" }
+style=\"width: 64px; height: 22px;\" /> 自动完成的截图，不喜勿看。</strong><br />"; }
 
   # 种子文件绝对路径
   main_file_dir="${one_TR_Dir}/${one_TR_Name}"
@@ -130,7 +131,7 @@ style=\"width: 64px; height: 22px;\" /> 自动完成的截图，不喜勿看。<
   [[ $enable_byrbt == yes ]] && \
     [[ "$info_gen_html" ]] && {
     echo -e "${info_gen_html}\n${_ext_html}\n<br />${max_size_file##*/}<br />\n \
-      <img src=\"$img_url_byr\" style=\"width: 900px;\" /><br />" > "$source_html" 
+  <img src=\"$img_url_byr\" style=\"width: 900px;\" /><br />" > "$source_html" 
     } || { echo "$info_gen_html" > "$source_html"; }
   unset img_url_com img_url_byr screen_file # clean
 }
