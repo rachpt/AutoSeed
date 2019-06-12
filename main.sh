@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-27
+# Date: 2019-05-21
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -75,8 +75,8 @@ generate_desc() {
     #---generate desc before done---#
     if [ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]; then
         unset completion
-        [[ "$test_func_probe" ]] || torrent_completed_precent
-        [[ "$test_func_probe" ]] && completion=100      # convenient for test
+        [[ "$test_func_probe" || $HAND = yes ]]  && completion=100 || \
+            torrent_completed_precent   # 获取下载完成百分比
         [[ "$completion" && $completion -ge 70 ]] && {
             debug_func "mainr:completed-[$completion]"  #----debug---
             debug_func 'main:gen_desc[生成简介]'        #----debug---
@@ -161,11 +161,12 @@ hold_on() {
 
 #-------------start function------------#
 # 将种子追加到发布列队
-if [ "$#" -eq 2 ]; then
-    # qbittorrent, 2 parameter
+if [ "$#" -ge 2 ]; then
+    # qbittorrent, 2 parameter; manual, 3
     Torrent_Name="$1"
     Tr_Path="$2"
-    debug_func 'main:run_from_qb'  #----debug---
+    [[ $3 != 'hand' ]] && debug_func 'main:run_from_qb' || \
+      HAND='yes'
 else
     # transmission, no parameter
     Torrent_Name="$TR_TORRENT_NAME"
@@ -173,8 +174,8 @@ else
     [[ $TR_TORRENT_NAME ]] && sleep 2 && \
         debug_func 'main:run_from_tr'  #----debug---
 fi
-[[ $Torrent_Name && $Tr_Path ]] && {
-    [[ $Tr_Path =~ .*/$ ]] && Tr_Path=${Tr_Path%/} # move slash end
+[[ "$Torrent_Name" && "$Tr_Path" ]] && {
+    Tr_Path=${Tr_Path%/} # move slash end
     hold_on # main.sh, sleep some time
     extract_rar_files # get_desc/extract.sh
     echo -e "${Torrent_Name}\n${Tr_Path}" >> "$queue"; }
