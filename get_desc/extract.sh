@@ -17,7 +17,7 @@ if [[ "$(find "${Tr_Path}/${Torrent_Name}" -type f -iname "*.rar")" ]]; then
     # make dot torrent file, 10 means the files to extract already exist 
     \rm -f "${flexget_path}/${Torrent_Name}.torrent"
     $dottorrent -t "https://iptorrents.com" -s 4M -p -x '*.rar' -x '*.r[0-9]*' -x '*.sfv' \
-      -c "Powered by rachpt/AutoSeed. https://github.com/rachpt/AutoSeed" \
+      -x '.*' -c "Powered by rachpt/AutoSeed. https://github.com/rachpt/AutoSeed" \
       "${Tr_Path}/${Torrent_Name}" "${flexget_path}/${Torrent_Name}.torrent"
     [[ $? -ne 0 ]] && debug_func 'extract: failed to make .torrent file!'
   else

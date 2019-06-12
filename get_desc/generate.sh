@@ -173,7 +173,7 @@ print(json.dumps(gen,sort_keys=True,indent=2,separators=(',',':'),ensure_ascii=F
 filt_subt() {
  [[ "$chs_name_douban" && "$extra_subt" ]] && {
    extra_subt="$(echo "$extra_subt"|sed -E \
-   "s/$chs_name_douban//;s%^[ /]+%%;s/ +/ /g;s/&quot;//g")"
+   "s/$chs_name_douban//;s%^[ /]+%%;s/ +/ /g;s/&quot;//g;s/\[ *\]//g")"
  }
 }
 #-------------------------------------#

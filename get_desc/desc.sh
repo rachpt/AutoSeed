@@ -53,7 +53,7 @@ if [ ! -s "$source_desc" ]; then
     form_source_site_get_Desc         # get_desc/detail_page.sh
     # generate info? 
     if [ ! -s "$source_desc" ]; then
-        [[ $completion -eq 100 ]] && {
+        [[ $completion -ge 95 ]] && {
         # import functions
         debug_func 'desc:info'        #----debug---
         [[ `type -t read_info_file` != "function" ]] && \

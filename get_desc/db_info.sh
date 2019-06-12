@@ -210,7 +210,7 @@ while [[ -z $json && $_count -le 5 ]]; do
   gen_format_desc "$_kw" "$(eval echo '$'db_apikey_$_rand)"
   ((_count++))
 done
-unset json rand _kw _count base_url imdb_img imdb_rating num_raters_im
+unset json _rand _kw _count base_url imdb_img imdb_rating num_raters_im
 unset this_title trans_title episodes awards
 #-------------------------------------#
 
