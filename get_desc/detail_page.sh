@@ -15,7 +15,7 @@
 no_source_2_source() {
    # 来自 byr
    if [[ $source_site_URL =~ .*byr.* ]]; then
-       source_site_URL="$post_site[byr]"
+       source_site_URL="$post_site[byrbt]"
        enable_byrbt='no'
        s_site_uid='byrbt'
    # 来自 cmct
