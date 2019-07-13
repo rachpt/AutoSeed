@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-20
+# Date: 2019-07-13
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -128,11 +128,11 @@ style=\"width: 64px; height: 22px;\" /> 自动完成的截图，不喜勿看。<
     echo -e "${info_gen_desc}\n\n${_ext_desc}\n${max_size_file##*/}
 [img]$img_url_com[/img]" > "$source_desc"
   # byrbt desc to html
-  [[ $enable_byrbt == yes ]] && \
+  [[ $enable_byrbt == yes ]] && { \
     [[ "$info_gen_html" ]] && {
     echo -e "${info_gen_html}\n${_ext_html}\n<br />${max_size_file##*/}<br />\n \
   <img src=\"$img_url_byr\" style=\"width: 900px;\" /><br />" > "$source_html" 
-    } || { echo "$info_gen_html" > "$source_html"; }
+    } || { echo "$info_gen_html" > "$source_html"; }; }
   unset img_url_com img_url_byr screen_file # clean
 }
 
