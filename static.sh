@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-20
+# Date: 2019-07-09
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -65,7 +65,7 @@ descrCom_simple="[quote] [b]这是一个自动发布的种子[/b] [em2]
 #
 ( [ "$enable_hudbt" = 'yes' ] || [ "$enable_whu" = 'yes' ] ) && \
 descrCom_complex="[quote]
-[align=center][span style='inline-block:block;background-color:slateblue;padding:30px;border:dashed silver 1px;border-radius:px;box-shadow: 2px 2px 5px gray;width:100px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:6em auto;'][b]这是一个自动发布的种子[/b] [em57][/span]
+[align=center][span style='inline-block:block;background-color:slateblue;padding:30px;border:dashed silver 1px;border-radius:px;box-shadow: 2px 2px 5px gray;width:100px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:6em auto;'][b][color=White]这是一个自动发布的种子[/color][/b] [em57][/span]
 [/align]
 
 
@@ -123,8 +123,8 @@ trackers[nanyangpt]='tracker.nanyangpt.com'
 post_site[nanyangpt]='https://nanyangpt.com'
 trackers[byrbt]='tracker.byr.cn'
 post_site[byrbt]='https://bt.byr.cn'
-trackers[cmct]='tracker.hdcmct.org'
-post_site[cmct]='https://hdcmct.org'
+trackers[cmct]='on.springsunday.net'
+post_site[cmct]='https://springsunday.net'
 trackers[tjupt]='.tjupt.org'
 post_site[tjupt]='https://tjupt.org'
 #--------------------------------------#
