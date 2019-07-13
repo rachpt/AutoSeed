@@ -129,10 +129,14 @@ trackers[tjupt]='.tjupt.org'
 post_site[tjupt]='https://tjupt.org'
 #--------------------------------------#
 # source tracker url
+post_site[ttg]='https://totheglory.im'
 trackers[ttg]='tracker.totheglory.im'
+post_site[hdc]='https://hdchina.org'
 trackers[hdc]='tracker.hdchina.org'
+post_site[hds]='https://hdsky.me'
 trackers[hds]='tracker.hdsky.me'
-trackers[mt]='tp.m-team.cc'
+post_site[mt]='https://pt.m-team.cc'
+trackers[mt]='pt.m-team.cc'
 #--------------------------------------#
 # import functions
 source "$ROOT_PATH/qbittorrent.sh"
