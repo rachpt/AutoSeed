@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-07-09
+# Date: 2019-07-14
 #
 #--------------------------------------#
 export LANGUAGE=en_US
@@ -98,21 +98,6 @@ descrCom_complex_html="<br />
 declare -A trackers
 declare -A post_site
 #
-#[[ $enable_hudbt = yes ]] && { trackers[hudbt]='hudbt.hust.edu.cn'
-    #post_site[hudbt]='https://hudbt.hust.edu.cn'; }
-#[[ $enable_whu = yes ]] && { trackers[whu]='tracker.whupt.net'
-    #post_site[whu]='https://whu.pt'; }
-#[[ $enable_npupt = yes ]] && { trackers[npupt]='npupt.com'
-    #post_site[npupt]='https://npupt.com'; }
-#[[ $enable_nanyangpt = yes ]] && { trackers[nanyangpt]='tracker.nanyangpt.com'
-    #post_site[nanyangpt]='https://nanyangpt.com'; }
-#[[ $enable_byrbt = yes ]] && { trackers[byrbt]='tracker.byr.cn'
-    #post_site[byrbt]='https://bt.byr.cn'; }
-#[[ $enable_cmct = yes ]] && { trackers[cmct]='tracker.hdcmct.org'
-    #post_site[cmct]='https://hdcmct.org'; }
-#[[ $enable_tjupt = yes ]] && { trackers[tjupt]='.tjupt.org'
-    #post_site[tjupt]='https://tjupt.org'; }
-#
 trackers[hudbt]='hudbt.hust.edu.cn'
 post_site[hudbt]='https://hudbt.hust.edu.cn'
 trackers[whu]='tracker.whupt.net'
@@ -169,7 +154,7 @@ upload_image_com() {
   local _rand_=$((RANDOM % 10)) # choose an api randomly
   up_case_func() {
   case $_rand_ in
-    0)
+    00)
       # https://sm.ms
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
         "$upload_poster_api_0" smfile@"$_file" "$user_agent"|grep -Eo \

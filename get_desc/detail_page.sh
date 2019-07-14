@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-07-13
+# Date: 2019-07-14
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -15,27 +15,27 @@
 no_source_2_source() {
    # 来自 byr
    if [[ $source_site_URL =~ .*byr.* ]]; then
-       source_site_URL="$post_site[byrbt]"
+       source_site_URL="${post_site[byrbt]}"
        enable_byrbt='no'
        s_site_uid='byrbt'
    # 来自 cmct
    elif [[ $source_site_URL =~ .*springsunday.* ]]; then
-       source_site_URL="$post_site[cmct]"
+       source_site_URL="${post_site[cmct]}"
        enable_cmct='no'
        s_site_uid='cmct'
    # 来自 nanyangpt
    elif [[ $source_site_URL =~ .*nanyangpt.* ]]; then
-       source_site_URL="$post_site[nanyangpt]"
+       source_site_URL="${post_site[nanyangpt]}"
        enable_nanyangpt='no'
        s_site_uid='nanyangpt'
    # 来自 npupt
    elif [[ $source_site_URL =~ .*npupt.* ]]; then
-       source_site_URL="$post_site[npupt]"
+       source_site_URL="${post_site[npupt]}"
        enable_npupt='no'
        s_site_uid='npupt'
    # 来自 tjupt
    elif [[ $source_site_URL =~ .*tjupt.* ]]; then
-       source_site_URL="$post_site[tjupt]"
+       source_site_URL="${post_site[tjupt]}"
        enable_tjupt='no'
        s_site_uid='tjupt'
    fi
@@ -50,22 +50,22 @@ get_source_site() {
         sed '/FILES/,$d;/^$/d;/[ ]*http/!d')"
     # 获取种子原站点
     if [[ "$tracker_info" =~ .*hdsky.* ]]; then
-        source_site_URL="$post_site[hds]"
+        source_site_URL="${post_site[hds]}"
         s_site_uid='hds'
     elif [[ "$tracker_info" =~ .*hdsky.* ]]; then
-        source_site_URL="$post_site[ttg]"
+        source_site_URL="${post_site[ttg]}"
         s_site_uid='ttg'
     elif [[ "$tracker_info" =~ .*hdchina.* ]]; then
-        source_site_URL="$post_site[hdc]"
+        source_site_URL="${post_site[hdc]}"
         s_site_uid='hdc'
     elif [[ "$tracker_info" =~ .*m-team.cc.* ]]; then
-        source_site_URL="$post_site[mt]"
+        source_site_URL="${post_site[mt]}"
         s_site_uid='mt'
     elif [[ "$tracker_info" =~ .*springsunday.net.* ]]; then
-        source_site_URL="$post_site[cmct]"
+        source_site_URL="${post_site[cmct]}"
         s_site_uid='cmct'
     #elif [[ "$tracker_info" =~ .*newsite.* ]]; then
-    #    source_site_URL="$post_site[newsite]"
+    #    source_site_URL="${post_site[newsite]}"
     else
         source_site_URL="$(echo "$tracker_info"|grep -Eo 'https?://[^/]*'| \
           head -1|sed 's/ssl.empirehost.me/iptorrents.com/;
@@ -81,15 +81,15 @@ get_source_site() {
 #-------------------------------------#
 set_source_site_cookie() {
     # 供二次编辑简介使用
-    if [[ $source_site_URL = $post_site[hds] ]]; then
+    if [[ $source_site_URL = ${post_site[hds]} ]]; then
         cookie_source_site="$cookie_hds"
-    elif [[ $source_site_URL = $post_site[ttg] ]]; then
+    elif [[ $source_site_URL = ${post_site[ttg]} ]]; then
         cookie_source_site="$cookie_ttg"
-    elif [[ $source_site_URL = $post_site[hdc] ]]; then
+    elif [[ $source_site_URL = ${post_site[hdc]} ]]; then
         cookie_source_site="$cookie_hdc"
-    elif [[ $source_site_URL = $post_site[mt] ]]; then
+    elif [[ $source_site_URL = ${post_site[mt]} ]]; then
         cookie_source_site="$cookie_mt"
-    elif [[ $source_site_URL = $post_site[cmct] ]]; then
+    elif [[ $source_site_URL = ${post_site[cmct]} ]]; then
         cookie_source_site="$cookie_cmct"
     fi
 }
@@ -136,7 +136,7 @@ if [[ "$source_site_URL" && "$cookie_source_site" ]]; then
   local _search_w
   _get_s_id() {
   ## TODO 搜索原种ID
-  if [[ "$source_site_URL" = $post_site[ttg] ]]; then
+  if [[ "$source_site_URL" = ${post_site[ttg]} ]]; then
     # TTG
     local s_search_URL="${source_site_URL}/browse.php"
 
@@ -207,18 +207,18 @@ form_source_site_get_Desc() {
 
     # 匹配官方组 简介中的 info 以及 screens 所在行号
     local start_line end_line middle_line # extra_subt 原种副标题，非局域变量
-    if [[ "$source_site_URL" = "$post_site[hds]" ]]; then
+    if [[ "$source_site_URL" = "${post_site[hds]}" ]]; then
       extra_subt="$(grep '&passkey=' "$source_full"|sed -E 's/.*">//;s%</.*>%%g')"
       start_line=$(sed -n '/影片参数/=' "$source_full"|head -1)
       end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -1) # 第一个
 
-    elif [[ "$source_site_URL" = "$post_site[hdc]" ]]; then
+    elif [[ "$source_site_URL" = "${post_site[hdc]}" ]]; then
       extra_subt="$(grep -A1 '<h2' "$source_full"|grep '<h3>'|sed -E \
         "s/[[:space:]]+/ /;s%</?h3>%%g")"
       start_line=$(sed -n '/<fieldset><legend>/=' "$source_full"|tail -1)
       end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -2|tail -1) # 第二个
 
-    elif [[ "$source_site_URL" = "$post_site[ttg]" ]]; then
+    elif [[ "$source_site_URL" = "${post_site[ttg]}" ]]; then
       extra_subt="$(grep '<h1>' "$source_full"|sed -E "s/[^\[]+\[//;s/\]//;s%</?h1>%%g")"
       sed -E -i "s%<br[ ]?/>%<br />\n%ig" "$source_full" # 2019-02-19 update
       # 使用 sed -n '/匹配内容/=' 获取行号
@@ -230,13 +230,13 @@ form_source_site_get_Desc() {
       [[ $end_line ]] || end_line=$(sed -n '/x264 [info]/=' "$source_full"|tail -1)
 
 
-    elif [[ "$source_site_URL" = "$post_site[mt]" ]]; then
+    elif [[ "$source_site_URL" = "${post_site[mt]}" ]]; then
       extra_subt="$(grep -A2 '^<h1' "$source_full"|grep 'class="rowhead"'| \
         sed -E 's/.*">//;s%</.*>%%g')"
       start_line=$(sed -n '/codetop/=' "$source_full"|head -1)
       end_line=$(sed -n '/<\/div><\/td><\/tr>$/=' "$source_full"|head -1) # 第一个
 
-    elif [[ "$source_site_URL" = "$post_site[cmct]" ]]; then
+    elif [[ "$source_site_URL" = "${post_site[cmct]}" ]]; then
       extra_subt="$(grep -E "download.php\?id=[0-9]+\">\[CMCT\]" "$source_full"| \
         sed -E 's/.*">//;s%</.*>%%g;s/\[//g;s/\]//g')"
       start_line=$(sed -n '/资料参数/=;/参数信息/=;/General Information/=' "$source_full"|head -1)
