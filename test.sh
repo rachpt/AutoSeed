@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2018-12-13
+# Date: 2019-07-14
 #
 #--------------------------------------#
 # 说明：该文件用于逐个测试站点情况，
@@ -36,10 +36,13 @@ test_func() {
 #--------------------------------------#
 #test_func  #--Uncomment to debug!---#
 #
-# debug function
 debug_func() {
     # set true to debug, false to close
+    #if true; then
     if false; then
-        echo "[$(date '+%m-%d %H:%M:%S')]：$*" >> "$debug_Log"
+      # 减少 debug 记录大量重复无用信息
+      if [[ ${completion:-100} -ge 92 ]]; then
+        echo -e "[$(date '+%m-%d %H:%M:%S')]：$*" >> "$debug_Log"
+      fi
     fi
 }
