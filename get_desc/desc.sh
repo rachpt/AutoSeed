@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-28
+# Date: 2019-07-14
 #
 #-------------------------------------#
 # 调函数，生成简介
@@ -38,12 +38,12 @@ source_desc="${ROOT_PATH}/tmp/${org_tr_name}_desc.txt"
   source_desc2tjupt="${ROOT_PATH}/tmp/${org_tr_name}_desc2tjupt.txt"
 
 #---to log and edit.sh---#
-if [ -z "$source_site_URL" ]; then
-    debug_func 'desc:get-source'      #----debug---
-    get_source_site                   # get_desc/detail_page.sh
+if [[ -z "$source_site_URL" ]]; then
+  get_source_site                   # get_desc/detail_page.sh
+  debug_func "desc:get-site[$source_site_URL]"  #----debug---
 else
-    debug_func 'desc:get-source[0]'   #----debug---
-    set_source_site_cookie            # get_desc/detail_page.sh
+  set_source_site_cookie            # get_desc/detail_page.sh
+  debug_func 'desc:get-site-cookie'             #----debug---
 fi
 
 #---if not exist desc file---#
@@ -53,7 +53,7 @@ if [ ! -s "$source_desc" ]; then
     form_source_site_get_Desc         # get_desc/detail_page.sh
     # generate info? 
     if [ ! -s "$source_desc" ]; then
-        [[ $completion -ge 95 ]] && {
+        [[ $completion -ge 92 ]] && {
         # import functions
         debug_func 'desc:info'        #----debug---
         [[ `type -t read_info_file` != "function" ]] && \
