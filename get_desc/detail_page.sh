@@ -52,7 +52,7 @@ get_source_site() {
     if [[ "$tracker_info" =~ .*hdsky.* ]]; then
         source_site_URL="${post_site[hds]}"
         s_site_uid='hds'
-    elif [[ "$tracker_info" =~ .*hdsky.* ]]; then
+    elif [[ "$tracker_info" =~ .*totheglory.* ]]; then
         source_site_URL="${post_site[ttg]}"
         s_site_uid='ttg'
     elif [[ "$tracker_info" =~ .*hdchina.* ]]; then
@@ -75,6 +75,7 @@ get_source_site() {
     fi
     no_source_2_source # 减少不必要的过程
     # set cookie
+    [[ $s_site_uid ]] && \
     cookie_source_site="$(eval echo '$'cookie_$s_site_uid)"
 }
 
@@ -133,52 +134,54 @@ get_search_keys() {
 #-------------------------------------#
 form_source_site_get_tID() {
 if [[ "$source_site_URL" && "$cookie_source_site" ]]; then
-  local _search_w
+  local _sw_2 _sw_3 _sw_4
   _get_s_id() {
-  ## TODO 搜索原种ID
+  ## TODO 搜索原种ID; 一个参数：关键词
   if [[ "$source_site_URL" = ${post_site[ttg]} ]]; then
     # TTG
     local s_search_URL="${source_site_URL}/browse.php"
 
     source_t_id="$(http --verify=no --ignore-stdin --timeout=25 -b GET \
-    "$s_search_URL" c==M search_field=="$_search_w" "$cookie_source_site" "$user_agent"| \
-    grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
+    "$s_search_URL" c==M search_field=="$1" "$cookie_source_site" "$user_agent"| \
+    grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{3,}')"
   else
     # 一般形式
     local s_search_URL="${source_site_URL}/torrents.php"
 
     source_t_id="$(http --verify=no --ignore-stdin --timeout=25 -b GET \
-    "$s_search_URL" search=="$_search_w" "$cookie_source_site" "$user_agent"| \
-    grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{4,}')"
+    "$s_search_URL" search=="$1" "$cookie_source_site" "$user_agent"| \
+    grep -Eo "id=[0-9]+[^\"]*hit=1"|head -1|grep -Eo '[0-9]{3,}')"
   fi
   }
+  # 先判断源cookie是否有效
+  [[ "$(http --verify=no --ignore-stdin -b "$source_site_URL" \
+    "$cookie_source_site" "$user_agent"|grep 'name="username"')" ]] && { \
+    echo "[ $source_site_URL ] Invalid cookie!!!" >> "$log_Path"
+    debug_func "detail_p:[ $source_site_URL ] Invalid cookie!!!" # 无效 cookie
+  } || {
+
   # First try
-  _search_w="$dot_name"
-  _get_s_id
+  _get_s_id "$dot_name"
 
   # Second try
   if [ ! "$source_t_id" ]; then
-      _search_w="$(get_search_keys "$dot_name")"
-      _get_s_id
+      debug_func "detail_p:关键词[$dot_name]未搜索到原种id！"
+      _sw_2="$(get_search_keys "$dot_name")"
+      [[ $dot_name != $_sw_2 ]] && _get_s_id "$_sw_2"
   fi
 
   #---deal with wrong year---#
   if [ ! "$source_t_id" ]; then
-      _search_w="$(echo "$_search_w"|sed "s/+[12][089][0-9][0-9]//g")"
-      _get_s_id
+      _sw_3="$(echo "$_sw_2"|sed "s/+[12][089][0-9][0-9]//g")"
+      [[ $_sw_3 != $_sw_2 ]] && _get_s_id "$_sw_3"
   fi
   #---try just with base name---#
   if [ ! "$source_t_id" ]; then
-      _search_w="$(echo "$_search_w"|sed "s/\.+\..*//g")"
-      _get_s_id
+      _sw_4="$(echo "$_sw_3"|sed "s/\.+\..*//g")"
+      [[ $_sw_4 != $_sw_3 ]] && _get_s_id "$_sw_3"
   fi
-  # 判断cookie是否有效，写入debug
-  [[ $source_t_id ]] && debug_func "detail_p:source-t_id[$source_t_id]" || {
-    [[ "$(http --verify=no --ignore-stdin -b "$source_site_URL" \
-    "$cookie_source_site" "$user_agent"|grep 'name="username"')" ]] && \
-    echo "[ $source_site_URL ] Invalid cookie!!!" >> "$log_Path"  && \
-    debug_func "detail_p:[ $source_site_URL ] Invalid cookie!!!" # 无效 cookie
-    debug_func "detail_p:[$_search_w]未搜索到原种id！"
+  [[ $source_t_id ]] && debug_func "detail_p:source-t_id[$source_t_id]" || \
+    debug_func "detail_p:[$_sw_4]未搜索到原种id！"
   }
   unset _search_w
   unset -f _get_s_id
