@@ -45,7 +45,8 @@ else
   set_source_site_cookie            # get_desc/detail_page.sh
   debug_func 'desc:get-site-cookie'             #----debug---
 fi
-
+# 使用预先编辑报的简介，将不会再尝试生成info
+match_douban_desc                   # get_desc/match.sh
 #---if not exist desc file---#
 if [ ! -s "$source_desc" ]; then
     debug_func 'desc:no-source-info'  #----debug---
@@ -68,10 +69,8 @@ if [ ! -s "$source_desc" ]; then
         # import functions to generate desc
         #------------match imdb/douban url----------#
         debug_func 'desc:match'       #----debug---
-        [[ `type -t match_douban_imdb` != "function" ]] && \
-          source "$ROOT_PATH/get_desc/match.sh"
-        match_douban_imdb "$dot_name"
-        match_douban_imdb "$org_tr_name"
+        match_douban_imdb "$dot_name"  # get_desc/match.sh
+        match_douban_imdb "$org_tr_name"  # get_desc/match.sh
         #-----------use python/api gen desc---------#
         debug_func 'desc:generate'    #----debug---
         [[ `type -t generate_main_func` != "function" ]] && \

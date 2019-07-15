@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-04-16
+# Date: 2019-07-15
 #
 #-------------------------------------#
 # 本文件匹配指定文件中的imdb或者豆瓣链接，用于生成简介以及post，
@@ -46,3 +46,36 @@ match_douban_imdb() {
     debug_func 'match:no-match-lists-file!'  #----debug---
   fi
 }
+
+#-------------------------------------#
+# 使用预先编辑好的豆瓣简介信息，
+# 在 tmp/db 目录下使用 种子英文名+txt后缀命名，
+# 使用 .[dot] 分割。样例见 sample.txt
+#-------------------------------------#
+match_douban_desc() {
+  local m_dir i db_name
+  m_dir="$ROOT_PATH/tmp/db"
+  for i in `cd "$m_dir" 2>/dev/null && \ls -1`; do
+    if [[ $dot_name =~ ${i%.txt}.* ]]; then
+      \cp -f "${mdir%/}/$i" "$source_desc"
+      # html 格式
+      [[ $enable_byrbt = yes ]] && {
+        sed "s%[img] *%<img src=\"%g;s%[/img]%\"/>%g;s%\$%&<br />%g;/&[_a-z]*&/d" "$source_desc" > "$source_html"
+      }
+      # 副标题额外信息
+      [[ $extra_subt ]] && {
+      db_name="$(cat "$source_desc"|grep '&shc_name_douban&'| \
+        sed 's/&shc_name_douban&//')"
+      extra_subt="$(echo "$extra_subt"|sed -E \
+          "s/$db_name//;s%^[ /]+%%;s/ +/ /g;s/&quot;//g;s/\[ *\]//g")"
+      sed -i "1c &extra_comment&${extra_subt}" "$source_desc"
+      }
+      unset source_t_id extra_subt source_site_URL s_site_uid
+      unset imdb_url douban_url
+      unset source_desc_tmp  source_html_tmp
+      unset chs_name_douban  eng_name_douban  douban_poster_url
+      break;
+    fi
+  done
+}
+

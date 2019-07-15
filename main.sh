@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-21
+# Date: 2019-07-15
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -16,6 +16,7 @@ source "$ROOT_PATH/settings.sh"
 source "$ROOT_PATH/get_desc/detail_page.sh"
 source "$ROOT_PATH/get_desc/customize.sh"
 source "$ROOT_PATH/get_desc/extract.sh"
+source "$ROOT_PATH/get_desc/match.sh"
 #----------------lock func--------------#
 remove_lock() {
     \rm -f "$lock_File" "$qb_rt_queue"
@@ -77,7 +78,7 @@ generate_desc() {
         unset completion
         [[ "$test_func_probe" || $HAND = yes ]]  && completion=100 || \
             torrent_completed_precent   # 获取下载完成百分比
-        [[ "$completion" && $completion -ge 70 ]] && {
+        [[ "$completion" && $completion -ge 55 ]] && {
             debug_func "mainr:completed-[$completion]"  #----debug---
             debug_func 'main:gen_desc[生成简介]'        #----debug---
             source "$ROOT_PATH/get_desc/desc.sh" ; }
