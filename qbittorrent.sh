@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-19
+# Date: 2019-07-16
 #
 #--------------------------------------#
 qb_login="${qb_HOST}:$qb_PORT/api/v2/auth/login"
@@ -53,7 +53,8 @@ qb_set_ratio_queue() {
   done
 
   debug_func 'qb:set-ratio-queue'  #----debug---
-  echo -e "${org_tr_name}\n${add_site_tracker}\n${ratio_set}" >> "$qb_rt_queue"
+  echo -e "${org_tr_name}\n${add_site_tracker}\n${ratio_set}" >> \
+      "${qb_rt_queue}-$index"
   # say thanks 
   [[ $Allow_Say_Thanks == yes ]] && \
   [[ "$(eval echo '$'"say_thanks_$site")" == yes ]] && \
@@ -90,6 +91,9 @@ qb_get_hash() {
 
 #---------------------------------------#
 qb_set_ratio_loop() {
+  [[ -f "${qb_rt_queue}-1" ]] && {
+    \cat "${qb_rt_queue}-"[0-9]* > "$qb_rt_queue"
+    \rm -f "${qb_rt_queue}-"[0-9]* ; }
   if [ -s "$qb_rt_queue" ]; then
     local data qb_lp_counter trker rtio tr_hash
     sleep 20 # 延时
@@ -132,9 +136,10 @@ qb_set_ratio_loop() {
     debug_func 'main:exit\n'  #----debug---
   fi
 }
+
 #---------------------------------------#
 qb_add_torrent_url() {
-  sleep 3
+  sleep 2
   qbit_webui_cookie
   # add url
   debug_func 'qb:add-from-url'  #----debug---
@@ -159,12 +164,12 @@ qb_add_torrent_url() {
       -F 'skip_checking=true' "$qb_add" && debug_func 'qbit:used-curl-POST'
   fi
 
-  sleep 10
+  sleep 12  # 保证tracker字段值
   qb_set_ratio_queue
 }
 #---------------------------------------#
 qb_add_torrent_file() {
-  sleep 3
+  sleep 2
   qbit_webui_cookie
   # add file
   debug_func 'qb:add-from-file'  #----debug---
@@ -175,7 +180,7 @@ qb_add_torrent_file() {
 # curl -k -b "`echo "$qb_Cookie"|sed -E 's/^cookie:[ ]?//i'`" -X POST -F 'root_folder=true' \
 #   -F "name=@$${ROOT_PATH}/tmp/${t_id}.torrent" -F "savepath=$one_TR_Dir" \
 #   -F 'skip_checking=true' "$qb_add" && debug_func 'qbit:used-curl-POST'
-  sleep 1
+  sleep 12
   qb_set_ratio_queue
 }
 

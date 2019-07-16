@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-19
+# Date: 2019-07-16
 #
 #---------------------------------------#
 # 将简介以及种子以post方式发布
@@ -27,31 +27,31 @@ judge_before_upload() {
     #---necessary judge---# 
     if [ "$(grep -E '禁止转载|禁转|独占资源' "$source_desc")" ]; then
         up_status='no'  # give up upload
-        echo "禁转禁发资源"                      >> "$log_Path"
+        echo "禁转禁发资源"                      >> "${log_Path}-$index"
     elif [[ "$(grep -E '.类.*别.*情色' "$source_desc")" ]]; then
         up_status='no'  # give up upload
-        echo "情色电影。--"                      >> "$log_Path"
+        echo "情色电影。--"                      >> "${log_Path}-$index"
     fi
 
     unset t_id        # set t_id to none
     #---post---#
     if [[ $up_status = yes ]]; then
         #---log---#
-        echo "-----------[post data]-----------" >> "$log_Path"
-        echo "name=${dot_name}"                  >> "$log_Path"
-        echo "small_descr=${chinese_title}"      >> "$log_Path"
-        echo "imdburl=${imdb_url}"               >> "$log_Path"
-        echo "uplver=${anonymous}"               >> "$log_Path"
-        echo "${postUrl%/*}"                     >> "$log_Path"
+        echo "-----------[post data]-----------" >> "${log_Path}-$index"
+        echo "name=${dot_name}"                  >> "${log_Path}-$index"
+        echo "small_descr=${chinese_title}"      >> "${log_Path}-$index"
+        echo "imdburl=${imdb_url}"               >> "${log_Path}-$index"
+        echo "uplver=${anonymous}"               >> "${log_Path}-$index"
+        echo "${postUrl%/*}"                     >> "${log_Path}-$index"
     fi
 }
 
 add_t_id_2_client() {        
     #---if get t_id then add it to tr---#
     [[ $up_status = yes ]] && if [[ -z $t_id ]]; then
-        echo '=!==!=[failed to get tID]==!==!==' >> "$log_Path"
+        echo '=!==!=[failed to get tID]==!==!==' >> "${log_Path}-$index"
     else
-        echo "t_id: [$t_id]"                     >> "$log_Path"
+        echo "t_id: [$t_id]"                     >> "${log_Path}-$index"
         #---add torrent---#
         torrent2add="${downloadUrl}${t_id}&passkey=${passkey}"
         source "$ROOT_PATH/post/add.sh"
@@ -84,7 +84,7 @@ reseed_torrent() {
 unset_tempfiles() {
     [ ! "$test_func_probe" ] && \
       \rm -f "$source_desc" "$source_html" "$source_desc2tjupt"
-    unset source_desc source_html source_desc2tjupt
+    unset source_desc source_html source_desc2tjupt index
     unset douban_poster_url source_site_URL source_t_id imdb_url douban_url
     echo "----------[deleted tmp]----------"     >> "$log_Path"
 }
@@ -97,55 +97,68 @@ from_desc_get_param      # $ROOT_PATH/post/parameter.sh
 # 美剧imdb链接修正
 match_douban_imdb "$dot_name" 'series'
 match_douban_imdb "$org_tr_name" 'series'
-
+index=0  # 线程标识符
 if [ "$enable_whu" = 'yes' ]; then
-    source "$ROOT_PATH/post/whu.sh"
+    ((index++))
+    (source "$ROOT_PATH/post/whu.sh"
     judge_before_upload
     [[ $up_status = yes ]] && whu_post_func
-    add_t_id_2_client
+    add_t_id_2_client) &
 fi
 
 if [ "$enable_hudbt" = 'yes' ]; then
-    source "$ROOT_PATH/post/hudbt.sh"
+    ((index++))
+    (source "$ROOT_PATH/post/hudbt.sh"
     judge_before_upload
     [[ $up_status = yes ]] && hudbt_post_func
-    add_t_id_2_client
+    add_t_id_2_client) &
 fi
 
 if [ "$enable_npupt" = 'yes' ]; then
-    source "$ROOT_PATH/post/npupt.sh"
+    ((++index))
+    (source "$ROOT_PATH/post/npupt.sh"
     judge_before_upload
     [[ $up_status = yes ]] && npupt_post_func
-    add_t_id_2_client
+    add_t_id_2_client) &
 fi
 
 if [ "$enable_nanyangpt" = 'yes' ]; then
-    source "$ROOT_PATH/post/nanyangpt.sh"
+    ((++index))
+    (source "$ROOT_PATH/post/nanyangpt.sh"
     judge_before_upload
     [[ $up_status = yes ]] && nanyangpt_post_func
-    add_t_id_2_client
+    add_t_id_2_client) &
 fi
 
 if [ "$enable_byrbt" = 'yes' ]; then
-    source "$ROOT_PATH/post/byrbt.sh"
+    ((++index))
+    (source "$ROOT_PATH/post/byrbt.sh"
     judge_before_upload
     [[ $up_status = yes ]] && byrbt_post_func
-    add_t_id_2_client
+    add_t_id_2_client) &
 fi
 
 if [ "$enable_cmct" = 'yes' ]; then
-    source "$ROOT_PATH/post/cmct.sh"
+    ((++index))
+    (source "$ROOT_PATH/post/cmct.sh"
     judge_before_upload
     [[ $up_status = yes ]] && cmct_post_func
-    add_t_id_2_client
+    add_t_id_2_client) &
 fi
 
 if [ "$enable_tjupt" = 'yes' ]; then
-    source "$ROOT_PATH/post/tjupt.sh"
+    ((++index))
+    (source "$ROOT_PATH/post/tjupt.sh"
     judge_before_upload
     [[ $up_status = yes ]] && tjupt_post_func
-    add_t_id_2_client
+    add_t_id_2_client) &
 fi
+#---------------------------------------#
+wait
+[[ -f "${log_Path}-1" ]] && {
+  \cat "${log_Path}-"[0-9]* >> "$log_Path"
+  \rm -f "${log_Path}-"[0-9]* ; }
+
 #---------------unset-------------------#
 
 unset_tempfiles

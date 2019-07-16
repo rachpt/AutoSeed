@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-02-22
+# Date: 2019-07-16
 #
 #---------------------------------------#
 # 将发布后的种子添加到客户端做种
@@ -24,9 +24,9 @@ if [ "$one_TR_Dir" ]; then
       [ ! "`stat -c "%s" "$whu_tr"`" ] && debug_func \
         "add:whu-prarm:[${downloadUrl}${t_id}][$user_agent][$cookie]"  #----debug---
       if [ "$to_client" = 'qbittorrent' ]; then
-          qb_add_torrent_file
+          qb_add_torrent_file  # transmission.sh
       elif [ "$to_client" = 'transmission' ]; then
-          tr_add_torrent_file
+          tr_add_torrent_file  # transmission.sh
       else
           debug_func "add:Client-Error!-[whu]"  #----debug---
       fi
@@ -34,14 +34,14 @@ if [ "$one_TR_Dir" ]; then
       unset whu_tr a && unset -f dl_whu_tr
   else
       if [ "$to_client" = 'qbittorrent' ]; then
-          qb_add_torrent_url
+          qb_add_torrent_url  # qbittorrent.sh
       elif [ "$to_client" = 'transmission' ]; then
-          tr_add_torrent_url
+          tr_add_torrent_url  # qbittorrent.sh
       else
           debug_func "add:Client-Error!"  #----debug---
       fi
   fi
-  echo "-------------[added]-------------"           >> "$log_Path"
+  echo "-------------[added]-------------"           >> "${log_Path}-$index"
   # 更新豆瓣外部信息
   if http --verify=no --ignore-stdin --timeout=16 GET "${postUrl%/*}/retriver.php" \
     id=="$t_id" type==2 siteid==2 "$cookie" "$user_agent" &> /dev/null; then
@@ -55,7 +55,7 @@ if [ "$one_TR_Dir" ]; then
       6) debug_func 'add:Exceeded --max-redirects=<n> redirects!' ;;
       *) debug_func 'add:Other Error!' ;;
     esac
-    sleep 2
+    sleep 1
     # 备用更新方法
     curl -k -b "`echo "$cookie"|sed -E 's/^cookie:[ ]?//i'`"  \
       -A "`echo "$user_agent"|sed -E 's/^User-Agent:[ ]?//i'`"  \
@@ -64,7 +64,7 @@ if [ "$one_TR_Dir" ]; then
   fi
 
 else
-  echo "没有找到本地文件！"                          >> "$log_Path"
+  echo "没有找到本地文件！"                          >> "${log_Path}-$index"
 fi
 #---------------------------------------#
 

@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-01-12
+# Date: 2019-07-16
 #
 #----------------------------------------#
 judge_torrent_func() {
@@ -47,7 +47,7 @@ judge_torrent_func() {
               up_status='yes'  # upload
           else
               up_status='no'   # give up upload
-              echo "Dupe! [${postUrl%/*}]" >> "$log_Path"
+              echo "Dupe! [${postUrl%/*}]" >> "${log_Path}-$index"
           fi
       #---normal dupe judge---#
       else
@@ -55,7 +55,7 @@ judge_torrent_func() {
            up_status='yes'  # upload
        else
            up_status='no'   # give up upload
-           echo "Dupe! [${postUrl%/*}]" >> "$log_Path"
+           echo "Dupe! [${postUrl%/*}]" >> "${log_Path}-$index"
        fi
       fi  # nanyang
       }   # 辅种
