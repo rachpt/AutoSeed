@@ -21,27 +21,28 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 ## 特点
 
- - 自动生成并提交简介，尽量与原种简介一致。
- - 自动设置做种时间，分享率。自动清理种子，硬盘不会爆仓。
- - 支持自动 Dupe 以及禁转判断。
+ - 自动生成并提交简介，与原种简介尽量一致。
+ - 自动设置做种时间与分享率、清理旧种子、硬盘容量释放。
+ - 速度快，使用临时文件提前生成简介，使用多线程提速。
  - 开箱即用，不需要使用数据库等复杂操作。
- - 速度快，使用临时文件提前生成简介。
- - 几乎全自动。 
+ - 支持自动 Dupe 以及禁转判断。
+ - 支持多项自定义规则优化任务。
+ - 总的来说，几乎全自动。 
 
 
 ## 环境要求
 
-- GNU/Linux （在ubuntu 18.04 lts、archLinux、centos7 测试通过）。
+- GNU/Linux（ubuntu 18.04 lts、archLinux、centos7 测试通过）。
 - 软件：
   - transmission-daemon，transmission-remote，transmission-show，transmission-edit；
-  - qBittorrent v4.1+, 如果选择使用该客户端做种(transmission-show,edit 为必须项！)； 
+  - qBittorrent v4.1+，(使用该客户端须安装transmission-show,edit！)； 
   - httpie 0.9.8+，用于和web服务器通讯；
-  - mediainfoa，[mtn](http://moviethumbnail.sourceforge.net/)(非必须) 用于本地生成info信息;
+  - mediainfo，[mtn](http://moviethumbnail.sourceforge.net/)(非必须) 用于本地生成info信息;
   - ffmpeg，用于本地生成缩略图(配合mediainfo);
   - 其他常用软件工具，sed，grep，awk等(详见 setting.sh，一般系统自带)；
-  - 默认先使用`python3`本地解析豆瓣简介，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖(requests,bs4,html2bbcode)；
+  - 默认先使用`python3`本地解析豆瓣简介，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，(Python相关依赖requests,bs4,html2bbcode)；
   - curl，备用下载工具;
-  - unrar、[dottorrent](https://github.com/kz26/dottorrent)，解压0day资源。
+  - unrar、[dottorrent](https://github.com/kz26/dottorrent)，解压0day分卷资源。
 
 - ubuntu 系安装
   ```sh
@@ -72,21 +73,19 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 
 1. clone 本 repo (或者下载 zip) 至本地，请使用最新的版本；
 2. 修改设置文件`setting.sh`(包括cookie、passkey，监控 torrent 文件路径等)；
-3. 添加 `main.sh` 脚本路径至 transmission 的 `script-torrent-done-filename`。具体可以参见 [这里](https://rachpt.github.io/2018/03/25/transmission-settings/) ；
-4. 若使用 qbittorrent **订阅源种**(非reseed)，则需要添加如 `/home/AutoSeed/main.sh "%N" "%D"` 所示代码至 完成时运行外部程序处(目前只能使用一个客户端订阅源种)；
-4. (推荐)将 `main.sh` 添加到  `crontab` 周期运行（运行锁会解决各种冲突问题），以提前生成简介；
-5. 调试请看 test.sh 中的说明。
+3. 使用 transmission **订阅源种**，添加 `main.sh` 路径至 `script-torrent-done-filename`，具体见 [这里](https://rachpt.github.io/2018/03/25/transmission-settings/) ；
+5. 使用 qbittorrent **订阅源种**，添加如 `/home/AutoSeed/main.sh "%N" "%D"` 所示代码至`完成时运行外部程序`处；  
+   3、4只能选其一，目前只能使用一个客户端订阅源种；
+6. (推荐)将 `main.sh` 添加到  `crontab` 周期运行(运行锁会解决各种问题)，以提前生成简介；
+7. 调试请看 test.sh 中的说明。
 
 详细请看[WIKI](https://github.com/rachpt/AutoSeed/wiki)。
 
 *其他：*
 
-请使用 flexget 订阅下载，transmission 使用 [transmissionrpc](https://flexget.com/Plugins/transmission) 将源种传入，qbittorrent 使用 flexget 的 qbittorrent 模块。
-
- `crontab` 运行参考命令 `*/5 * * * * /home/AutoSeed/main.sh >/dev/null 2>&1`。
-
-ubuntu 用户注意使用 bash 运行而非系统默认的 dash!
-
+请使用 flexget 订阅下载，transmission 使用 [transmissionrpc](https://flexget.com/Plugins/transmission) 将源种传入，qbittorrent 使用 flexget 的 qbittorrent 模块。  
+ `crontab` 运行参考命令 `*/5 * * * * /home/AutoSeed/main.sh >/dev/null 2>&1`。  
+ubuntu 用户注意使用 bash 运行而非系统默认的 dash!  
 python 并非必须，只需将 `setting.sh` 中的`Use_Local_Gen='yes'`改为其他值，则使用基于 [web](https://rhilip.github.io/PT-help/ptgen) 的生成方法，当然本地解析失败时，也会尝试使用web方法生成。
 
 
