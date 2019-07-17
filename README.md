@@ -36,26 +36,35 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
   - transmission-daemon，transmission-remote，transmission-show，transmission-edit；
   - qBittorrent v4.1+, 如果选择使用该客户端做种(transmission-show,edit 为必须项！)； 
   - httpie 0.9.8+，用于和web服务器通讯；
-  - mediainfo，用于本地生成info信息;
+  - mediainfoa，[mtn](http://moviethumbnail.sourceforge.net/)(非必须) 用于本地生成info信息;
   - ffmpeg，用于本地生成缩略图(配合mediainfo);
   - 其他常用软件工具，sed，grep，awk等(详见 setting.sh，一般系统自带)；
   - 默认先使用`python3`本地解析豆瓣简介，感谢 [@Rhilip](https://github.com/Rhilip/PT-help/blob/master/modules/infogen/gen.py) 的脚本，Python相关依赖(requests,bs4,html2bbcode)；
-  - curl，备用下载工具。
+  - curl，备用下载工具;
+  - unrar、[dottorrent](https://github.com/kz26/dottorrent)，解压0day资源。
 
 - ubuntu 系安装
   ```sh
-  sudo apt install transmission-daemon transmission-cli qbittorrent(or nox) httpie mediainfo python3 ffmpeg
+  sudo apt install transmission-daemon \
+    transmission-cli qbittorrent(or nox) \
+    httpie mediainfo python3 ffmpeg
   sudo pip3 install requests bs4 html2bbcode
   ``` 
 - arch 系安装
   ```sh
-  sudo pacman -Sy transmsiion-cli qbittorrent(or nox) httpie mediainfo python python-pip ffmpeg
-  sudp pacman -Sy python-requests python-beautifulsoup4 
-  sudo pip3 install html2bbcode # 不要通过 pip 安装上面两个库
+  sudo pacman -Sy transmsiion-cli \
+    qbittorrent(or nox) httpie mediainfo \
+    python python-pip ffmpeg
+  sudo pacman -Sy python-requests python-beautifulsoup4 
+  # 不要通过 pip 安装上面两个库到系统
+  sudo pip3 install html2bbcode 
   ```
 - centos 安装
   ```sh
-  sudo yum -y install transmission-cli transmission-common transmission-daemon qbittorrent(or nox) httpie mediainfo python python-pip ffmpeg
+  sudo yum -y install transmission-cli \
+    transmission-common transmission-daemon \
+    qbittorrent(or nox) httpie mediainfo \
+    python python-pip ffmpeg
   sudo pip3 install install requests bs4 html2bbcode
   ```
 
@@ -68,7 +77,7 @@ An Autoseed used to reseed Movies in PT sites powered by shell scripts. Get a py
 4. (推荐)将 `main.sh` 添加到  `crontab` 周期运行（运行锁会解决各种冲突问题），以提前生成简介；
 5. 调试请看 test.sh 中的说明。
 
-详细请看[wiki](https://github.com/rachpt/AutoSeed/wiki)。
+详细请看[WIKI](https://github.com/rachpt/AutoSeed/wiki)。
 
 *其他：*
 
@@ -108,5 +117,9 @@ python 并非必须，只需将 `setting.sh` 中的`Use_Local_Gen='yes'`改为�
 
 ## 实现流程
 
-https://www.processon.com/view/link/5c088855e4b0ca4b40c93a49
+[点击查看](https://www.processon.com/view/link/5c088855e4b0ca4b40c93a49)
+
+## License
+
+[GPL-3.0](https://github.com/rachpt/AutoSeed/blob/master/LICENSE)
 
