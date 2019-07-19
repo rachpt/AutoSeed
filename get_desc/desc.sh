@@ -40,13 +40,14 @@ source_desc="${ROOT_PATH}/tmp/${org_tr_name}_desc.txt"
 #---to log and edit.sh---#
 if [[ -z "$source_site_URL" ]]; then
   get_source_site                   # get_desc/detail_page.sh
-  debug_func "desc:get-site[$source_site_URL]"  #----debug---
+  debug_func "desc:get-site[$source_site_URL][$s_site_uid]"  #----debug---
 else
   set_source_site_cookie            # get_desc/detail_page.sh
   debug_func 'desc:get-site-cookie'             #----debug---
 fi
 # 使用预先编辑报的简介，将不会再尝试生成info
-match_douban_desc                   # get_desc/match.sh
+[[ ! -s "$source_desc" ]] && \
+  match_douban_desc                   # get_desc/match.sh
 #---if not exist desc file---#
 if [ ! -s "$source_desc" ]; then
     debug_func 'desc:no-source-info'  #----debug---

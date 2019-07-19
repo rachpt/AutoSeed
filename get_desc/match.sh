@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-07-15
+# Date: 2019-07-18
 #
 #-------------------------------------#
 # 本文件匹配指定文件中的imdb或者豆瓣链接，用于生成简介以及post，
@@ -57,11 +57,14 @@ match_douban_desc() {
   m_dir="$ROOT_PATH/tmp/db"
   for i in `cd "$m_dir" 2>/dev/null && \ls -1`; do
     if [[ $dot_name =~ ${i%.txt}.* ]]; then
-      \cp -f "${mdir%/}/$i" "$source_desc"
+      \cp -f "${m_dir%/}/$i" "$source_desc"
       # html 格式
       [[ $enable_byrbt = yes ]] && {
         sed "s%[img] *%<img src=\"%g;s%[/img]%\"/>%g;s%\$%&<br />%g;/&[_a-z]*&/d" "$source_desc" > "$source_html"
+        echo -e "<br /><fieldset><legend> <span style=\"color:#ffffff;background-color:#000000;\">转载来源</span></legend>
+    <span style=\"font-size:20px;\">本种来自： ${source_site_URL}</span> <br /></fieldset><br />" >> "$source_html"
       }
+      echo -e "\n[quote=转载来源][b]本种来自：[/b] ${source_site_URL}[/quote]" >> "$source_desc"
       # 副标题额外信息
       [[ $extra_subt ]] && {
       db_name="$(cat "$source_desc"|grep '&shc_name_douban&'| \
@@ -74,6 +77,7 @@ match_douban_desc() {
       unset imdb_url douban_url
       unset source_desc_tmp  source_html_tmp
       unset chs_name_douban  eng_name_douban  douban_poster_url
+      debug_func 'match:use-info-existed!'  #----debug---
       break;
     fi
   done
