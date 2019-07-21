@@ -139,33 +139,33 @@ fi
 
 #-------------------------------------#
 whu_post_func() {
-    gen_whu_parameter
-    #---post data---#
-t_id=$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
-    'name'="$noDot_name"\
-    'small_descr'="$whu_small_descr"\
-    'url'="$imdb_url"\
-    'url_douban'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo '11')"\
-    'descr'="$whu_des"\
-    'type'="$whu_type"\
-    'standard_sel'="$whu_stardand"\
-    'uplver'="$anonymous_whu"\
-    file@"${torrent_Path}"\
-    "$cookie_whu"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
+  gen_whu_parameter
+  #---post data---#
+t_id="$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
+  'name'="$noDot_name"\
+  'small_descr'="$whu_small_descr"\
+  'url'="$imdb_url"\
+  'url_douban'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo '11')"\
+  'descr'="$whu_des"\
+  'type'="$whu_type"\
+  'standard_sel'="$whu_stardand"\
+  'uplver'="$anonymous_whu"\
+  file@"${torrent_Path}"\
+  "$cookie_whu"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
-if [ -z "$t_id" ]; then
-    # 辅种
-    t_id=$(http --verify=no --ignore-stdin -f -b --timeout=10 POST "$postUrl"\
-        name="$noDot_name"\
-        small_descr="$whu_small_descr"\
-        url="$imdb_url"\
-        url_douban="$( [ ! "$imdb_url" ] && echo "$douban_url")"\
-        descr="$whu_des"\
-        type="$whu_type"\
-        standard_sel="$whu_stardand"\
-        uplver="$anonymous_whu"\
-        file@"${torrent_Path}"\
-        "$cookie_whu"|grep 'id='|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
+if [[ -z "$t_id" ]]; then
+  # 辅种
+t_id="$(http --verify=no --ignore-stdin -f -b --timeout=10 POST "$postUrl"\
+   name="$noDot_name"\
+   small_descr="$whu_small_descr"\
+   url="$imdb_url"\
+   url_douban="$( [ ! "$imdb_url" ] && echo "$douban_url")"\
+   descr="$whu_des"\
+   type="$whu_type"\
+   standard_sel="$whu_stardand"\
+   uplver="$anonymous_whu"\
+   file@"${torrent_Path}"\
+   "$cookie_whu"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 fi
 }
 

@@ -134,33 +134,32 @@ fi
 # 6  Lossy
 # 5  Lossless
 
-
 #-------------------------------------#
 hudbt_post_func() {
-    gen_hudbt_parameter
-t_id=$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
-    'name'="$noDot_name"\
-    'small_descr'="$hudbt_small_descr"\
-    'url'="$imdb_url"\
-    'descr'="$hudbt_des"\
-    'type'="$hudbt_type"\
-    'standard_sel'="$hudbt_stardand"\
-    'uplver'="$anonymous_hudbt"\
-    file@"${torrent_Path}"\
-    "$cookie_hudbt"|grep "id="|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
+  gen_hudbt_parameter
+t_id="$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
+  'name'="$noDot_name"\
+  'small_descr'="$hudbt_small_descr"\
+  'url'="$imdb_url"\
+  'descr'="$hudbt_des"\
+  'type'="$hudbt_type"\
+  'standard_sel'="$hudbt_stardand"\
+  'uplver'="$anonymous_hudbt"\
+  file@"${torrent_Path}"\
+  "$cookie_hudbt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
-if [ -z "$t_id" ]; then
-    # 辅种
-    t_id=$(http --verify=no --ignore-stdin -f --timeout=10 POST "$postUrl"\
-        name="$noDot_name"\
-        small_descr="$hudbt_small_descr"\
-        url="$imdb_url"\
-        descr="$hudbt_des"\
-        type="$hudbt_type"\
-        standard_sel="$hudbt_stardand"\
-        uplver="$anonymous_hudbt"\
-        file@"${torrent_Path}"\
-        "$cookie_hudbt"|grep 'hit=1'|head -1|cut -d = -f 5|cut -d '&' -f 1)
+if [[ -z "$t_id" ]]; then
+  # 辅种
+  t_id="$(http --verify=no --ignore-stdin -f --timeout=10 POST "$postUrl"\
+    name="$noDot_name"\
+    small_descr="$hudbt_small_descr"\
+    url="$imdb_url"\
+    descr="$hudbt_des"\
+    type="$hudbt_type"\
+    standard_sel="$hudbt_stardand"\
+    uplver="$anonymous_hudbt"\
+    file@"${torrent_Path}"\
+    "$cookie_hudbt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 fi
 }
 

@@ -165,28 +165,28 @@ esac
 
 #-------------------------------------#
 cmct_post_func() {
-    gen_cmct_parameter
-    #---post data---#
-t_id=$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
-    'name'="$dot_name"\
-    'small_descr'="$cmct_small_descr"\
-    'url'="$imdb_url"\
-    'descr'="$cmct_des"\
-    'type'="$cmct_type"\
-    'medium_sel'="$cmct_medium"\
-    'codec_sel'="$cmct_codec"\
-    'audiocodec_sel'="$cmct_audio"\
-    'standard_sel'="$cmct_standard"\
-    'source_sel'="$cmct_source"\
-    'pack'="$is_package"\
-    'uplver'="$anonymous_cmct"\
-    file@"${torrent_Path}"\
-    "$cookie_cmct"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
+  gen_cmct_parameter
+  #---post data---#
+id="$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
+  'name'="$dot_name"\
+  'small_descr'="$cmct_small_descr"\
+  'url'="$imdb_url"\
+  'descr'="$cmct_des"\
+  'type'="$cmct_type"\
+  'medium_sel'="$cmct_medium"\
+  'codec_sel'="$cmct_codec"\
+  'audiocodec_sel'="$cmct_audio"\
+  'standard_sel'="$cmct_standard"\
+  'source_sel'="$cmct_source"\
+  'pack'="$is_package"\
+  'uplver'="$anonymous_cmct"\
+  file@"${torrent_Path}"\
+  "$cookie_cmct"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
-    if [ -z "$t_id" ]; then
-        # 辅种
-        reseed_torrent
-    fi
+  if [[ -z "$t_id" ]]; then
+    # 辅种
+    reseed_torrent
+  fi
 }
 
 #-------------------------------------#

@@ -48,6 +48,7 @@ judge_before_upload() {
 
 add_t_id_2_client() {        
     #---if get t_id then add it to tr---#
+    t_id="${t_id/$'\n'*/}"  # use first line
     [[ $up_status = yes ]] && if [[ -z $t_id ]]; then
         echo '=!==!=[failed to get tID]==!==!==' >> "${log_Path}-$index"
     else

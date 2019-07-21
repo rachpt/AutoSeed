@@ -85,7 +85,7 @@ if [[ $formhash ]] && \rm -f "$neu6_tmp"
 neu6_post_func() {
     gen_neu6_parameter
     #---post data---#
-t_id=$(http --verify=no --ignore-stdin --print=h -f  POST "$postUrl"\
+t_id="$(http --verify=no --ignore-stdin --print=h -f  POST "$postUrl"\
     mod==post action==newthread fid==156 topicsubmit==yes \
     'formhash'="$formhash"\
     'posttime'="$(date +%s)"\
@@ -96,9 +96,9 @@ t_id=$(http --verify=no --ignore-stdin --print=h -f  POST "$postUrl"\
     'specialextra'="torrent"\
     'special'="127"\
     torrent@"${torrent_Path}"\
-    "$cookie_neu6"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
+    "$cookie_neu6"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
-    if [ -z "$t_id" ]; then
+    if [[ -z "$t_id" ]]; then
         # 辅种
         reseed_torrent
     fi

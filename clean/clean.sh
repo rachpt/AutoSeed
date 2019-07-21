@@ -72,7 +72,7 @@ comparer_file_and_delete() {
 #-----------------------------#
 # judge function, return a value
 disk_check() {
-  disk_avail=$(\df -h "$FILE_PATH"|grep "^/dev/.*"|awk '{print $4}'|cut -d 'G' -f 1)
+  disk_avail=$(\df -h "$FILE_PATH"|awk '/^\//{split($4,a,"G");print a[1]}')
   disk_over=$(echo "${disk_avail:-0} < ${DISK_AVAIL_MIN:-0}"|bc)  # var default 0
   # bc true = 1, false = 0
 }

@@ -149,81 +149,81 @@ fi
 # 2   其他
 #-------------------------------------#
 byrbt_post_func() {
-    gen_byrbt_parameter
-if [ "$byrbt_type" = '408' ]; then
-    # 电影 POST
-    t_id=$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
-        'movie_cname'="$chinese_title"\
-        'ename0day'="$dot_name"\
-        'type'="$byrbt_type"\
-        'small_descr'="$chs_included"\
-        'url'="$imdb_url"\
-        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo 'none')"\
-        'descr'="$byrbt_des"\
-        'type'="$byrbt_type"\
-        'second_type'="$byrbt_second_type"\
-        'movie_type'="$genre"\
-        'movie_country'="$region"\
-        'uplver'="$anonymous_byrbt"\
-        file@"${torrent_Path}"\
-        "$cookie_byrbt"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
+  gen_byrbt_parameter
+if [[ "$byrbt_type" == '408' ]]; then
+  # 电影 POST
+t_id="$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
+    'movie_cname'="$chinese_title"\
+    'ename0day'="$dot_name"\
+    'type'="$byrbt_type"\
+    'small_descr'="$chs_included"\
+    'url'="$imdb_url"\
+    'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo 'none')"\
+    'descr'="$byrbt_des"\
+    'type'="$byrbt_type"\
+    'second_type'="$byrbt_second_type"\
+    'movie_type'="$genre"\
+    'movie_country'="$region"\
+    'uplver'="$anonymous_byrbt"\
+    file@"${torrent_Path}"\
+    "$cookie_byrbt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
-    if [ -z "$t_id" ]; then
-        # 辅种
-        reseed_torrent
-    fi
-elif [ "$byrbt_type" = '401' ]; then
-    # 剧集 POST
-    t_id=$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
-        'type'="$byrbt_type"\
-        'second_type'="$byrbt_second_type"\
-        'tv_type'="$byrbt_tv_type"\
-        'cname'="$chinese_title"\
-        'tv_ename'="$dot_name"\
-        'tv_season'="$byrbt_tv_season"\
-        'tv_filetype'="$byrbt_tv_filetype"\
-        'type'="$byrbt_type"\
-        'small_descr'="$chs_included"\
-        'url'="$imdb_url"\
-        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo 'none')"\
-        'descr'="$byrbt_des"\
-        'movie_type'="$genre"\
-        'uplver'="$anonymous_byrbt"\
-        file@"${torrent_Path}"\
-        "$cookie_byrbt" | grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
-    if [ -z "$t_id" ]; then
-        # 辅种
-        reseed_torrent
-    fi
-elif [ "$byrbt_type" = '410' ]; then
-    # 纪录片 POST
-    t_id=$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
-        'type'="$byrbt_type"\
-        'second_type'="$byrbt_second_type"\
-        'record_whetherend'="$byrbt_rend"\
-        'cname'="$chinese_title"\
-        'record_ename'="$byrbt_engname"\
-        'record_season'="$byrbt_season"\
-        'record_filetype'="$byrbt_filetype"\
-        'record_source'="$byrbt_source"\
-        'record_format'="$byrbt_format"\
-        'record_group'="$byrbt_group"\
-        'type'="$byrbt_type"\
-        'small_descr'="$chs_included"\
-        'url'="$imdb_url"\
-        'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo 'none')"\
-        'descr'="$byrbt_des"\
-        'uplver'="$anonymous_byrbt"\
-        file@"${torrent_Path}"\
-        "$cookie_byrbt"|grep 'id='|grep 'detail'|head -1|cut -d '=' -f 2|cut -d '&' -f 1)
+  if [[ -z "$t_id" ]]; then
+    # 辅种
+    reseed_torrent
+  fi
+elif [[ "$byrbt_type" == '401' ]]; then
+  # 剧集 POST
+t_id="$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
+    'type'="$byrbt_type"\
+    'second_type'="$byrbt_second_type"\
+    'tv_type'="$byrbt_tv_type"\
+    'cname'="$chinese_title"\
+    'tv_ename'="$dot_name"\
+    'tv_season'="$byrbt_tv_season"\
+    'tv_filetype'="$byrbt_tv_filetype"\
+    'type'="$byrbt_type"\
+    'small_descr'="$chs_included"\
+    'url'="$imdb_url"\
+    'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo 'none')"\
+    'descr'="$byrbt_des"\
+    'movie_type'="$genre"\
+    'uplver'="$anonymous_byrbt"\
+    file@"${torrent_Path}"\
+    "$cookie_byrbt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
+  if [[ -z "$t_id" ]]; then
+    # 辅种
+    reseed_torrent
+  fi
+elif [[ "$byrbt_type" == '410' ]]; then
+  # 纪录片 POST
+t_id="$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl"\
+    'type'="$byrbt_type"\
+    'second_type'="$byrbt_second_type"\
+    'record_whetherend'="$byrbt_rend"\
+    'cname'="$chinese_title"\
+    'record_ename'="$byrbt_engname"\
+    'record_season'="$byrbt_season"\
+    'record_filetype'="$byrbt_filetype"\
+    'record_source'="$byrbt_source"\
+    'record_format'="$byrbt_format"\
+    'record_group'="$byrbt_group"\
+    'type'="$byrbt_type"\
+    'small_descr'="$chs_included"\
+    'url'="$imdb_url"\
+    'dburl'="$( [ ! "$imdb_url" ] && echo "$douban_url" || echo 'none')"\
+    'descr'="$byrbt_des"\
+    'uplver'="$anonymous_byrbt"\
+    file@"${torrent_Path}"\
+    "$cookie_byrbt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
-    if [ -z "$t_id" ]; then
-        # 辅种
-        reseed_torrent
-    fi
+  if [[ -z "$t_id" ]]; then
+    # 辅种
+    reseed_torrent
+  fi
 else
-    # 其他 POST
-    :
+  # 其他 POST
+  :
 fi
 }
 
