@@ -92,7 +92,11 @@ qb_get_hash() {
 #---------------------------------------#
 qb_set_ratio_loop() {
   [[ -f "${qb_rt_queue}-1" ]] && {
-    \cat "${qb_rt_queue}-"[0-9]* > "$qb_rt_queue"
+    local tmp f
+    for f in "${qb_rt_queue}-"[0-9]*;do tmp="${tmp}$(< "$f")\n";done
+    printf '%b' "$tmp" > "$qb_rt_queue"
+    unset tmp f
+    #\cat "${qb_rt_queue}-"[0-9]* > "$qb_rt_queue"
     \rm -f "${qb_rt_queue}-"[0-9]* ; }
   if [ -s "$qb_rt_queue" ]; then
     local data qb_lp_counter trker rtio tr_hash

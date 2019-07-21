@@ -15,7 +15,7 @@ my_dupe_rules() {
   local lists _d i _name _one_name _url _site _line
   lists="$ROOT_PATH/tmp/dupe-rules.txt"
   # 过滤后的数据
-  _d="$(cat "$lists"|sed -E 's/[#＃].*//g;s/[ 　]+//g;/^$/d;s/[A-Z]/\l&/g')"
+  _d="$(sed -E 's/[#＃].*//g;s/[ 　]+//g;/^$/d;s/[A-Z]/\l&/g' "$lists")"
   if [[ -f $lists && $(echo "$_d"|wc -l) -ge 1 ]]; then
     for ((i=1;i<=$(echo "$_d"|wc -l);i++)); do
       _name="$(echo "$dot_name"|sed 'y/。，？；：‘“、（）｀～！＠＃％＊ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ/.,?;:\"\",()`~!@#%*abcdefghijklmnopqrstuvwxyz/')"

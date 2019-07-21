@@ -18,11 +18,11 @@ downloadUrl="${post_site[whu]}/download.php?id="
 #-------------------------------------#
 gen_whu_parameter() {
 
-if [ -s "$source_desc" ]; then
-    whu_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_whu/g")
-$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
+if [[ -s "$source_desc" ]]; then
+    whu_des="${descrCom_complex//&ratio_in_desc&/$ratio_whu/}
+$(sed '/&shc_name_douban&/d;/&eng_name_douban&/d' "$source_desc")"
 else
-    whu_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_whu/g")
+    whu_des="${descrCom_complex//&ratio_in_desc&/$ratio_whu/}
 $failed_to_get_des"
 fi
 

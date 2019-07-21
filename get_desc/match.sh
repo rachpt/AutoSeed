@@ -23,7 +23,7 @@ match_douban_imdb() {
       match_list="$ROOT_PATH/tmp/match-lists.txt"
   fi
   # 过滤后的数据
-  _d="$(cat "$match_list"|sed -E 's/[#＃].*//g;s/[ 　]+//g;/^$/d;s/[A-Z]/\l&/g')"
+  _d="$(sed -E 's/[#＃].*//g;s/[ 　]+//g;/^$/d;s/[A-Z]/\l&/g' "$match_list")"
   if [[ -f $match_list && $(echo "$_d"|wc -l) -ge 2 ]]; then
     for ((i=1;i<=$(echo "$_d"|wc -l);i+=2)); do
       let j=i+1
@@ -67,11 +67,11 @@ match_douban_desc() {
       echo -e "\n[quote=转载来源][b]本种来自：[/b] ${source_site_URL}[/quote]" >> "$source_desc"
       # 副标题额外信息
       [[ $extra_subt ]] && {
-      db_name="$(cat "$source_desc"|grep '&shc_name_douban&'| \
-        sed 's/&shc_name_douban&//')"
-      extra_subt="$(echo "$extra_subt"|sed -E \
-          "s/$db_name//;s%^[ /]+%%;s/ +/ /g;s/&quot;//g;s/\[ *\]//g")"
-      sed -i "1c &extra_comment&${extra_subt}" "$source_desc"
+        db_name="$(grep '&shc_name_douban&' "$source_desc")"
+        db_name="${db_name//&shc_name_douban&/}"
+        extra_subt="$(echo "${extra_subt/$db_name/}"|sed -E \
+          "s%^[ /]+%%;s/ +/ /g;s/&quot;//g;s/\[ *\]//g")"
+        sed -i "1c &extra_comment&${extra_subt}" "$source_desc"
       }
       unset source_t_id extra_subt source_site_URL s_site_uid
       unset imdb_url douban_url

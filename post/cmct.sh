@@ -19,10 +19,10 @@ downloadUrl="${post_site[cmct]}/download.php?id="
 gen_cmct_parameter() {
 
 if [ -s "$source_desc" ]; then
-    cmct_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_cmct/g")
-$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
+    cmct_des="${descrCom_simple//&ratio_in_desc&/$ratio_cmct/}
+$(sed '/&shc_name_douban&/d;/&eng_name_douban&/d' "$source_desc")"
 else
-    cmct_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_cmct/g")
+    cmct_des="${descrCom_simple//&ratio_in_desc&/$ratio_cmct/}
 $failed_to_get_des"
 fi
 

@@ -21,7 +21,7 @@ gen_byrbt_parameter() {
 
 if [ -s "$source_html" ]; then
     byrbt_des="$descrCom_complex_html
-    $(cat "$source_html")"
+    $(< "$source_html")"
 else
     byrbt_des="$descrCom_complex_html
     <br /><br /><br /><strong><span style=\"font-size:30px;\">\

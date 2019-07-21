@@ -130,15 +130,15 @@ main_loop() {
 #--------------timeout func--------------#
 time_out() {
     local waitfor=1200    # 单位秒, 1200=20 min
-    local main_pid=$(cat "$lock_File")
+    local main_pid=$(< "$lock_File")
     local user_hz=$(getconf CLK_TCK) #mostly it's 100 on x86/x86_64
-    local start_time=$(cat /proc/$main_pid/stat|cut -d" " -f22)
-    local sys_uptime=$(cat /proc/uptime|cut -d" " -f1)
+    local start_time=$(awk '{print $22}' /proc/$main_pid/stat)
+    local sys_uptime=$(awk '{print $1}' /proc/uptime)
     local run_time=$(( ${sys_uptime%.*} - $start_time/$user_hz ))
     if [[ $main_pid && $run_time -gt $waitfor ]]; then
         # 处理超时
         kill -9 $main_pid
-        \rm -f "$lock_File" "$qb_rt_queue" "$ROOT_PATH/tmp/autoseed-.*"
+        \rm -f "$lock_File" "$qb_rt_queue" "$ROOT_PATH/tmp/autoseed-"*
         debug_func "程序因超时[$run_time]被强制终止！"  #----debug---
     else
         # 重复运行

@@ -19,11 +19,11 @@ downloadUrl="${post_site[nanyangpt]}/download.php?id="
 # 需要的参数
 gen_nanyangpt_parameter() {
 
-if [ -s "$source_desc" ]; then
-nanyangpt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_nanyangpt/g")
-$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
+if [[ -s "$source_desc" ]]; then
+nanyangpt_des="${descrCom_simple//&ratio_in_desc&/$ratio_nanyangpt/}
+$(sed '/&shc_name_douban&/d;/&eng_name_douban&/d' "$source_desc")"
 else
-nanyangpt_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_nanyangpt/g")
+nanyangpt_des="${descrCom_simple//&ratio_in_desc&/$ratio_nanyangpt/}
 $failed_to_get_des"
 fi
 

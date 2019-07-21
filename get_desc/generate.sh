@@ -182,13 +182,14 @@ generate_main_func() {
     from_douban_get_desc
     filt_subt
     # bbcode
+    : "$(< "$source_desc")"
 source_desc_tmp="&extra_comment&${extra_subt}
 &shc_name_douban&${chs_name_douban}
 &eng_name_douban&${eng_name_douban}
 ${gen_desc_bbcode}
 
 [quote=iNFO][font=monospace]
-$([[ -s $source_desc ]] && cat "$source_desc" || echo 'Failed to get mediainfo!')
+$([[ -s $source_desc ]] && echo "$_" || echo 'Failed to get mediainfo!')
 [/font][/quote]
 $(if [ $source_t_id ]; then
     echo -e "\n[quote=转载来源][b]本种来自：[/b] ${source_site_URL}/details.php?id=${source_t_id}[/quote]"
@@ -198,9 +199,10 @@ fi )
 "
 
     # byrbt 所需要的 html 简介
+    : "$(< "$source_html")"
 [[ $enable_byrbt = yes ]] && source_html_tmp="${gen_desc_html}<br /><br /><br />
 <fieldset><legend><span style=\"color:#ffffff;background-color:#000000;\">iNFO</span></legend><font face=\"Courier New\">
-$([[ -s $source_desc ]] && cat "$source_html" || echo 'Failed to get mediainfo!')
+$([[ -s $source_desc ]] && echo "$_" || echo 'Failed to get mediainfo!')
 </font></fieldset><br /><br /><br /><br /><br /><fieldset><legend>
 <span style=\"color:#ffffff;background-color:#000000;\">转载来源</span></legend>
 $(if [ $source_t_id ]; then

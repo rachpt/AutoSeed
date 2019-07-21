@@ -104,11 +104,11 @@ clean_dir() {
     OLD_IFS="$IFS"; IFS=$'\n'
     local line add_to_dir
     add_to_dir=1
-    for line in $(cat "$ROOT_PATH/clean/dir"); do
+    while read -r line; do
        [[ "$one_TR_Dir" == "$line" ]] && {
         add_to_dir=0 # give up add
         break; }
-    done
+    done < "$ROOT_PATH/clean/dir"
     IFS="$OLD_IFS"
     [[ $add_to_dir -eq 1 && $one_TR_Dir ]] && \
       echo "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
@@ -137,11 +137,11 @@ clean_main() {
   [[ $use_qbt = yes ]] && qb_delete_old  # will not delete file
   [[ $use_trs = yes ]] && tr_delete_old  # will not delete file
   [ -s "$ROOT_PATH/clean/dir" ] && \
-  cat "$ROOT_PATH/clean/dir"|while read one_line; do
+  while read -r one_line; do
     FILE_PATH="$one_line"      # no slash end !!!
     comparer_file_and_delete   # make sure new file will not be deleted
     disk_is_over_use           # make sure free space
-  done
+  done < "$ROOT_PATH/clean/dir"
   unset one_line _qb_names _tr_names
   echo "+++++++++++++[clean]+++++++++++++" >> "$log_Path"
 }

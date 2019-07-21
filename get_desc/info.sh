@@ -104,7 +104,7 @@ style=\"width: 64px; height: 22px;\" /> 自动完成的截图，不喜勿看。<
     info_gen_html="$($mediainfo --Output=HTML "$max_size_file"|sed \
     "s%${one_TR_Dir}/%%"|sed '/html>/d;/body>/d;/head>/d;/<META/d')"
   else
-    info_gen_desc="$(\cat "$source_desc")"
+    info_gen_desc="$(< "$source_desc")"
     [[ $enable_byrbt == yes ]] && \
     info_gen_html="$(echo "$info_gen_desc"|sed 's/ /\&nbsp; /g;s!$!&<br />!g')"
   fi

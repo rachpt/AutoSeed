@@ -20,10 +20,10 @@ downloadUrl="${post_site[neu6]}/forum.php?mod=attachment&aid=NTMxNjc3NHw3OTU0OWY
 gen_neu6_parameter() {
 
 if [ -s "$source_desc" ]; then
-neu6_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_neu6/g")
-$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d')"
+neu6_des="${descrCom_simple//&ratio_in_desc&/$ratio_neu6/}
+$(sed '/&shc_name_douban&/d;/&eng_name_douban&/d' "$source_desc")"
 else
-neu6_des="$(echo "$descrCom_simple"|sed "s/&ratio_in_desc&/$ratio_neu6/g")
+neu6_des="${descrCom_simple//&ratio_in_desc&/$ratio_neu6/}
 $failed_to_get_des"
 fi
 

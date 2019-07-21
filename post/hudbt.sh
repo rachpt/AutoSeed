@@ -19,10 +19,10 @@ downloadUrl="${post_site[hudbt]}/download.php?id="
 gen_hudbt_parameter() {
 
 if [ -s "$source_desc" ]; then
-    hudbt_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_hudbt/g")
-$(cat "$source_desc"|sed '/&shc_name_douban&/d;/&eng_name_douban&/d;s/  /　/g')"
+    hudbt_des="${descrCom_complex//&ratio_in_desc&/$ratio_hudbt/}
+$(sed '/&shc_name_douban&/d;/&eng_name_douban&/d;s/  /　/g' "$source_desc")"
 else
-    hudbt_des="$(echo "$descrCom_complex"|sed "s/&ratio_in_desc&/$ratio_hudbt/g")
+    hudbt_des="${descrCom_complex//&ratio_in_desc&/$ratio_hudbt/}
 $failed_to_get_des"
 fi
 

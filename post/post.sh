@@ -82,11 +82,19 @@ reseed_torrent() {
 
 #---------------------------------------#
 unset_tempfiles() {
-    [ ! "$test_func_probe" ] && \
-      \rm -f "$source_desc" "$source_html" "$source_desc2tjupt"
+  [[ -f "${log_Path}-1" ]] && {
+    local tmp f
+    for f in "${log_Path}-"[0-9]*;do tmp="${tmp}$(< "$f")\n";done
+    printf '%b' "$tmp" >> "$log_Path"
+    unset tmp f
+    #\cat "${log_Path}-"[0-9]* >> "$log_Path"
+    \rm -f "${log_Path}-"[0-9]* ; }
+
+  [ ! "$test_func_probe" ] && \
+    \rm -f "$source_desc" "$source_html" "$source_desc2tjupt"
     unset source_desc source_html source_desc2tjupt index
     unset douban_poster_url source_site_URL source_t_id imdb_url douban_url
-    echo "----------[deleted tmp]----------"     >> "$log_Path"
+    echo "----------[deleted tmp]----------"   >> "$log_Path"
 }
 
 #-----import and call functions---------#
@@ -155,10 +163,6 @@ if [ "$enable_tjupt" = 'yes' ]; then
 fi
 #---------------------------------------#
 wait
-[[ -f "${log_Path}-1" ]] && {
-  \cat "${log_Path}-"[0-9]* >> "$log_Path"
-  \rm -f "${log_Path}-"[0-9]* ; }
-
 #---------------unset-------------------#
 
 unset_tempfiles
