@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-07-18
+# Date: 2019-07-22
 #
 #-------------------------------------#
 # 本文件匹配指定文件中的imdb或者豆瓣链接，用于生成简介以及post，
@@ -60,7 +60,7 @@ match_douban_desc() {
       \cp -f "${m_dir%/}/$i" "$source_desc"
       # html 格式
       [[ $enable_byrbt = yes ]] && {
-        sed "s%[img] *%<img src=\"%g;s%[/img]%\"/>%g;s%\$%&<br />%g;/&[_a-z]*&/d" "$source_desc" > "$source_html"
+        sed "s%\[img\] *%<img src=\"%g;s%\[/img\]%\"/>%g;s%\$%&<br />%g;/&[_a-z]*&/d" "$source_desc" > "$source_html"
         echo -e "<br /><fieldset><legend> <span style=\"color:#ffffff;background-color:#000000;\">转载来源</span></legend>
     <span style=\"font-size:20px;\">本种来自： ${source_site_URL}</span> <br /></fieldset><br />" >> "$source_html"
       }
