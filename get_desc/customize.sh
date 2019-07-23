@@ -19,7 +19,7 @@ my_dupe_rules() {
   if [[ -f $lists && $(echo "$_d"|wc -l) -ge 1 ]]; then
     for ((i=1;i<=$(echo "$_d"|wc -l);i++)); do
       _name="$(echo "$dot_name"|sed 'y/。，？；：‘“、（）｀～！＠＃％＊ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ/.,?;:\"\",()`~!@#%*abcdefghijklmnopqrstuvwxyz/')"
-      _name="$(echo "$_name"|sed 's/[\. 　]//g;s/[A-Z]/\l&/g')"
+      _name="$(echo "${_name,,}"|sed 's/[\. 　]//g')"
       _line="$(echo "$_d"|sed -n "${i}{s/[\. 　]//g;p;q}")"
       _one_name="$(echo "$_line"|awk -F '+' '{print $NF}'|sed  "s/[\. 　]//g")"
       _one_name="$(echo "$_one_name"|sed 'y/。，？；：‘“、（）｀～！＠＃％＊ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ/.,?;:\"\",()`~!@#%*abcdefghijklmnopqrstuvwxyz/')"

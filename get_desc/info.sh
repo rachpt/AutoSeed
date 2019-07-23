@@ -22,10 +22,10 @@ gen_thumbnail_with_ffmpeg() {
   ratio="$($mediainfo "$file" --Output="Video;%FrameRate%")"
   total="$($mediainfo "$file" --Output="Video;%FrameCount%")"
   # 首末去掉 1500 帧，等分
-  step=$(echo "($total - 3000)/(($row * $column) * $ratio)"|bc)
+  step=$(bc <<< "($total - 3000)/(($row * $column) * $ratio)")
   for ((i=1;i<=(row * column);i++)); do
     # 多线程
-    ( $ffmpeg -ss "$(echo "(1500/$ratio)+($step * $i)"|bc)" -i "$file" -vframes 1 \
+    ( $ffmpeg -ss "$(bc <<< "(1500/$ratio)+($step * $i)")" -i "$file" -vframes 1 \
     -vf "scale=$size:-1" "${ROOT_PATH}/tmp/thumbnail-$(printf "%03d" $i).jpg" -y 2>/dev/null ) &
   done
   wait # 等待所有 截图完成
@@ -53,10 +53,10 @@ gen_thumbnail_with_mtn() {
     -F FFFF00:18:"$_font":ff0000:000000:24 -o '-autoseed.jpg' -f "$_font" \
     "$_file" -O "${ROOT_PATH}/tmp"
   [[ $? -eq 0 ]] && {
-    screen_file="$(ls -1 "${ROOT_PATH}/tmp/"*-autoseed.jpg)"
-    [[ "$(echo "$screen_file"|wc -l)" -gt 1 ]] && \
+    screen_file="$(Listf "${ROOT_PATH}/tmp" '-autoseed.jpg')"
+    [[ "$(count "${ROOT_PATH}/tmp/"*-autoseed.jpg)" -gt 1 ]] && \
       debug_func "info-mtn-生成了多张!!但是只会使用一张"
-    screen_file="$(echo "$screen_file"|head -1)" # 取第一张
+    screen_file="${screen_file/$'\n'*}" # 取第一张
     # 文件名包含特殊字符
     [[ $screen_file =~ ^[-/0-9a-zA-Z\._]+$ ]] || {
       local screen_file_old="$screen_file" # 临时旧文件名
@@ -125,14 +125,15 @@ style=\"width: 64px; height: 22px;\" /> 自动完成的截图，不喜勿看。<
 
   # 存档
   [[ "$img_url_com" ]] && \
-    echo -e "${info_gen_desc}\n\n${_ext_desc}\n${max_size_file##*/}
-[img]$img_url_com[/img]" > "$source_desc"
+    printf '%s\n\n%s\n%s\n%s\n' "${info_gen_desc}" "${_ext_desc}" \
+      "${max_size_file##*/}" "[img]$img_url_com[/img]" > "$source_desc"
   # byrbt desc to html
   [[ $enable_byrbt == yes ]] && { \
     [[ "$info_gen_html" ]] && {
-    echo -e "${info_gen_html}\n${_ext_html}\n<br />${max_size_file##*/}<br />\n \
-  <img src=\"$img_url_byr\" style=\"width: 900px;\" /><br />" > "$source_html" 
-    } || { echo "$info_gen_html" > "$source_html"; }; }
+    printf '%s\n\n%s\n%s\n%s\n' "${info_gen_html}" "${_ext_html}" \
+    "<br />${max_size_file##*/}<br />" \
+    "<img src=\"$img_url_byr\" style=\"width: 900px;\" /><br />" > "$source_html" 
+    } || { printf '%s\n' "$info_gen_html" > "$source_html"; }; }
   unset img_url_com img_url_byr screen_file # clean
 }
 
@@ -160,7 +161,7 @@ read_info_file() {
       if [[ $nfo_file_downloaded ]]; then
         local judge_download_nfo judge_nfo_file charset
         judge_download_nfo=$((nfo_file_downloaded/100)) # $(())中变量可以不要$
-        judge_nfo_file=$(echo "$nfo_file_size * 10"|bc|awk -F '.' '{print $1}')
+        judge_nfo_file=$(bc <<< "$nfo_file_size * 10"|awk -F '.' '{print $1}')
         if [ "$judge_download_nfo" -eq  "$judge_nfo_file" ]; then
           charset="$(file -i "$nfo_file_path"|sed 's/.*charset=//')" 
           [[ ! $charset ]] && charset='iso-8859-1'

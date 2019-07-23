@@ -39,9 +39,9 @@ is_old_file() {
   file_modf=$(stat -c '%Y' "$FILE_PATH/$1")
   time_interval=$(($(date '+%s') - ${file_modf:-0}))
   if [[ $time_interval -ge ${TimeINTERVAL:-7200} ]]; then
-      echo 1  # yes
+      printf 1  # yes
   else
-      echo 0  # no
+      printf 0  # no
   fi
 }
 #-----------------------------#
@@ -63,7 +63,7 @@ comparer_file_and_delete() {
        if [[ $delete_commit = yes ]]; then
          debug_func "clean:del-file:[$f]"  #----debug---
          [[ "$f" && -e "$FILE_PATH/$f" && ! $test_c ]] && \rm -rf "$FILE_PATH/$f"
-         echo "[$(date '+%m-%d %H:%M:%S')]deleted Torrent[$f]" >> "$log_Path"
+         printf '%s\n' "[$(date '+%m-%d %H:%M:%S')]deleted Torrent[$f]" >> "$log_Path"
        fi
     fi
   done
@@ -73,7 +73,7 @@ comparer_file_and_delete() {
 # judge function, return a value
 disk_check() {
   disk_avail=$(\df -h "$FILE_PATH"|awk '/^\//{split($4,a,"G");print a[1]}')
-  disk_over=$(echo "${disk_avail:-0} < ${DISK_AVAIL_MIN:-0}"|bc)  # var default 0
+  disk_over=$(bc <<< "${disk_avail:-0} < ${DISK_AVAIL_MIN:-0}")  # var default 0
   # bc true = 1, false = 0
 }
 #-----------------------------#
@@ -99,9 +99,8 @@ disk_is_over_use() {
 clean_dir() {
   if [ ! -s "$ROOT_PATH/clean/dir" ]; then
     # add to the first line
-    [[ "$one_TR_Dir" ]] && echo "$one_TR_Dir" > "$ROOT_PATH/clean/dir"
+    [[ "$one_TR_Dir" ]] && printf '%s\n' "$one_TR_Dir" > "$ROOT_PATH/clean/dir"
   else
-    OLD_IFS="$IFS"; IFS=$'\n'
     local line add_to_dir
     add_to_dir=1
     while read -r line; do
@@ -109,9 +108,8 @@ clean_dir() {
         add_to_dir=0 # give up add
         break; }
     done < "$ROOT_PATH/clean/dir"
-    IFS="$OLD_IFS"
     [[ $add_to_dir -eq 1 && $one_TR_Dir ]] && \
-      echo "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
+      printf '%s\n' "$one_TR_Dir" >> "$ROOT_PATH/clean/dir"
   fi
   unset line add_to_dir
 }
@@ -143,7 +141,7 @@ clean_main() {
     disk_is_over_use           # make sure free space
   done < "$ROOT_PATH/clean/dir"
   unset one_line _qb_names _tr_names
-  echo "+++++++++++++[clean]+++++++++++++" >> "$log_Path"
+  printf '%s\n' "+++++++++++++[clean]+++++++++++++" >> "$log_Path"
 }
 
 #---------call func-----------#

@@ -83,15 +83,32 @@ get_source_site() {
 set_source_site_cookie() {
     # 供二次编辑简介使用
     if [[ $source_site_URL = ${post_site[hds]} ]]; then
+        s_site_uid='hds'
         cookie_source_site="$cookie_hds"
     elif [[ $source_site_URL = ${post_site[ttg]} ]]; then
+        s_site_uid='ttg'
         cookie_source_site="$cookie_ttg"
     elif [[ $source_site_URL = ${post_site[hdc]} ]]; then
+        s_site_uid='hdc'
         cookie_source_site="$cookie_hdc"
     elif [[ $source_site_URL = ${post_site[mt]} ]]; then
+        s_site_uid='mt'
         cookie_source_site="$cookie_mt"
     elif [[ $source_site_URL = ${post_site[cmct]} ]]; then
+        s_site_uid='cmct'
         cookie_source_site="$cookie_cmct"
+    elif [[ $source_site_URL = ${post_site[byrbt]} ]]; then
+        s_site_uid='byrbt'
+        cookie_source_site="$cookie_byrbt"
+    elif [[ $source_site_URL = ${post_site[npupt]} ]]; then
+        s_site_uid='npupt'
+        cookie_source_site="$cookie_npupt"
+    elif [[ $source_site_URL = ${post_site[nanyangpt]} ]]; then
+        s_site_uid='nanyangpt'
+        cookie_source_site="$cookie_nanyangpt"
+    elif [[ $source_site_URL = ${post_site[tjupt]} ]]; then
+        s_site_uid='tjupt'
+        cookie_source_site="$cookie_tjupt"
     fi
 }
 

@@ -20,10 +20,10 @@ downloadUrl="${post_site[npupt]}/download.php?id="
 gen_npupt_parameter() {
 
 if [ -s "$source_desc" ]; then
-npupt_des="${descrCom_simple//&ratio_in_desc&/$ratio_npupt/}
+npupt_des="${descrCom_simple//&ratio_in_desc&/$ratio_npupt}
 $(sed '/&shc_name_douban&/d;/&eng_name_douban&/d' "$source_desc")"
 else
-npupt_des="${descrCom_simple//&ratio_in_desc&/$ratio_npupt/}
+npupt_des="${descrCom_simple//&ratio_in_desc&/$ratio_npupt}
 $failed_to_get_des"
 fi
 

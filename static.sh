@@ -33,7 +33,7 @@ ffmpeg='ffmpeg'
 #---path of mtn---#
 mtn='mtn'
 #---path of dottorrent---#
-dottorrent='dottorrent' # example /home/rachpt/.local/bin/dottorrent
+dottorrent='/home/rachpt/.local/bin/dottorrent'
 #---
 user_agent='User-Agent:Mozilla/5.0(X11;Linux x86_64;rv:63.0)Gecko/20100101 Firefox/63.0'
 #--------------------------------------#
@@ -275,5 +275,8 @@ is_tracker_down() {
   done
   unset _site
 }
+#-------------------------------------#
+count(){ [[ -f $1 ]] && printf '%s' "$#"|| printf 0; }
+Listf(){ local i;for i in "${1%/}/"*"$2";do [[ -f $i ]] && printf '%s\n' "$i";done; }
 #-------------------------------------#
 

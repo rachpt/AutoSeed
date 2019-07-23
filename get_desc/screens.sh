@@ -42,7 +42,7 @@ deal_with_images() {
   fi
   
   # 遍历 html 简介中的非法图片
-  local img_url img_url_d img_file img_url_byr img_url_com
+  local img_url img_url_d img_file img_url_byr img_url_com _ext
   local _counter=0
   while true; do
     if [ "$enable_byrbt" = 'yes' ]; then
@@ -57,8 +57,7 @@ deal_with_images() {
     fi
     # ttg img use https url
     [[ $img_url =~ .*tu\.totheglory\.im.* ]] && \
-      img_url_d="$(echo "$img_url"|sed 's%http:%https:%')" || \
-      img_url_d="$img_url"
+      img_url_d="${img_url/http:/https:/}" || img_url_d="$img_url"
     debug_func "screens-loop[$_counter]"  #----debug---
     # 跳出循环条件
     if [ ! "$img_url" ]; then
@@ -69,11 +68,12 @@ deal_with_images() {
         break # jump out
     fi
     # 临时图片路径，使用时间作为文件名的一部分
-    img_file="$ROOT_PATH/tmp/autoseed-pic-$(date '+%s%N')$(echo "${img_url##*/}"| \
-        sed -r 's/.*(\.[jpgb][pnim]e?[gfp]).*/\1/i')"
+    _ext="${img_url//"${img_url%.*}"}"
+    img_file="${ROOT_PATH}/tmp/autoseed-pic-$(date '+%s%N')${_ext%%[%&=@]*}"
     http --verify=no --timeout=25 --ignore-stdin -o "$img_file" -d "$img_url_d" "$user_agent"
-    [[ ! -s $img_file ]] && \
-    curl -k -o "$img_file" "$img_url_d" && debug_func 'screens_img:use-curl-download'
+    [[ ! -s $img_file ]] && {
+        curl -k -o "$img_file" "$img_url_d"
+        debug_func 'screens_img:use-curl-download'; }
     [[ -s $img_file ]] && debug_func 'screens_img:downloaded' || \
       debug_func 'screens_img:failed-to-dl'  #----debug---
 
@@ -82,10 +82,10 @@ deal_with_images() {
       [[ $img_url_byr ]] && sed -i "s!$img_url!$img_url_byr!g" "$source_html" && \
       debug_func "screens-byr[$img_url_byr]"
     # tjupt image
-    [[ $enable_tjupt = yes ]] && [ ! "$(echo "$img_url"| \
-      grep "i\.loli\.net")" ] && upload_image_com "$img_file" && \
-      [[ $img_url_com ]] && sed -i "s!$img_url!$img_url_com!g" \
-      "$source_desc2tjupt" && debug_func "screens-byr[$img_url_com]"
+    [[ $enable_tjupt = yes ]] && [[ ! "$img_url" =~ *i.loli.net* ]] && \
+      upload_image_com "$img_file" && [[ $img_url_com ]] && \
+      sed -i "s!$img_url!$img_url_com!g" "$source_desc2tjupt" && \
+      debug_func "screens-byr[$img_url_com]"
 
     [[ $enable_byrbt = yes && $img_url_byr ]] && \rm -f "$img_file"
     #[[ $enable_tjupt = yes && $img_url_com ]] && \rm -f "$img_file"

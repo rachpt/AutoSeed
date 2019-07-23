@@ -61,10 +61,10 @@ match_douban_desc() {
       # html 格式
       [[ $enable_byrbt = yes ]] && {
         sed "s%\[img\] *%<img src=\"%g;s%\[/img\]%\"/>%g;s%\$%&<br />%g;/&[_a-z]*&/d" "$source_desc" > "$source_html"
-        echo -e "<br /><fieldset><legend> <span style=\"color:#ffffff;background-color:#000000;\">转载来源</span></legend>
+        printf '\n%s\n' "<br /><fieldset><legend> <span style=\"color:#ffffff;background-color:#000000;\">转载来源</span></legend>
     <span style=\"font-size:20px;\">本种来自： ${source_site_URL}</span> <br /></fieldset><br />" >> "$source_html"
       }
-      echo -e "\n[quote=转载来源][b]本种来自：[/b] ${source_site_URL}[/quote]" >> "$source_desc"
+      printf '\n%s\n' "[quote=转载来源][b]本种来自：[/b] ${source_site_URL}[/quote]" >> "$source_desc"
       # 副标题额外信息
       [[ $extra_subt ]] && {
         db_name="$(grep '&shc_name_douban&' "$source_desc")"

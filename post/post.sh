@@ -18,67 +18,72 @@ source "$ROOT_PATH/get_desc/desc.sh"    # get source site
     source "$ROOT_PATH/get_desc/match.sh"
 #---------------------------------------#
 judge_before_upload() {
-    up_status='yes'    # judge code
-    #---judge to get away from dupe---#
-    #[ "$postUrl" = "${post_site[whu]}/takeupload.php" ] && \
-        #judge_torrent_func # $ROOT_PATH/post/judge.sh
-    [ "$postUrl" = "${post_site[nanyangpt]}/takeupload.php" ] && \
-        judge_torrent_func # $ROOT_PATH/post/judge.sh
-    #---necessary judge---# 
-    if [ "$(grep -E '禁止转载|禁转|独占资源' "$source_desc")" ]; then
-        up_status='no'  # give up upload
-        echo "禁转禁发资源"                      >> "${log_Path}-$index"
-    elif [[ "$(grep -E '.类.*别.*情色' "$source_desc")" ]]; then
-        up_status='no'  # give up upload
-        echo "情色电影。--"                      >> "${log_Path}-$index"
-    fi
+  up_status='yes'    # judge code
+  #---judge to get away from dupe---#
+  #[ "$postUrl" = "${post_site[whu]}/takeupload.php" ] && \
+      #judge_torrent_func # $ROOT_PATH/post/judge.sh
+  [ "$postUrl" = "${post_site[nanyangpt]}/takeupload.php" ] && \
+      judge_torrent_func # $ROOT_PATH/post/judge.sh
+  #---necessary judge---#
+  if [ "$(grep -Em1 '禁止转载|禁转|独占资源' "$source_desc")" ]; then
+      up_status='no'  # give up upload
+      printf '%b' "禁转禁发资源\n"             >> "${log_Path}-$index"
+  elif [[ "$(grep -Em1 '.类.*别.*情色' "$source_desc")" ]]; then
+      up_status='no'  # give up upload
+      printf '%b' "情色电影。--\n"             >> "${log_Path}-$index"
+  fi
 
-    unset t_id        # set t_id to none
-    #---post---#
-    if [[ $up_status = yes ]]; then
-        #---log---#
-        echo "-----------[post data]-----------" >> "${log_Path}-$index"
-        echo "name=${dot_name}"                  >> "${log_Path}-$index"
-        echo "small_descr=${chinese_title}"      >> "${log_Path}-$index"
-        echo "imdburl=${imdb_url}"               >> "${log_Path}-$index"
-        echo "uplver=${anonymous}"               >> "${log_Path}-$index"
-        echo "${postUrl%/*}"                     >> "${log_Path}-$index"
-    fi
+  unset t_id        # set t_id to none
+  #---post---#
+  if [[ $up_status = yes ]]; then
+    #---log---#
+    printf '%s\n' "-----------[post data]-----------" >> "${log_Path}-$index"
+    printf '%s\n' "name=${dot_name}"                  >> "${log_Path}-$index"
+    printf '%s\n' "small_descr=${chinese_title}"      >> "${log_Path}-$index"
+    printf '%s\n' "imdburl=${imdb_url}"               >> "${log_Path}-$index"
+    printf '%s\n' "uplver=${anonymous}"               >> "${log_Path}-$index"
+    printf '%s\n' "${postUrl%/*}"                     >> "${log_Path}-$index"
+  fi
 }
 
 add_t_id_2_client() {        
-    #---if get t_id then add it to tr---#
-    t_id="${t_id/$'\n'*/}"  # use first line
-    [[ $up_status = yes ]] && if [[ -z $t_id ]]; then
-        echo '=!==!=[failed to get tID]==!==!==' >> "${log_Path}-$index"
-    else
-        echo "t_id: [$t_id]"                     >> "${log_Path}-$index"
-        #---add torrent---#
-        torrent2add="${downloadUrl}${t_id}&passkey=${passkey}"
-        source "$ROOT_PATH/post/add.sh"
-    fi
-    unset t_id torrent2add
+  #---if get t_id then add it to tr---#
+  t_id="${t_id/$'\n'*/}"  # use first line
+  [[ $up_status = yes ]] && if [[ -z $t_id ]]; then
+    printf '%s\n' '=!==!=[failed to get tID]==!==!==' >> "${log_Path}-$index"
+  else
+    printf '%s\n' "t_id: [$t_id]"                     >> "${log_Path}-$index"
+    #---add torrent---#
+    torrent2add="${downloadUrl}${t_id}&passkey=${passkey}"
+    source "$ROOT_PATH/post/add.sh"
+  fi
+  unset t_id torrent2add
 }
 #---------------------------------------#
 # 用于辅种
 reseed_torrent() {
   local result name
+  shopt -s extglob  # 开启扩展匹配
   # 分辨率
-  name="$(echo "$dot_name"|sed -E 's/(1080[pi]|720p|4k|2160p).*//i')"
+  name="${dot_name//*(1080[PpIi]|720[Pp]|4[Kk]|2160[Pp])}"
+  name="${name,,}"  # 小写
   # 介质
-  name="$(echo "$name"|sed -E 's/(hdtv|blu-?ray|web-?dl|bdrip|dvdrip|webrip).*//i')"
+  name="${name//*(hdtv|blu?(-)ray|web?(-)dl|bdrip|dvdrip|webrip)}"
   # 删除季数
-  name="$(echo "$name"|sed -E 's/[ \.]s([012]?[1-9])(ep?[0-9]+)?[ \.].*//i')"
-  name="$(echo "$name"|sed -E 's/[ \.]ep?[0-9]{1,2}(-e?p?[0-9]{1,2})?[ \.].*//i')"
+  name="${name//*([ \.]s(?[012][1-9])?(e?p+[0-9])[ \.]*)}"
+  name="${name//*([ \.]e?p[0-9]?[0-9]?(-?e?p[0-9]?[0-9])[ \.]*)}"
+  #name="$(echo "$name"|sed -E 's/[ \.]ep?[0-9]{1,2}(-e?p?[0-9]{1,2})?[ \.].*//i')"
   # 删除合集
-  name="$(echo "$name"|sed -E 's/[ \.]Complete[\. ].*//i')"
+  name="${name//[ \.][Cc]omplete[\. ].*/}"
   result="$(http --verify=no --ignore-stdin -b --timeout=25 GET "${postUrl%/*}/torrents.php?search=${name}&incldead=1" "$cookie" "$user_agent")"
-  t_id=$(echo "$result"|grep "$dot_name"|grep -Eoi '[^a-z]details\.php\?id=[0-9]+'|head -1|grep -Eo '[0-9]+')
+  t_id=$(printf '%s' "$result"|grep "$dot_name"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')
   [[ ! $t_id ]] && {
   result="$(http --verify=no --ignore-stdin -b --timeout=25 GET "${postUrl%/*}/torrents.php?search=${dot_name}&incldead=1" "$cookie" "$user_agent")"
-  t_id=$(echo "$result"|grep "$dot_name"|grep -Eoi '[^a-z]details\.php\?id=[0-9]+'|head -1|grep -Eo '[0-9]+')
+  t_id=$(printf '%s' "$result"|grep "$dot_name"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')
   }
+  t_id="${t_id/$'\n'*/}"  # use first line
   debug_func "post:reseed-get[$t_id]"  #----debug---
+  shopt -u extglob  # 关闭扩展匹配
 }
 
 #---------------------------------------#

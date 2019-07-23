@@ -38,11 +38,11 @@ test_func() {
 #
 debug_func() {
     # set true to debug, false to close
-    #if true; then
-    if false; then
+    if true; then
+    #if false; then
       # 减少 debug 记录大量重复无用信息
       if [[ ${completion:-100} -ge 92 ]]; then
-        echo -e "[$(date '+%m-%d %H:%M:%S')]：$*" >> "$debug_Log"
+        printf '%b\n' "[$(date '+%m-%d %H:%M:%S')]：$*" >> "$debug_Log"
       fi
     fi
 }
