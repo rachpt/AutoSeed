@@ -146,7 +146,7 @@ t_id="$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl
   'standard_sel'="$hudbt_stardand"\
   'uplver'="$anonymous_hudbt"\
   file@"${torrent_Path}"\
-  "$cookie_hudbt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
+  "$cookie_hudbt"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
 if [[ -z "$t_id" ]]; then
   # 辅种
@@ -159,7 +159,7 @@ if [[ -z "$t_id" ]]; then
     standard_sel="$hudbt_stardand"\
     uplver="$anonymous_hudbt"\
     file@"${torrent_Path}"\
-    "$cookie_hudbt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
+    "$cookie_hudbt"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 fi
 }
 

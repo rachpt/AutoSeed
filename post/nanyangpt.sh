@@ -79,7 +79,7 @@ if [[ "$nanyangpt_type" == '401' ]]; then
     'type'="$nanyangpt_type"\
     'uplver'="$anonymous_nanyangpt"\
     file@"${torrent_Path}"\
-    "$cookie_nanyangpt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
+    "$cookie_nanyangpt"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
   if [[ -z "$t_id" ]]; then
     # 辅种
@@ -97,7 +97,7 @@ elif [[ "$nanyangpt_type" == '402' ]]; then
     'type'="$nanyangpt_type"\
     'uplver'="$anonymous_nanyangpt"\
     file@"${torrent_Path}"\
-    "$cookie_nanyangpt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
+    "$cookie_nanyangpt"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
   if [[ -z "$t_id" ]]; then
     # 辅种
@@ -116,7 +116,7 @@ elif [[ "$nanyangpt_type" == '406' ]]; then
     'type'="$nanyangpt_type"\
     'uplver'="$anonymous_nanyangpt"\
     file@"${torrent_Path}"\
-    "$cookie_nanyangpt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
+    "$cookie_nanyangpt"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
   if [[ -z "$t_id" ]]; then
     # 辅种

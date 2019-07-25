@@ -96,7 +96,7 @@ t_id="$(http --verify=no --ignore-stdin --print=h -f  POST "$postUrl"\
     'specialextra'="torrent"\
     'special'="127"\
     torrent@"${torrent_Path}"\
-    "$cookie_neu6"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
+    "$cookie_neu6"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
     if [[ -z "$t_id" ]]; then
         # 辅种

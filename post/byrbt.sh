@@ -166,7 +166,7 @@ t_id="$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl
     'movie_country'="$region"\
     'uplver'="$anonymous_byrbt"\
     file@"${torrent_Path}"\
-    "$cookie_byrbt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
+    "$cookie_byrbt"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
   if [[ -z "$t_id" ]]; then
     # 辅种
@@ -190,7 +190,7 @@ t_id="$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl
     'movie_type'="$genre"\
     'uplver'="$anonymous_byrbt"\
     file@"${torrent_Path}"\
-    "$cookie_byrbt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
+    "$cookie_byrbt"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
   if [[ -z "$t_id" ]]; then
     # 辅种
     reseed_torrent
@@ -215,7 +215,7 @@ t_id="$(http --verify=no --ignore-stdin -f --print=h --timeout=10 POST "$postUrl
     'descr'="$byrbt_des"\
     'uplver'="$anonymous_byrbt"\
     file@"${torrent_Path}"\
-    "$cookie_byrbt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
+    "$cookie_byrbt"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
   if [[ -z "$t_id" ]]; then
     # 辅种

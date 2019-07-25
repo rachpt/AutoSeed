@@ -76,10 +76,10 @@ reseed_torrent() {
   # 删除合集
   name="${name//[ \.][Cc]omplete[\. ].*/}"
   result="$(http --verify=no --ignore-stdin -b --timeout=25 GET "${postUrl%/*}/torrents.php?search=${name}&incldead=1" "$cookie" "$user_agent")"
-  t_id=$(printf '%s' "$result"|grep "$dot_name"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')
+  t_id=$(printf '%s' "$result"|grep "$dot_name"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')
   [[ ! $t_id ]] && {
   result="$(http --verify=no --ignore-stdin -b --timeout=25 GET "${postUrl%/*}/torrents.php?search=${dot_name}&incldead=1" "$cookie" "$user_agent")"
-  t_id=$(printf '%s' "$result"|grep "$dot_name"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')
+  t_id=$(printf '%s' "$result"|grep "$dot_name"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')
   }
   t_id="${t_id/$'\n'*/}"  # use first line
   debug_func "post:reseed-get[$t_id]"  #----debug---

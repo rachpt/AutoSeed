@@ -90,7 +90,7 @@ t_id="$(http --verify=no --ignore-stdin --print=h -f  POST "$postUrl"\
     'source_sel'="$npupt_source"\
     'uplver'="$anonymous_npupt"\
     file@"${torrent_Path}"\
-    "$cookie_npupt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
+    "$cookie_npupt"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
     if [[ -z "$t_id" ]]; then
         # 辅种

@@ -109,7 +109,7 @@ t_id="$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
     'team_sel'="$tjupt_team"\
     'uplver'="$anonymous_tjupt"\
     file@"${torrent_Path}"\
-    "$cookie_tjupt"|grep -om1 '/detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
+    "$cookie_tjupt"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
 if [[ -z "$t_id" ]]; then
     # 辅种
