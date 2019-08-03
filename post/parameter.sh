@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-20
+# Date: 2019-08-03
 #
 #-------------------------------------#
 # 通过之前生成的 desc 简介文档，提取其中的各种参数。
@@ -59,10 +59,13 @@ from_desc_get_param() {
       # 剧集季度
       season="$(echo "$dot_name"|grep -Eio '[ \.]s0?(10|20|[1-9]+).?(ep?[0-9]+)?[ \.]'| \
           sed 's/[a-z]/\u&/g;s/\.//g')"
-      #[[ $(echo "$season"|awk '{print length($0)}') -gt 8 ]] && \
       [[ $season ]] || \
       season="$(echo "$dot_name"|grep -Eio '[ \.]ep?[0-9]{1,3}-?(e?p?[0-9]{1,3})?[\. ]'| \
           sed 's/[a-z]/\u&/g;s/\.//g')"
+      # 使用原简介中的集数信息
+      [[ $season ]] || {
+        season="$(grep -Eiom1 'Ep?[0-9]{1,2}(-Ep?[0-9]{1,2})?' "$source_desc")"
+        season="${season/$'\n'*/}"; }
   else
       normal='yes'
   fi
