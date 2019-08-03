@@ -264,10 +264,12 @@ form_source_site_get_Desc() {
 
     else
       extra_subt="$(grep -E "副标题" "$source_full"|sed -E 's/.*">//;s%</.*>%%g;s/\[//g;s/\]//g')"
-      _ep="$(grep -Eiom1 'Ep?[0-9]{1,2}(-Ep?[0-9]{1,2})?' "$source_full")"
+      _ep="$(grep -Eiom1 '[^a-z0-9]Ep?[0-9]{1,2}(-Ep?[0-9]{1,2})?' "$source_full")"
       [[ "$_ep" && "$extra_subt" ]] && {
         _ep="${_ep/$'\n'*/}"  # 取第一行， 替代 head -1
-        extra_subt="${extra_subt} | 集数: $_ep"; }
+        shopt -s extglob
+        extra_subt="${extra_subt} | 集数: ${_ep/?([^a-zA-Z0-9])}"
+        shopt -u extglob; }
 
     fi
     # 裁剪简介获取 iNFO 以及 screens
