@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-07-14
+# Date: 2019-08-03
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -226,7 +226,7 @@ form_source_site_get_Desc() {
     [ "$(grep -E '禁止转载|禁转资源|谢绝转发|独占资源|禁转资源|No forward anywhere' "$source_full")" ] && local forbid='yes'
 
     # 匹配官方组 简介中的 info 以及 screens 所在行号
-    local start_line end_line middle_line # extra_subt 原种副标题，非局域变量
+    local start_line end_line middle_line _ep ## extra_subt 原种副标题，非局域变量
     if [[ "$source_site_URL" = "${post_site[hds]}" ]]; then
       extra_subt="$(grep '&passkey=' "$source_full"|sed -E 's/.*">//;s%</.*>%%g')"
       start_line=$(sed -n '/影片参数/=' "$source_full"|head -1)
@@ -264,6 +264,10 @@ form_source_site_get_Desc() {
 
     else
       extra_subt="$(grep -E "副标题" "$source_full"|sed -E 's/.*">//;s%</.*>%%g;s/\[//g;s/\]//g')"
+      _ep="$(grep -Eiom1 'Ep?[0-9]{1,2}(-Ep?[0-9]{1,2})?' "$source_full")"
+      [[ "$_ep" && "$extra_subt" ]] && {
+        _ep="${_ep/$'\n'*/}"  # 取第一行， 替代 head -1
+        extra_subt="${extra_subt} | 集数: $_ep"; }
 
     fi
     # 裁剪简介获取 iNFO 以及 screens
