@@ -200,7 +200,7 @@ fi )
 
     # byrbt 所需要的 html 简介
     : "$(< "$source_html")"
-[[ $enable_byrbt = yes ]] && source_html_tmp="${gen_desc_html}<br /><br /><br />
+[[ $enable_byrbt = yes ]] && source_html_tmp="${gen_desc_html}<br />
 <fieldset><legend><span style=\"color:#ffffff;background-color:#000000;\">iNFO</span></legend><font face=\"Courier New\">
 $([[ -s $source_desc ]] && echo "$_" || echo 'Failed to get mediainfo!')
 </font></fieldset><br /><br /><br /><br /><br /><fieldset><legend>
