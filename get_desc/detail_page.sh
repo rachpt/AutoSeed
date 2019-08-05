@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-08-03
+# Date: 2019-08-05
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -264,15 +264,20 @@ form_source_site_get_Desc() {
 
     else
       extra_subt="$(grep -E "副标题" "$source_full"|sed -E 's/.*">//;s%</.*>%%g;s/\[//g;s/\]//g')"
-      _ep="$(grep -Eiom1 '[^a-z0-9]Ep?[0-9]{1,2}(-Ep?[0-9]{1,2})?' "$source_full")"
+      _ep="$(grep -Eiom1 '[^a-z]Ep?[0-9]{1,2}(-Ep?[0-9]{1,2})?' "$source_full")"
       [[ "$_ep" && "$extra_subt" ]] && {
         _ep="${_ep/$'\n'*/}"  # 取第一行， 替代 head -1
         shopt -s extglob
         extra_subt="${extra_subt} | 集数: ${_ep/?([^a-zA-Z0-9])}"
         shopt -u extglob; }
+      # tjupt origin info
+      [[ "$source_site_URL" = "${post_site[tjupt]}" ]] && {
+      start_line="$(sed -n  '\%<div class="codetop">代码</div>%=' "$source_full")"
+      end_line="$(sed -n  '\%</div></td></tr>$%=' "$source_full")"; }
 
     fi
     # 裁剪简介获取 iNFO 以及 screens
+    start_line=${start_line/$'\n'*}; end_line=${end_line/$'\n'*}  # 替代 head -1
     if [[ $start_line && $end_line && $start_line -lt $end_line ]]; then
       sed -n "${start_line},${end_line}p" "$source_full" > "$source_desc"
     else

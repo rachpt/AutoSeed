@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-08-03
+# Date: 2019-08-05
 #
 #-------------------------------------#
 # 通过之前生成的 desc 简介文档，提取其中的各种参数。
@@ -62,10 +62,17 @@ from_desc_get_param() {
       [[ $season ]] || \
       season="$(echo "$dot_name"|grep -Eio '[ \.]ep?[0-9]{1,3}-?(e?p?[0-9]{1,3})?[\. ]'| \
           sed 's/[a-z]/\u&/g;s/\.//g')"
-      # 使用原简介中的集数信息
+      # 文件名没有集数信息，使用原简介中的集数信息
       [[ $season ]] || {
         season="$(grep -Eiom1 'Ep?[0-9]{1,2}(-Ep?[0-9]{1,2})?' "$source_desc")"
-        season="${season/$'\n'*/}"; }
+        season="${season/$'\n'*/}"
+        # 对于没有 Complete 标记的补上 集数 信息
+        [[ $season && ! $dot_name =~ .*[cC][oO][mM][pP][lL][eE][tT][eE].* ]] && {
+           dot_name="${dot_name/2160/$season.2160}"
+           dot_name="${dot_name/1080/$season.1080}"
+           dot_name="${dot_name/720/$season.720}"
+           dot_name="${dot_name/4[kK]/$season.4K}"; }
+      }
   else
       normal='yes'
   fi
