@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-07-13
+# Date: 2019-08-04
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -45,11 +45,12 @@ gen_thumbnail_with_mtn() {
   _file="$max_size_file" # 截图文件，可以是路径
   _font="${ROOT_PATH}/get_desc/font/cyberbit.ttf" # 字体文件，兼顾中英文
   _inf="Powered by rachpt/Autoseed (https://github.com/rachpt/AutoSeed)"
-  # 参数说明： -B 180 跳过开头3min，-D 12 边缘检测，-b 0.8 全黑最大80%
+  # 参数说明： -g 8小图间隔8pix，--shadow=3阴影3pix，-H文件大小友好显示
+  #   -B 180 跳过开头3min，-D 12 边缘检测，-b 0.8 全黑最大80%
   #   -T 自定义文字，-w 图片宽度，-c column -r row -k 背景色 -L info和时间位置
   #   -F info和时间戳字体和大小等，-o 后缀名 -f info字体 -O 输出路径dir
   # 详细：http://moviethumbnail.sourceforge.net/usage.en.html
-  $mtn -B 180 -D 12 -b 0.8 -T "$_inf" -w 1600 -c 3 -r 4 -k 000000 -L 4:2 \
+  $mtn -g 8 --shadow=3 -H -B 180 -D 12 -b 0.8 -T "$_inf" -w 1600 -c 3 -r 4 -k 000000 -L 4:2 \
     -F FFFF00:18:"$_font":ff0000:000000:24 -o '-autoseed.jpg' -f "$_font" \
     "$_file" -O "${ROOT_PATH}/tmp"
   [[ $? -eq 0 ]] && {
