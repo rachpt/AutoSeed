@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-08-05
+# Date: 2019-08-17
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -18,11 +18,6 @@ no_source_2_source() {
        source_site_URL="${post_site[byrbt]}"
        enable_byrbt='no'
        s_site_uid='byrbt'
-   # 来自 cmct
-   elif [[ $source_site_URL =~ .*springsunday.* ]]; then
-       source_site_URL="${post_site[cmct]}"
-       enable_cmct='no'
-       s_site_uid='cmct'
    # 来自 nanyangpt
    elif [[ $source_site_URL =~ .*nanyangpt.* ]]; then
        source_site_URL="${post_site[nanyangpt]}"
@@ -61,9 +56,11 @@ get_source_site() {
     elif [[ "$tracker_info" =~ .*m-team.cc.* ]]; then
         source_site_URL="${post_site[mt]}"
         s_site_uid='mt'
+        enable_mt='no'
     elif [[ "$tracker_info" =~ .*springsunday.net.* ]]; then
         source_site_URL="${post_site[cmct]}"
         s_site_uid='cmct'
+        enable_cmct='no'
     #elif [[ "$tracker_info" =~ .*newsite.* ]]; then
     #    source_site_URL="${post_site[newsite]}"
     else
@@ -223,7 +220,7 @@ form_source_site_get_Desc() {
     imdb_url="$(grep -Eo 'tt[0-9]{7,8}' "$source_full"|head -1)"
     douban_url="$(grep -Eo 'douban\.com/subject/[0-9]{7,8}' "$source_full"|head -1)"
     [[ $douban_url ]] && douban_url="https://movie.douban.com/subject/${douban_url##*/}"
-    [ "$(grep -E '禁止转载|禁转资源|谢绝转发|独占资源|禁转资源|No forward anywhere' "$source_full")" ] && local forbid='yes'
+    [[ "$(grep -E '禁止转载|禁转资源|谢绝转发|独占资源|禁转资源|No forward anywhere' "$source_full")" ]] && local forbid='yes'
 
     # 匹配官方组 简介中的 info 以及 screens 所在行号
     local start_line end_line middle_line _ep ## extra_subt 原种副标题，非局域变量
@@ -242,7 +239,8 @@ form_source_site_get_Desc() {
       extra_subt="$(grep '<h1>' "$source_full"|sed -E "s/[^\[]+\[//;s/\]//;s%</?h1>%%g")"
       sed -E -i "s%<br[ ]?/>%<br />\n%ig" "$source_full" # 2019-02-19 update
       # 使用 sed -n '/匹配内容/=' 获取行号
-      start_line=$(sed -n '/\.[cC]omparisons/=;/\.[sS]elected\.[sS]creens/=;/\.[mM]ore\.[sS]creens/=;/\.[pP]lot/=' "$source_full"|head -1)
+      start_line=$(sed -n '/\.[cC]omparisons/=;/\.[sS]elected\.[sS]creens/=;
+      /\.[mM]ore\.[sS]creens/=;/\.[pP]lot/=' "$source_full"|head -1)
       middle_line=$(sed -n '/.x264.[iI]nfo/=' "$source_full"|head -1)
       end_line=$(sed -n "$middle_line,$(($middle_line + 10))p" \
         "$source_full"|sed -n '/<\/table>/='|head -1)  # ttg
@@ -287,13 +285,16 @@ form_source_site_get_Desc() {
     #----------------desc----------------start
     if [ -s "$source_desc" ]; then
     #---filter html code---#
-    sed -i "s/.*id='kdescr'>//g;s/onclick=\"Previewurl([^)]*)[;]*\"//g;s/onload=\"Scale([^)]*)[;]*\"//g;s/onmouseover=\"[^\"]*;\"//g" "$source_desc"
+    sed -i "s/.*id='kdescr'>//g;s/onclick=\"Previewurl([^)]*)[;]*\"//g;
+    s/onload=\"Scale([^)]*)[;]*\"//g;s/onmouseover=\"[^\"]*;\"//g" "$source_desc"
     sed -i "s#onclick=\"Previewurl.*/><br />#/><br />#g" "$source_desc"
     sed -i "/本资源仅限/d;/法律责任/d" "$source_desc"
-    sed -Ei "s@\"[^\"]*attachments([^\"]+)@\"${source_site_URL}/attachments\1@ig;s#src=\"attachments#src=\"${source_site_URL}/attachments#ig" "$source_desc"
+    sed -Ei "s@\"[^\"]*attachments([^\"]+)@\"${source_site_URL}/attachments\1@ig;
+    s#src=\"attachments#src=\"${source_site_URL}/attachments#ig" "$source_desc"
     sed -i "s#onmouseover=\"[^\"]*[;]*\"##ig" "$source_desc"
     sed -i "s#onload=\"[^\"]*[;]*\"##ig" "$source_desc"
     sed -i "s#onclick=\"[^\"]*[;)]*\"##ig" "$source_desc"
+    sed -i "1 s/代码//" "$source_desc"
     #---ttg,table---#
     sed -Ei "/^x264.*<\/table>/ s!</table>.*!</table>\n!ig" "$source_desc"
  
