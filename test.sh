@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-07-14
+# Date: 2019-08-17
 #
 #--------------------------------------#
 # 说明：该文件用于逐个测试站点情况，
@@ -26,9 +26,11 @@ test_func() {
     #---[nanyangpt]---#
     enable_nanyangpt='no'
     #---[byrbt]---#
-    enable_byrbt='yes'
+    enable_byrbt='no'
     #---[cmct]---#
     enable_cmct='no'
+    #---[mteam]---#
+    enable_mt='yes'
     #---[tjupt]---#
     enable_tjupt='no'
     #
@@ -41,7 +43,7 @@ debug_func() {
     if true; then
     #if false; then
       # 减少 debug 记录大量重复无用信息
-      if [[ ${completion:-100} -ge 92 ]]; then
+      if [[ ${completion:-100} -ge 50 ]]; then
         printf '%b\n' "[$(date '+%m-%d %H:%M:%S')]：$*" >> "$debug_Log"
       fi
     fi
