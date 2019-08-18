@@ -3,18 +3,18 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-19
+# Date: 2019-08-17
 #
 # Environmental requirements:
 # - transmission-[remote,daemon or gtk] or qbittorrent
 # - transmission-edit and transmission-show
-# - httpie, head, awk, sed, find, grep,
-# - cut, cat, sort, tail, stat, python3
+# - httpie, awk, sed, find, grep,
+# - sort, tail, head, stat, python3
 # - base64, iconv, mediainfo
 #
 #---------------[caption]--------------#
 # usually, value can set 'yes' or 'no'
-# path should use absolutely one and no slash end
+# path should use absolutely one and no slash end best
 #----------------[main]----------------#
 # you can use source to import this file to test each func
 [[ ! $ROOT_PATH ]] && \
@@ -124,7 +124,21 @@ ratio_cmct='4'
 cookie_cmct='Cookie:c_secure_uid=XXXXXX; c_secure_pass=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx; c_secure_login=bm9wZQ=='
 #---your passkey---#
 passkey_cmct='12345678909876543212345654'
-####################===#################
+#######################===##############
+#---[mt]---#
+enable_mt='yes'
+say_thanks_mt='no'
+header_mt='no'
+client_mt='qbittorrent'
+#---delete screens img---#
+#
+anonymous_mt='yes'
+#---ratio of uploaded torrent---#
+ratio_mt='5'
+cookie_mt='Cookie:tp=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=='
+#---your passkey---#
+passkey_mt='12345678909876543212345654'
+###########################===##########
 #---[tjupt]---#
 enable_tjupt='yes'
 say_thanks_tjupt='yes'
@@ -137,7 +151,7 @@ ratio_tjupt='4'
 cookie_tjupt='Cookie:c_secure_uid=XXXXXX; c_secure_pass=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx; c_secure_login=bm9wZQ=='
 #---your passkey---#
 passkey_tjupt='12345678909876543212345654'
-#######################===##############
+##############################===#######
 #---[neu6]---#
 enable_neu6='no'
 say_thanks_neu6='yes'
@@ -151,7 +165,7 @@ cookie_neu6='Cookie: LRpW_2132_saltkey=xxx; LRpW_2132_auth=xxxxxxx'
 #---your passkey---#
 passkey_neu6='12345678909876543212345654'
 
-#############################===########
+#################################===####
 #------------[transmission]------------#
 #---authoriz for transmission---#
 tr_HOST='127.0.0.1'
@@ -176,9 +190,5 @@ ratio_ttg='2'  # just for fg_client='qbittorrent' case
 cookie_hdc='Cookie:mv_secure_uid=xxxx; mv_secure_pass=xxx;hdchina=xxx;PHPSESSID=xxx;mv_secure_login=bm9wZQ=='
 ratio_hdc='2'  # just for fg_client='qbittorrent' case
 #
-cookie_mt='Cookie:tp=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=='
-ratio_hdc='2'  # just for fg_client='qbittorrent' case
-#------------[donot change]------------#
-source "$ROOT_PATH/static.sh"
 #-----------------[EOF]----------------#
 
