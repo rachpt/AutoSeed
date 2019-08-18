@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-07-15
+# Date: 2019-08-17
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -11,6 +11,7 @@ ROOT_PATH="$(dirname "$(readlink -f "$0")")"
 [[ $ROOT_PATH == /*bin* ]] && \
 ROOT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$ROOT_PATH/settings.sh"
+source "$ROOT_PATH/static.sh"
 #---------------------------------------#
 # import extra functions
 source "$ROOT_PATH/get_desc/detail_page.sh"
@@ -41,7 +42,7 @@ write_log_begin() {
 write_log_end() {
     printf '%s\n' "+++++++++++++++++++++++++++++++++"   >> "$log_Path"
     printf '%s'   "[$(date '+%Y-%m-%d %H:%M:%S')]"      >> "$log_Path"
-    printf '%s\n' "已经发布:[$org_tr_name]"             >> "$log_Path"
+    printf '%s\n' "已经处理:[$org_tr_name]"             >> "$log_Path"
 }
 
 #--------------is-completed-------------#
@@ -66,8 +67,7 @@ generate_desc_func() {
     $tr_show "$torrent_Path"|grep -A 99 FILES|grep -Eq '.*\.rar |.*\.r[0-9]+ '
     [[ "$?" -eq 0 ]] && \rm -f "$torrent_Path" && break # delete rar torrent
     # org_tr_name 用于和 transmission/qb 中的种子名进行比较，
-    org_tr_name="$($tr_show "$torrent_Path"|grep -m1 '^Name')"
-    org_tr_name="${org_tr_name#Name:[ ]*}"
+    org_tr_name="$(get_torrents_name "$torrent_Path")"
     one_TR_Name="$org_tr_name"
     #---generate desc before done---#
     if [[ ! -s "${ROOT_PATH}/tmp/${org_tr_name}_desc.txt" ]]; then
@@ -88,8 +88,7 @@ main_loop_func() {
   #---loop for torrent in flexget path ---#
   for tr_i in "$flexget_path"/*.torrent; do [[ -f "$tr_i" ]] && {
     #----------------------------------------------
-    org_tr_name="$($tr_show "$tr_i"|grep -m1 '^Name')"
-    org_tr_name="${org_tr_name#Name:[ ]*}"
+    org_tr_name="$(get_torrents_name "$tr_i")"
 
     debug_func 'main:m-loop'           #----debug---
     #-----------------------------------------------
@@ -156,10 +155,27 @@ hold_on_func() {
 #-------------start function------------#
 # 将种子追加到发布列队
 if [[ "$#" -ge 2 ]]; then
-    # qbittorrent, 2 parameter; manual, 3
+  # manual, 2 parameters; one is file path
+  if [[ -f "$1" ]]; then
+    Torrent_Name="$(get_torrents_name "$1")"
+    Tr_Path="$2"
+    HAND='yes'
+    \mv "$1" "${flexget_path%/}/handTorrent-$RANDOM.torrent"
+  elif [[ -f "$2" ]]; then
+    Torrent_Name="$(get_torrents_name "$2")"
+    Tr_Path="$1"
+    HAND='yes'
+    \mv "$2" "${flexget_path%/}/handTorrent-$RANDOM.torrent"
+  # qbittorrent, 2 parameters; one is directory
+  elif [[ -d "$1" ]]; then
+    Torrent_Name="$2"
+    Tr_Path="$1"
+    debug_func 'main:run_from_QB'
+  elif [[ -d "$2" ]]; then
     Torrent_Name="$1"
     Tr_Path="$2"
-    [[ $3 != 'hand' ]] && debug_func 'main:run_from_QB' || HAND='yes'
+    debug_func 'main:run_from_QB'
+  fi
 else
     # transmission, no parameter
     Torrent_Name="$TR_TORRENT_NAME"
