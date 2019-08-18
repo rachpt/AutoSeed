@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-08-05
+# Date: 2019-08-15
 #
 #-------------------------------------#
 # 通过之前生成的 desc 简介文档，提取其中的各种参数。
@@ -13,7 +13,7 @@
 unset_all_parameter() {
   unset noDot_name region serials season normal documentary genre language
   unset chs_included chinese_title foreign_title imdb_url douban_url is_ipad
-  unset is_bd is_hdtv is_webdl is_4k is_1080p is_720p is_other file_type
+  unset is_bd is_hdtv is_webdl is_4k is_1080p is_720p is_other file_type mt_chs
   unset is_package is_264 is_265 is_dts is_ac3 is_aac is_flac animation theater
 }
 #-------------------------------------#
@@ -203,8 +203,9 @@ from_desc_get_param() {
   # 添加额外信息  ---1
   chs_included="$(grep '&extra_comment&' "$source_desc"|sed 's/&extra_comment&//')"
   # 中文字幕  ---2
-  [[ ! $chs_included && "$(grep -i "CH[ST]" "$source_desc")" ]] && \
+  [[ ! $chs_included && "$(grep -i "CH[ST]" "$source_desc")" ]] && {
       chs_included='中文字幕 '
+      mt_chs=1; }
   # 剧集集数信息  ---3
   [[ ! $chs_included && $serials = yes ]] && chs_included="$season"
   # 删除
