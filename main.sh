@@ -177,15 +177,27 @@ if [[ "$#" -ge 2 ]]; then
     debug_func 'main:run_from_QB'
   fi
 else
-    # transmission, no parameter
-    Torrent_Name="$TR_TORRENT_NAME"
-    Tr_Path="$TR_TORRENT_DIR"
-    [[ $TR_TORRENT_NAME ]] && { sleep 1; debug_func 'main:run_from_TR'; }
+    # no parameter
+    [[ $TR_TORRENT_NAME ]] && { 
+      # transmission
+      Torrent_Name="$TR_TORRENT_NAME"
+      Tr_Path="$TR_TORRENT_DIR"
+      debug_func 'main:run_from_TR'
+    } || {
+      # 提前发布
+      [[ -f "$ROOT_PATH/enhance.sh" ]] && \
+        source "$ROOT_PATH/enhance.sh"
+    }
 fi
 [[ "$Torrent_Name" && "$Tr_Path" ]] && {
     hold_on_func  # main.sh, sleep some time
     extract_rar_files  # get_desc/extract.sh
-    printf '%s\n%s\n' "${Torrent_Name}" "${Tr_Path%/}" >> "$queue"; }
+    while [[ ! -e $quene_lock ]]; do
+      printf "$$" > "$quene_lock"   # quene lock
+      printf '%s\n%s\n' "${Torrent_Name}" "${Tr_Path%/}" >> "$queue"; 
+    done
+    \rm -f "$quene_lock"
+  }
 unset Torrent_Name Tr_Path
 #---------------------------------------#
 [[ "$Disable_AutoSeed" == yes ]] && exit 0

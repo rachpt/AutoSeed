@@ -3,8 +3,9 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-07-14
+# Date: 2019-08-18
 #
+# This file defines constants and functions
 #--------------------------------------#
 export LANGUAGE=en_US
 source "$ROOT_PATH/test.sh"
@@ -16,6 +17,7 @@ debug_Log="$ROOT_PATH/tmp/debug"
 lock_File="$ROOT_PATH/tmp/LOCK"
 #---queue path (do not change)---#
 queue="$ROOT_PATH/tmp/queue"
+quene_lock="$ROOT_PATH/tmp/queue-lock"
 #---for qbit (do not change)---#
 qb_rt_queue="$ROOT_PATH/tmp/qb-ratio-queue"
 #
@@ -33,9 +35,9 @@ ffmpeg='ffmpeg'
 #---path of mtn---#
 mtn='mtn'
 #---path of dottorrent---#
-dottorrent='/home/rachpt/.local/bin/dottorrent'
+dottorrent='dottorrent' # example /home/rachpt/.local/bin/dottorrent
 #---
-user_agent='User-Agent:Mozilla/5.0(X11;Linux x86_64;rv:63.0)Gecko/20100101 Firefox/63.0'
+user_agent='User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
 #--------------------------------------#
 # 豆瓣 api
 db_api_1='https://api.rhilip.info/tool/movieinfo/gen'
@@ -278,5 +280,10 @@ is_tracker_down() {
 #-------------------------------------#
 count(){ [[ -f $1 ]] && printf '%s' "$#"|| printf 0; }
 Listf(){ local i;for i in "${1%/}/"*"$2";do [[ -f $i ]] && printf '%s\n' "$i";done; }
+#-------------------------------------#
+get_torrents_name() {
+  [[ -f $1 ]] && $tr_show "$1"|grep -m1 '^Name:'|sed 's/Name:[ ]*//' || \
+    debug_func "get-tr-name:[$1]not a file"
+}
 #-------------------------------------#
 
