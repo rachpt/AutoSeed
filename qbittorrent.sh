@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-07-16
+# Date: 2019-08-17
 #
 #--------------------------------------#
 qb_login="${qb_HOST}:$qb_PORT/api/v2/auth/login"
@@ -47,12 +47,14 @@ qb_delete_torrent() {
 
 #---------------------------------------#
 qb_set_ratio_queue() {
+  local add_site_tracker
   for site in ${!post_site[*]}; do
-    [ "$(echo "$postUrl"|grep "${post_site[$site]}")" ] && \
-      add_site_tracker="${trackers[$site]}" && break # get out of for loop
+    [[ "$postUrl" =~ ${post_site[$site]}.* ]] && {
+      add_site_tracker="${trackers[$site]}"
+      break; }
   done
 
-  debug_func 'qb:set-ratio-queue'  #----debug---
+  debug_func "qb:set-ratio-queue[$site]"  #----debug---
   echo -e "${org_tr_name}\n${add_site_tracker}\n${ratio_set}" >> \
       "${qb_rt_queue}-$index"
   # say thanks 
@@ -60,7 +62,7 @@ qb_set_ratio_queue() {
   [[ "$(eval echo '$'"say_thanks_$site")" == yes ]] && \
   if http --verify=no --ignore-stdin -h -f POST "${post_site[$site]}/thanks.php" \
     id="$t_id" "$(eval echo '$'"cookie_$site")" "$user_agent" &> /dev/null; then
-    debug_func "qb:set-ratio-thanks-[$site]"  #----debug---
+    debug_func "qb:set-ratio-say-thanks-[$site]"  #----debug---
   else
     case $? in
       2) debug_func 'qbit[thx]:Request timed out!' ;;
