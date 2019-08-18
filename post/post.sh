@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-07-16
+# Date: 2019-08-17
 #
 #---------------------------------------#
 # 将简介以及种子以post方式发布
@@ -19,6 +19,7 @@ source "$ROOT_PATH/get_desc/desc.sh"    # get source site
 #---------------------------------------#
 judge_before_upload() {
   up_status='yes'    # judge code
+  yellow_mv='no'
   #---judge to get away from dupe---#
   #[ "$postUrl" = "${post_site[whu]}/takeupload.php" ] && \
       #judge_torrent_func # $ROOT_PATH/post/judge.sh
@@ -30,6 +31,7 @@ judge_before_upload() {
       printf '%b' "禁转禁发资源\n"             >> "${log_Path}-$index"
   elif [[ "$(grep -Em1 '.类.*别.*情色' "$source_desc")" ]]; then
       up_status='no'  # give up upload
+      yellow_mv='yes'
       printf '%b' "情色电影。--\n"             >> "${log_Path}-$index"
   fi
 
@@ -54,7 +56,11 @@ add_t_id_2_client() {
   else
     printf '%s\n' "t_id: [$t_id]"                     >> "${log_Path}-$index"
     #---add torrent---#
-    torrent2add="${downloadUrl}${t_id}&passkey=${passkey}"
+    if [[ $downloadUrl =~ .*m-team.cc.* ]]; then
+      torrent2add="${downloadUrl}${t_id}&passkey=${passkey}&https=1"  # &ipv6=1
+    else
+      torrent2add="${downloadUrl}${t_id}&passkey=${passkey}"
+    fi
     source "$ROOT_PATH/post/add.sh"
   fi
   unset t_id torrent2add
@@ -75,6 +81,7 @@ reseed_torrent() {
   #name="$(echo "$name"|sed -E 's/[ \.]ep?[0-9]{1,2}(-e?p?[0-9]{1,2})?[ \.].*//i')"
   # 删除合集
   name="${name//[ \.][Cc]omplete[\. ].*/}"
+  name="${name//+(.)/.}"
   result="$(http --verify=no --ignore-stdin -b --timeout=25 GET "${postUrl%/*}/torrents.php?search=${name}&incldead=1" "$cookie" "$user_agent")"
   t_id=$(printf '%s' "$result"|grep "$dot_name"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')
   [[ ! $t_id ]] && {
@@ -156,9 +163,19 @@ if [ "$enable_cmct" = 'yes' ]; then
     ((++index))
     (source "$ROOT_PATH/post/cmct.sh"
     judge_before_upload
-    [[ $up_status = yes ]] && cmct_post_func
+    [[ $up_status = yes || $yellow_mv = yes ]] && cmct_post_func
     add_t_id_2_client) &
 fi
+# 只转发特定小组资源
+[[ $dot_name =~ .*-(WiKi|HDChina)$ ]] && {
+if [ "$enable_mt" = 'yes' ]; then
+    ((++index))
+    (source "$ROOT_PATH/post/mteam.sh"
+    judge_before_upload
+    [[ $up_status = yes || $yellow_mv = yes ]] && mt_post_func
+    add_t_id_2_client) &
+fi
+}
 
 if [ "$enable_tjupt" = 'yes' ]; then
     ((++index))
