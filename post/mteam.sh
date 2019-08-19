@@ -183,7 +183,7 @@ id="$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
   'standard_sel'="$mt_standard"\
   'processing_sel'="$mt_source"\
   'l_sub'=${mt_chs:-0}\
-  'team_sel'=${mt_team:-0}
+  'team_sel'=${mt_team:-0}\
   'uplver'="$anonymous_mt"\
   file@"${torrent_Path}"\
   "$user_agent"\
