@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-08-15
+# Date: 2019-09-02
 #
 #-------------------------------------#
 # 通过之前生成的 desc 简介文档，提取其中的各种参数。
@@ -203,8 +203,8 @@ from_desc_get_param() {
   # 添加额外信息  ---1
   chs_included="$(grep '&extra_comment&' "$source_desc"|sed 's/&extra_comment&//')"
   # 中文字幕  ---2
-  [[ ! $chs_included && "$(grep -i "CH[ST]" "$source_desc")" ]] && {
-      chs_included='中文字幕 '
+  [[ "$(grep -i "CH[ST]" "$source_desc")" ]] && {
+      chs_included="${chs_included:-中文字幕}"
       mt_chs=1; }
   # 剧集集数信息  ---3
   [[ ! $chs_included && $serials = yes ]] && chs_included="$season"
