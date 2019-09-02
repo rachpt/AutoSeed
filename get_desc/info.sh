@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-08-04
+# Date: 2019-09-02
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -16,7 +16,7 @@ gen_thumbnail_with_ffmpeg() {
   local step total file size ratio row column
   screen_file="${ROOT_PATH}/tmp/autoseed-$(date '+%s%N').jpg"
   file="$max_size_file"
-  size=500  # 单个缩略图宽 500 pix
+  size=512  # 单个缩略图宽 512 pix，最好16的倍数
   row=4     # 行数
   column=3  # 列数
   ratio="$($mediainfo "$file" --Output="Video;%FrameRate%")"
@@ -50,7 +50,7 @@ gen_thumbnail_with_mtn() {
   #   -T 自定义文字，-w 图片宽度，-c column -r row -k 背景色 -L info和时间位置
   #   -F info和时间戳字体和大小等，-o 后缀名 -f info字体 -O 输出路径dir
   # 详细：http://moviethumbnail.sourceforge.net/usage.en.html
-  $mtn -g 8 --shadow=3 -H -B 180 -D 12 -b 0.8 -T "$_inf" -w 1600 -c 3 -r 4 -k 000000 -L 4:2 \
+  $mtn -g 8 --shadow=3 -H -B 180 -D 12 -b 0.8 -T "$_inf" -w 1568 -c 3 -r 4 -k 000000 -L 4:2 \
     -F FFFF00:18:"$_font":ff0000:000000:24 -o '-autoseed.jpg' -f "$_font" \
     "$_file" -O "${ROOT_PATH}/tmp"
   [[ $? -eq 0 ]] && {
@@ -141,14 +141,14 @@ style=\"width: 64px; height: 22px;\" /> 自动完成的截图，不喜勿看。<
 #---------------main------------------#
 # 首先判断是否有 nfo 文件，以及nfo是否下载完成
 read_info_file() {
+  [[ "$org_tr_name" == "$tr_name_hand" ]] && \
+    $one_TR_Dir="$tr_path_hand"
+  debug_func "info:one_TR_Dir.0[$one_TR_Dir]"  #----debug---
   if [[ ! "$one_TR_Dir" ]]; then
-      debug_func "info:one_TR_Dir.0[$one_TR_Dir]"  #----debug---
       one_TR_Dir="$(find "$default_FILE_PATH" -name \
           "$one_TR_Name" 2> /dev/null|head -1)"
       one_TR_Dir="${one_TR_Dir%/*}"
       debug_func "info:one_TR_Dir.1[$one_TR_Dir]"  #----debug---
-  else
-      debug_func "info:one_TR_Dir[$one_TR_Dir]"  #----debug---
   fi
 
   if [[ "$one_TR_Dir" ]]; then

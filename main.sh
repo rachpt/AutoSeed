@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-08-17
+# Date: 2019-09-02
 #
 #-----------import settings-------------#
 ROOT_PATH="$(dirname "$(readlink -f "$0")")"
@@ -20,11 +20,11 @@ source "$ROOT_PATH/get_desc/extract.sh"
 source "$ROOT_PATH/get_desc/match.sh"
 #----------------lock func--------------#
 remove_lock() {
-    \rm -f "$lock_File" "$qb_rt_queue"
+    \rm -f "$lock_File" "$qb_rt_queue" "$ROOT_PATH/tmp/$$.debug"
 }
 is_locked() {
     if [ -f "$lock_File" ]; then
-        exit
+        exit 0
     else
         set -o noclobber             # 禁止重定向覆盖
         printf "$$" > "$lock_File"   # pid 写入文件
@@ -121,35 +121,40 @@ main_loop_func() {
 
 #--------------timeout func--------------#
 time_out_func() {
-    local waitfor=1200    # 单位秒, 1200=20 min
-    local main_pid=$(< "$lock_File")
-    local user_hz=$(getconf CLK_TCK) #mostly it's 100 on x86/x86_64
-    local start_time=$(awk '{print $22}' /proc/$main_pid/stat)
-    local sys_uptime=$(awk '{print $1}' /proc/uptime)
-    local run_time=$(( ${sys_uptime%.*} - $start_time/$user_hz ))
-    if [[ $main_pid && $run_time -gt $waitfor ]]; then
-        # 处理超时
-        kill -9 $main_pid
-        \rm -f "$lock_File" "$qb_rt_queue" "$ROOT_PATH/tmp/autoseed-"*
-        debug_func "程序因超时[$run_time]被强制终止！"  #----debug---
-    else
-        # 重复运行
-        debug_func '主程序正在运行，稍后重试！'  #----debug---
-        exit
-    fi
+  [[ -s "$lock_File" ]] && {
+    local waitfor main_pid user_hz start_time sys_uptime run_time
+    waitfor=1200    # 单位秒, 1200=20 min
+    main_pid=$(< "$lock_File")
+    user_hz=$(getconf CLK_TCK) #mostly it's 100 on x86/x86_64
+    [[ $main_pid =~ [0-9]+ ]] && {
+      start_time=$(awk '{print $22}' /proc/$main_pid/stat)
+      sys_uptime=$(awk '{print $1}' /proc/uptime)
+      run_time=$(( ${sys_uptime%.*} - $start_time/$user_hz )); }
+  }
+  if [[ $main_pid && $run_time -gt $waitfor ]]; then
+      # 处理超时
+      kill -9 $main_pid
+      \rm -f "$lock_File" "$qb_rt_queue" "$ROOT_PATH/tmp/autoseed-"*
+      debug_func "程序因超时[$run_time]被强制终止！"  #----debug---
+  else
+      # 重复运行
+      debug_func '主程序正在运行，稍后重试！'  #----debug---
+      exit 0
+  fi
 }
 hold_on_func() {
-  # 依据cpu负载设置一个延时，解决系统IO问题
-  # ${var:-default} Use new value if undefined or null.
-  local cpu_number cpu_load _time
-  cpu_number="$(grep 'model name' /proc/cpuinfo|wc -l)"
-  cpu_load="$(uptime|awk -F 'average:' '{print $2}'|awk \
-      -F ',' '{print $1}'|sed 's/ //g')"
-  _time="$(bc <<< ${cpu_load:-0.4}*100/${cpu_number:-1}*0.4*${Speed:-1})"
-  [[ ! "$test_func_probe" ]] && {
-  sleep "${_time:-0}" # 默认值 0 秒
-  debug_func "main:hold-on[${_time:-0}]"; }  #----debug--- 
-  unset Speed _time
+  [[ $HAND != yes || ! $test_func_probe ]] && {
+    # 依据cpu负载设置一个延时，解决系统IO问题
+    # ${var:-default} Use new value if undefined or null.
+    local cpu_number cpu_load _time
+    cpu_number="$(grep 'model name' /proc/cpuinfo|wc -l)"
+    cpu_load="$(uptime|awk -F 'average:' '{print $2}'|awk \
+        -F ',' '{print $1}'|sed 's/ //g')"
+    _time="$(bc <<< ${cpu_load:-0.4}*100/${cpu_number:-1}*0.4*${Speed:-1})"
+    sleep "${_time:-0}" # 默认值 0 秒
+    debug_func "main:hold-on[${_time:-0}]"  #----debug---
+    unset Speed _time
+  }
 }
 #---------------------------------------#
 #-------------start function------------#
@@ -157,15 +162,17 @@ hold_on_func() {
 if [[ "$#" -ge 2 ]]; then
   # manual, 2 parameters; one is file path
   if [[ -f "$1" ]]; then
+    flexget_path="$ROOT_PATH/tmp"
     Torrent_Name="$(get_torrents_name "$1")"
     Tr_Path="$2"
     HAND='yes'
-    \mv "$1" "${flexget_path%/}/handTorrent-$RANDOM.torrent"
+    \cp -f "$1" "${flexget_path%/}/handTorrent-$RANDOM.torrent"
   elif [[ -f "$2" ]]; then
+    flexget_path="$ROOT_PATH/tmp"
     Torrent_Name="$(get_torrents_name "$2")"
     Tr_Path="$1"
     HAND='yes'
-    \mv "$2" "${flexget_path%/}/handTorrent-$RANDOM.torrent"
+    \cp -f "$2" "${flexget_path%/}/handTorrent-$RANDOM.torrent"
   # qbittorrent, 2 parameters; one is directory
   elif [[ -d "$1" ]]; then
     Torrent_Name="$2"
@@ -190,23 +197,33 @@ else
     }
 fi
 [[ "$Torrent_Name" && "$Tr_Path" ]] && {
-    hold_on_func  # main.sh, sleep some time
-    extract_rar_files  # get_desc/extract.sh
-    while [[ ! -e $quene_lock ]]; do
-      printf "$$" > "$quene_lock"   # quene lock
-      printf '%s\n%s\n' "${Torrent_Name}" "${Tr_Path%/}" >> "$queue"; 
-    done
-    \rm -f "$quene_lock"
+  [[ $HAND != yes ]] && {
+    hold_on_func     # main.sh, sleep some time
+    extract_rar_files     # get_desc/extract.sh
+  } || {
+    tr_name_hand="$Torrent_Name"
+    tr_path_hand="$Tr_Path"
   }
+  while [[ ! -e $quene_lock ]]; do
+    printf "$$" > "$quene_lock"   # quene lock
+    printf '%s\n%s\n' "${Torrent_Name}" "${Tr_Path%/}" >> "$queue"
+  done
+  \rm -f "$quene_lock"
+}
 unset Torrent_Name Tr_Path
 #---------------------------------------#
 [[ "$Disable_AutoSeed" == yes ]] && exit 0
 #---------------------------------------#
-# 禁止重复运行
-#debug_func "进程[$(ps -C 'main.sh' --no-headers|wc -l)]个" #----debug---
-[[ "$(ps -C 'main.sh' --no-headers|wc -l)" -gt 2 ]] && time_out_func
 # move the end slash
 flexget_path=${flexget_path%/}
+[[ $HAND == yes ]] && {
+  while [[ -f "$lock_File" ]]; do
+    sleep 1
+  done
+} || {
+  # 禁止重复运行; crontab 会开两个 main.sh 进程
+  [[ "$(ps -C 'main.sh' --no-headers|wc -l)" -gt 2 ]] && time_out_func
+}
 is_locked            # 锁住进程，防止多开
 # 生成简介于发布循环不能异步运行，\
 # 否则有可能出现 .torrent 文件被改名\
