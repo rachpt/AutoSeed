@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-08-17
+# Date: 2019-10-28
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -299,8 +299,8 @@ form_source_site_get_Desc() {
     sed -Ei "/^x264.*<\/table>/ s!</table>.*!</table>\n!ig" "$source_desc"
  
     #---copy as a duplication for byrbt---#
-    [ "$enable_byrbt" = 'yes' ] && \cp -f "$source_desc" "$source_html"
-    sed -Ei 's/fieldset>|legend>/span>/ig;s/ ?引用 ?//g' "$source_html"
+    [ "$enable_byrbt" = 'yes' ] && { \cp -f "$source_desc" "$source_html"
+    sed -Ei 's/fieldset>|legend>/span>/ig;s/ ?引用 ?//g' "$source_html"; }
 
     #---html2bbcode---#
     source "$ROOT_PATH/get_desc/html2bbcode.sh"

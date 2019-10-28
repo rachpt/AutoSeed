@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-05-20
+# Date: 2019-10-28
 #
 #-------------------------------------#
 # 本文件通过豆瓣或者IMDB链接(如果都没有则使用资源0day名)，
@@ -199,8 +199,9 @@ fi )
 "
 
     # byrbt 所需要的 html 简介
-    : "$(< "$source_html")"
-[[ $enable_byrbt = yes ]] && source_html_tmp="${gen_desc_html}<br />
+[[ $enable_byrbt = yes ]] && {
+  : "$(< "$source_html")"
+  source_html_tmp="${gen_desc_html}<br />
 <fieldset><legend><span style=\"color:#ffffff;background-color:#000000;\">iNFO</span></legend><font face=\"Courier New\">
 $([[ -s $source_desc ]] && echo "$_" || echo 'Failed to get mediainfo!')
 </font></fieldset><br /><br /><br /><br /><br /><fieldset><legend>
@@ -210,7 +211,7 @@ $(if [ $source_t_id ]; then
 else
     echo '<span style="font-size:20px;">本种来自： '${source_site_URL}'</span>'
 fi)
-<br /></fieldset><br />"
+<br /></fieldset><br />"; }
 
     # 简介覆盖保存至文件 
     echo "$source_desc_tmp" > "$source_desc"
