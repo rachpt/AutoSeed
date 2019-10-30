@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-09-02
+# Date: 2019-10-30
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -141,8 +141,7 @@ style=\"width: 64px; height: 22px;\" /> 自动完成的截图，不喜勿看。<
 #---------------main------------------#
 # 首先判断是否有 nfo 文件，以及nfo是否下载完成
 read_info_file() {
-  [[ "$org_tr_name" == "$tr_name_hand" ]] && \
-    $one_TR_Dir="$tr_path_hand"
+  [[ "$org_tr_name" == "$tr_name_hand" ]] && one_TR_Dir="$tr_path_hand"
   debug_func "info:one_TR_Dir.0[$one_TR_Dir]"  #----debug---
   if [[ ! "$one_TR_Dir" ]]; then
       one_TR_Dir="$(find "$default_FILE_PATH" -name \
