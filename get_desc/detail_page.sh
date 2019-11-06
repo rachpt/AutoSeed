@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-10-28
+# Date: 2019-11-06
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -295,6 +295,8 @@ form_source_site_get_Desc() {
     sed -i "s#onload=\"[^\"]*[;]*\"##ig" "$source_desc"
     sed -i "s#onclick=\"[^\"]*[;)]*\"##ig" "$source_desc"
     sed -i "1 s/代码//" "$source_desc"
+    #---hdsky scripts---#
+    sed -Ei "s#<script src=[^>]+></script>##ig" "$source_desc"
     #---ttg,table---#
     sed -Ei "/^x264.*<\/table>/ s!</table>.*!</table>\n!ig" "$source_desc"
  
