@@ -229,7 +229,8 @@ upload_image_com() {
       # 京东
       img_url_com="$(http --pretty=format --verify=no --timeout=25 -Ibf POST \
       "${upload_poster_api_11}" filedata@"$_file" op='applyUpload' "$user_agent"| \
-      grep 'optDescription'|grep -io 'jfs[^"]*')" ;;
+      grep 'optDescription'|grep -io 'jfs[^"]*')" 
+      [[ $img_url_com ]] && img_url_com="https://img30.360buyimg.com/myjd/$img_url_com" ;;
 
   esac
   }
