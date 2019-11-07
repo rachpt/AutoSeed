@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-08-18
+# Date: 2019-11-07
 #
 # This file defines constants and functions
 #--------------------------------------#
@@ -37,7 +37,7 @@ mtn='mtn'
 #---path of dottorrent---#
 dottorrent='dottorrent' # example /home/rachpt/.local/bin/dottorrent
 #---
-user_agent='User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101 Firefox/68.0'
+user_agent='User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0'
 #--------------------------------------#
 # 豆瓣 api
 db_api_1='https://api.rhilip.info/tool/movieinfo/gen'
@@ -55,6 +55,7 @@ upload_poster_api_7='https://imgchr.com' # 路过图床，20/h 限制
 upload_poster_api_8='https://whoimg.com' # 无名图床
 upload_poster_api_9='https://upload.cc'
 upload_poster_api_10='https://imgbb.com'
+upload_poster_api_11='http://myjd.jd.com/afs/common/upload.action' # 京东图床
 byrbt_upload_api='https://bt.byr.cn/ckfinder/core/connector/php/connector.php'
 #-------------desc headers-------------#
 failed_to_get_des='[size=6][color=Magenta][em11] 获取简介失败！！！[/color][/size]'
@@ -132,7 +133,7 @@ source "$ROOT_PATH/transmission.sh"
 #--------------------------------------#
 # set client mode
 unset _site use_qbt use_trs # clean
-for _site in hudbt whu nanyangpt npupt byrbt cmct tjupt; do
+for _site in hudbt whu nanyangpt npupt byrbt mt cmct tjupt; do
   [[ "$(eval echo '$'enable_$_site)" = yes ]] && \
     case $(eval echo '$'client_$_site) in
       qbittorrent)
@@ -153,7 +154,7 @@ unset _site # clean
 upload_image_com() {
   unset img_url_com    # clean
   local _file="$1"     # 参数：图片路径
-  local _rand_=$((RANDOM % 10)) # choose an api randomly
+  local _rand_=$((RANDOM % 12)) # choose an api randomly
   up_case_func() {
   case $_rand_ in
     00)
@@ -224,14 +225,19 @@ upload_image_com() {
       "${upload_poster_api_9}/image_upload" uploaded_file[]@"$_file" "$user_agent"| \
       grep '"url":'|grep -Eio '[0-9a-z/\.]{14,}')"
       [[ $img_url_com ]] && img_url_com="${upload_poster_api_9}/${img_url_com}" ;;
+    10)
+      # 京东
+      img_url_com="$(http --pretty=format --verify=no --timeout=25 -Ibf POST \
+      "${upload_poster_api_11}" filedata@"$_file" op='applyUpload' "$user_agent"| \
+      grep 'optDescription'|grep -io 'jfs[^"]*')" ;;
 
   esac
   }
   up_case_func
   # 遍历所有 api 直到上传图片成功
   local _count=1
-  while [[ ! $img_url_com && $_count -le 10 ]]; do
-    [[ $_rand_ -eq 9 ]] && _rand_=0 || _rand_=$((_rand_ + 1))
+  while [[ ! $img_url_com && $_count -le 11 ]]; do
+    [[ $_rand_ -eq 11 ]] && _rand_=0 || _rand_=$((_rand_ + 1))
     up_case_func
     ((_count++))
   done
@@ -256,7 +262,7 @@ upload_image_byrbt() {
 # test tracker is down?
 is_tracker_down() {
   local _site
-  for _site in  hudbt whu nanyangpt npupt byrbt cmct tjupt; do
+  for _site in  hudbt whu nanyangpt npupt byrbt mt cmct tjupt; do
     [[ "$(eval echo '$'enable_$_site)" = yes ]] && \
     if http --verify=no --timeout=40 --ignore-stdin GET "${post_site[$_site]}/login.php" \
     "$(eval echo '$'"cookie_$_site")" "$user_agent" &> /dev/null; then
