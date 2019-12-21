@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-08-17
+# Date: 2019-12-21
 #
 # Environmental requirements:
 # - transmission-[remote,daemon or gtk] or qbittorrent
@@ -166,6 +166,18 @@ cookie_neu6='Cookie: LRpW_2132_saltkey=xxx; LRpW_2132_auth=xxxxxxx'
 passkey_neu6='12345678909876543212345654'
 
 #################################===####
+#---[tlfbits]---#
+enable_tlfbits='no'
+say_thanks_tlfbits='no'
+client_tlfbits='qbittorrent'
+anonymous_tlfbits='yes'
+[[ $enable_tlfbits == 'yes' ]] && only_tlfbits='yes'
+#---ratio of uploaded torrent---#
+ratio_tlfbits='4'
+cookie_tlfbits='Cookie:c_secure_uid=XXXXXX; c_secure_pass=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx; c_secure_login=bm9wZQ=='
+#---your passkey---#
+passkey_tlfbits='12345678909876543212345654'
+###################################===##
 #------------[transmission]------------#
 #---authoriz for transmission---#
 tr_HOST='127.0.0.1'

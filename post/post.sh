@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-08-17
+# Date: 2019-12-21
 #
 #---------------------------------------#
 # 将简介以及种子以post方式发布
@@ -182,6 +182,15 @@ if [ "$enable_tjupt" = 'yes' ]; then
     (source "$ROOT_PATH/post/tjupt.sh"
     judge_before_upload
     [[ $up_status = yes ]] && tjupt_post_func
+    add_t_id_2_client) &
+fi
+
+if [ "$enable_tlfbits" = 'yes' ]; then
+    ((++index))
+    (source "$ROOT_PATH/post/tlfbits.sh"
+    #judge_before_upload
+    up_status='yes'
+    tlfbits_post_func
     add_t_id_2_client) &
 fi
 #---------------------------------------#

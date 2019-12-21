@@ -33,6 +33,8 @@ test_func() {
     enable_mt='yes'
     #---[tjupt]---#
     enable_tjupt='no'
+    #---[tlfbits]---#
+    enable_tlfbits='yes'
     #
 }
 #--------------------------------------#

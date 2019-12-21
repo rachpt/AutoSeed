@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-11-07
+# Date: 2019-12-21
 #
 # This file defines constants and functions
 #--------------------------------------#
@@ -115,6 +115,8 @@ trackers[cmct]='on.springsunday.net'
 post_site[cmct]='https://springsunday.net'
 trackers[tjupt]='.tjupt.org'
 post_site[tjupt]='https://tjupt.org'
+trackers[tlfbits]='pt.eastgame.org'
+post_site[tlfbits]='https://pt.eastgame.org'
 #--------------------------------------#
 # source tracker url
 post_site[ttg]='https://totheglory.im'
@@ -263,7 +265,7 @@ upload_image_byrbt() {
 # test tracker is down?
 is_tracker_down() {
   local _site
-  for _site in  hudbt whu nanyangpt npupt byrbt mt cmct tjupt; do
+  for _site in  hudbt whu nanyangpt npupt byrbt mt cmct tjupt tlfbits; do
     [[ "$(eval echo '$'enable_$_site)" = yes ]] && \
     if http --verify=no --timeout=40 --ignore-stdin GET "${post_site[$_site]}/login.php" \
     "$(eval echo '$'"cookie_$_site")" "$user_agent" &> /dev/null; then

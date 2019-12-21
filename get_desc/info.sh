@@ -175,7 +175,7 @@ read_info_file() {
       debug_func 'info:use-main-file!'  #----debug---
     fi
     # gen from main file and gen screens
-    generate_info_local
+    [[ $only_tlfbits = 'yes' ]] || generate_info_local
   fi
   debug_func 'info:exit'  #----debug---
 }
