@@ -63,7 +63,7 @@ generate_desc_func() {
   #---loop for torrent in flexget path---#
   for tr_i in "$flexget_path"/*.torrent; do [[ -f "$tr_i" ]] && {
     torrent_Path="${tr_i}"
-    [[ $HAND != yes ]] && {
+    [[ $only_tlfbits == 'yes' ]] || {
       # test rar included torrent
       $tr_show "$torrent_Path"|grep -A 99 FILES|grep -Eq '.*\.rar |.*\.r[0-9]+ '
       [[ "$?" -eq 0 ]] && \rm -f "$torrent_Path" && break; } # delete rar torrent
@@ -200,7 +200,9 @@ fi
 [[ "$Torrent_Name" && "$Tr_Path" ]] && {
   [[ $HAND != yes ]] && {
     hold_on_func     # main.sh, sleep some time
-    extract_rar_files     # get_desc/extract.sh
+    [[ $only_tlfbits == 'yes' ]] || {
+      extract_rar_files     # get_desc/extract.sh
+    }
   } || {
     tr_name_hand="$Torrent_Name"
     tr_path_hand="$Tr_Path"

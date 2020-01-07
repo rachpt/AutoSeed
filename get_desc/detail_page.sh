@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-11-06
+# Date: 2020-01-07
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -64,7 +64,7 @@ get_source_site() {
     #elif [[ "$tracker_info" =~ .*newsite.* ]]; then
     #    source_site_URL="${post_site[newsite]}"
     else
-        source_site_URL="$(echo "$tracker_info"|grep -Eo 'https?://[^/]*'| \
+        source_site_URL="$(echo "$tracker_info"|grep -Eo 'https?://[^:/]*'| \
           head -1|sed 's/ssl.empirehost.me/iptorrents.com/;
           s/tracker\.//;s/routing.bgp.technology/iptorrents.com/;
           s/localhost.stackoverflow.tech/iptorrents.com/')"
