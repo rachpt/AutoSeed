@@ -63,9 +63,10 @@ generate_desc_func() {
   #---loop for torrent in flexget path---#
   for tr_i in "$flexget_path"/*.torrent; do [[ -f "$tr_i" ]] && {
     torrent_Path="${tr_i}"
-    # test rar included torrent
-    $tr_show "$torrent_Path"|grep -A 99 FILES|grep -Eq '.*\.rar |.*\.r[0-9]+ '
-    [[ "$?" -eq 0 ]] && \rm -f "$torrent_Path" && break # delete rar torrent
+    [[ $HAND != yes ]] && {
+      # test rar included torrent
+      $tr_show "$torrent_Path"|grep -A 99 FILES|grep -Eq '.*\.rar |.*\.r[0-9]+ '
+      [[ "$?" -eq 0 ]] && \rm -f "$torrent_Path" && break; } # delete rar torrent
     # org_tr_name 用于和 transmission/qb 中的种子名进行比较，
     org_tr_name="$(get_torrents_name "$torrent_Path")"
     one_TR_Name="$org_tr_name"
