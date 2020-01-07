@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-10-30
+# Date: 2020-01-07
 #
 #-------------------------------------#
 # 复制 nfo 文件内容至简介，如果没有 nfo 文件，
@@ -151,31 +151,43 @@ read_info_file() {
   fi
 
   if [[ "$one_TR_Dir" ]]; then
-    local nfo_file_size nfo_file_path nfo_file_downloaded   
+    local nfo_count
     [[ $one_TR_Dir =~ .*/$ ]] && one_TR_Dir=${one_TR_Dir%/} # move slash end
-    nfo_file_size=$("$tr_show" "$torrent_Path"| \
-      grep -Eio '\.nfo \([0-9\. ]+[kb]+\)'|grep -Eo '[0-9]+\.?[0-9]*')
-    if [[ $nfo_file_size ]]; then
-      nfo_file_path="$(find "${one_TR_Dir}/${one_TR_Name}" -iname '*.nfo'|head -1)"
-      nfo_file_downloaded=$(stat --format=%s "$nfo_file_path")
-      if [[ $nfo_file_downloaded ]]; then
-        local judge_download_nfo judge_nfo_file charset
-        judge_download_nfo=$((nfo_file_downloaded/100)) # $(())中变量可以不要$
-        judge_nfo_file=$(bc <<< "$nfo_file_size * 10"|awk -F '.' '{print $1}')
-        if [ "$judge_download_nfo" -eq  "$judge_nfo_file" ]; then
-          charset="$(file -i "$nfo_file_path"|sed 's/.*charset=//')" 
-          [[ ! $charset ]] && charset='iso-8859-1'
-          iconv -f "$charset" -t UTF-8 -c "$nfo_file_path"| \
-            sed -E "/^ú+$/d" > "$source_desc"
-          debug_func 'info:get-nfo-file'  #----debug---
+    nfo_count=$("$tr_show" "$torrent_Path"|grep -Eic '\.nfo \([0-9\. ]+[kb]+\)')
+    if [[ $nfo_count -eq 1 ]]; then
+      local nfo_file_size nfo_file_path nfo_file_downloaded
+      nfo_file_size=$("$tr_show" "$torrent_Path"| \
+        grep -Eio '\.nfo \([0-9\. ]+[kb]+\)'|grep -Eo '[0-9]+\.?[0-9]*')
+      if [[ $nfo_file_size ]]; then
+        nfo_file_path="$(find "${one_TR_Dir}/${one_TR_Name}" -iname '*.nfo'|head -1)"
+        nfo_file_downloaded=$(stat --format=%s "$nfo_file_path")
+        if [[ $nfo_file_downloaded ]]; then
+          local judge_download_nfo judge_nfo_file charset
+          judge_download_nfo=$((nfo_file_downloaded/100)) # $(())中变量可以不要$
+          judge_nfo_file=$(bc <<< "$nfo_file_size * 10"|awk -F '.' '{print $1}')
+          [[ "$judge_download_nfo" -eq  "$judge_nfo_file" ]] && {
+            charset="$(file -i "$nfo_file_path"|sed 's/.*charset=//')"
+            [[ $charset ]] || charset='iso-8859-1'
+            [[ $charset == 'binary' ]] && charset='IBM866'
+            iconv -f "$charset" -t UTF-8 -c "$nfo_file_path" > "$source_desc"
+            debug_func 'info:[one nfo file]use-nfo-file'; }  #----debug---
         fi
-        unset charset 
+      else
+        # 有一个nfo并且nfo未下载完成，使用主文件生成nfo信息
+        debug_func 'info:[one nfo file]use-main-file-gen!'  #----debug---
+        # gen from main file and gen screens
+        [[ $only_tlfbits = 'yes' ]] || generate_info_local
       fi
+    elif [[ $nfo_count -ge 2 ]]; then
+      # 对于有多个nfo的种子，使用文件列表代替 nfo
+      "$tr_show" "$torrent_Path"|sed '1,/FILES/d;/^ *$/d;\#https?://#d' > "$source_desc"
+      debug_func 'info:[mult nfo file]use-file-lists'  #----debug---
     else
-      debug_func 'info:use-main-file!'  #----debug---
+      # 对于没有 nfo 文件的种子
+      # gen from main file and gen screens
+      debug_func 'info:[no nfo file]use-main-file-gen'  #----debug---
+      [[ $only_tlfbits = 'yes' ]] || generate_info_local
     fi
-    # gen from main file and gen screens
-    [[ $only_tlfbits = 'yes' ]] || generate_info_local
   fi
   debug_func 'info:exit'  #----debug---
 }
