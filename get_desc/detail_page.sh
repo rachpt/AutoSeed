@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2020-01-07
+# Date: 2020-01-09
 #
 #-------------------------------------#
 # 通过搜索原种站点(依据torrent文件中的tracker信息)，
@@ -209,6 +209,10 @@ form_source_site_get_Desc() {
   form_source_site_get_tID
   # source_t_id will be unset in generate.sh
   if [ "$source_t_id" ]; then
+    #---hdsky 认领种子---#
+    [[ -f "${ROOT_PATH}/get_desc/hdsky_adoption.sh" ]] && {
+      source "${ROOT_PATH}/get_desc/hdsky_adoption.sh"
+      call_hdsky_adoption; }
     #---define temp file name---#
     source_full="${ROOT_PATH}/tmp/${org_tr_name}_full.txt"
     http --verify=no --ignore-stdin --timeout=25 -b GET \
