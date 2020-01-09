@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-12-21
+# Date: 2020-01-09
 #
 # This file defines constants and functions
 #--------------------------------------#
@@ -44,7 +44,7 @@ db_api_1='https://api.rhilip.info/tool/movieinfo/gen'
 db_api_2='https://api.nas.ink/infogen'
 #--------------------------------------#
 # 图片上传 API
-upload_poster_api_0='https://sm.ms/api/upload'
+upload_poster_api_0='https://sm.ms/api/v2/upload?inajax=1'
 upload_poster_api_1='https://i.endpot.com/api/upload'
 upload_poster_api_2='https://catbox.moe/user/api.php'
 upload_poster_api_3='https://apis.yum6.cn/api/5bd44dc94bcfc' #https://wiki.yum6.cn
@@ -84,7 +84,7 @@ descrCom_complex="[quote]
 descrCom_complex_html="<br />
 <div style=\"text-align:center\">
   <marquee behavior=\"alternate\" direction=\"down\" height=\"90\" style=\"border:none\" width=\"960\"><marquee behavior=\"alternate\"><span style=\"font-size:26px;\">
-  <a href=\"https://github.com/rachpt/AutoSeed\">
+  <a href=\"https://github.com/rachpt/AutoSeed\" target=\"_blank\">
 	<span style=\"inline-block:block;background-color:slateblue;padding:30px;border:dashed silver 1px;border-radius:px;box-shadow: 2px 2px 5px gray;width:100px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:6em auto;\"><strong>这是一个自动发布的种子</strong> <em> (点不到我^_-)</em> <img alt=\"[em57]\" src=\"https://bt.byr.cn/pic/smilies/57.gif\" /></span></a></span></marquee></marquee></div>
 <br /><br /><br />
 <span style=\"nline-block:block;background-color:pink;padding:10px;border:dashed silver 1px;border-radius:3px;box-shadow: 2px 2px 5px gray;width:110px;overflow-x:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2em auto;\"><strong>所有信息以种子文件名为准，标题、简介信息仅供参考，若发现有误请以［举报］或［留言］的形式通知工作人员审查编辑。</strong> </span><br />
@@ -159,7 +159,7 @@ upload_image_com() {
   local _rand_=$((RANDOM % 12)) # choose an api randomly
   up_case_func() {
   case $_rand_ in
-    00)
+    0)
       # https://sm.ms
       img_url_com="$(http --verify=no --timeout=25 --ignore-stdin -bf POST \
         "$upload_poster_api_0" smfile@"$_file" "$user_agent"|grep -Eo \
@@ -231,7 +231,7 @@ upload_image_com() {
       # 京东
       img_url_com="$(http --pretty=format --verify=no --timeout=25 -Ibf POST \
       "${upload_poster_api_11}" filedata@"$_file" op='applyUpload' "$user_agent"| \
-      grep 'optDescription'|grep -io 'jfs[^"]*')" 
+      grep 'optDescription'|grep -io 'jfs[^"]*')"
       [[ $img_url_com ]] && img_url_com="https://img30.360buyimg.com/myjd/$img_url_com" ;;
 
   esac
