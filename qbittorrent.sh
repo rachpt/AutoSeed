@@ -3,7 +3,7 @@
 #
 # Author: rachpt@126.com
 # Version: 3.1v
-# Date: 2019-08-17
+# Date: 2020-01-10
 #
 #--------------------------------------#
 qb_login="${qb_HOST}:$qb_PORT/api/v2/auth/login"
@@ -12,6 +12,7 @@ qb_delete="${qb_HOST}:$qb_PORT/api/v2/torrents/delete"
 qb_ratio="${qb_HOST}:$qb_PORT/api/v2/torrents/setShareLimits"
 qb_lists="${qb_HOST}:$qb_PORT/api/v2/torrents/info"
 qb_reans="${qb_HOST}:$qb_PORT/api/v2/torrents/reannounce"
+qb_addTker="${qb_HOST}:$qb_PORT/api/v2/torrents/addTrackers"
 #--------------------------------------#
 qbit_webui_cookie() {
   if [ "$(http --ignore-stdin -b GET "${qb_HOST}:$qb_PORT" "$qb_Cookie"| \
@@ -85,8 +86,8 @@ qb_get_hash() {
   # $1 name; $2 tracker; $3 qb info lists; return hash(echo), used in qb_set_ratio_loop
   local _hash _one _pos
   echo "$3"|sed -n "/name.*$1/="|while read _pos; do
-    _hash="$(echo "$3"|head -n $(($_pos - 1))|tail -1|sed -E 's/hash:[ ]*//')"
-    _one="$(echo "$3"|head -n $(($_pos + 1))|tail -1|sed -E 's/tracker:[ ]*//;s/passkey=.*//')"
+    _hash="$(echo "$3"|sed -n "$((_pos - 1)) {s/hash: *//;p}")"
+    _one="$(echo "$3"|sed -n "$((_pos + 1)) {s/tracker: *//;s/passkey=.*//;p}")"
     [[ "$(echo "$_one"|grep "$2")" ]] && echo "$_hash" && break
   done
 }
@@ -121,6 +122,13 @@ qb_set_ratio_loop() {
       if http --ignore-stdin -f POST "$qb_ratio" hashes="$tr_hash" \
         ratioLimit=$rtio seedingTimeLimit="$(echo "$MAX_SEED_TIME * 1440"|bc)" \
         "$qb_Cookie" &> /dev/null; then
+          # mteam 添加 ipv6 tracker 链接
+          [[ $trker = ${trackers[mt]} ]] && {
+            local mt_ipv6
+            sleep 10
+            mt_ipv6="https://ipv6.${post_site[mt]##*//}/announce.php?passkey=$passkey_mt"
+            http -If POST "$qb_addTker" hash="$tr_hash" urls="$mt_ipv6" "$qb_Cookie"
+          }
           debug_func "qb:sussess_set_rt[$trker]"       #----debug---
       else
         case $? in
@@ -201,12 +209,12 @@ qb_get_torrent_completion() {
     grep -B17 -A15 'name":'|sed -E \
     '/"completed":/{s/"//g};/"name":/{s/"//g};/"save_path":/{s/"//g};/"size":/{s/"//g};'|sed '/"/d')" 
   # match the torrent recently added.
-  pos=$(echo "$data"|sed -n "/name.*$org_tr_name/="|head -1)
+  pos=$(echo "$data"|sed -n "/name.*$org_tr_name/{=;q}")
   [[ $pos ]] && {
-   compl_one="$(echo "$data"|head -n $(($pos - 1))|tail -1|grep -Eo '[0-9]{4,}')"
-   size_one="$(echo "$data"|head -n $(($pos + 2))|tail -1|grep -Eo '[0-9]{4,}')"
+   compl_one="$(echo "$data"|sed -n "$((_pos - 1)) p"|grep -Eo '[0-9]{4,}')"
+   size_one="$(echo "$data"|sed -n "$((_pos + 2)) p"|grep -Eo '[0-9]{4,}')"
    # one_TR_Dir is not local variable
-   one_TR_Dir="$(echo "$data"|head -n $(($pos + 1))|tail -1|grep -o '/.*$')";
+   one_TR_Dir="$(echo "$data"|sed -n "$((_pos + 1)) p"|grep -o '/.*$')";
   }
   # return completed precent
   [[ $compl_one && $size_one ]] && \
