@@ -126,7 +126,7 @@ trackers[hdc]='tracker.hdchina.org'
 post_site[hds]='https://hdsky.me'
 trackers[hds]='tracker.hdsky.me'
 post_site[mt]='https://pt.m-team.cc'
-trackers[mt]='pt.m-team.cc'
+trackers[mt]='tracker.m-team.cc'
 #--------------------------------------#
 # import functions
 source "$ROOT_PATH/qbittorrent.sh"
