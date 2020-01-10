@@ -210,11 +210,13 @@ qb_get_torrent_completion() {
     '/"completed":/{s/"//g};/"name":/{s/"//g};/"save_path":/{s/"//g};/"size":/{s/"//g};'|sed '/"/d')" 
   # match the torrent recently added.
   pos=$(echo "$data"|sed -n "/name.*$org_tr_name/{=;q}")
-  [[ $pos ]] && {
-   compl_one="$(echo "$data"|sed -n "$((_pos - 1)) p"|grep -Eo '[0-9]{4,}')"
-   size_one="$(echo "$data"|sed -n "$((_pos + 2)) p"|grep -Eo '[0-9]{4,}')"
+  [[ $pos =~ [0-9]+ ]] && {
+   compl_one="$(echo "$data"|sed -n "$((pos - 1)) p"|grep -Eo '[0-9]{4,}')"
+   size_one="$(echo "$data"|sed -n "$((pos + 2)) p"|grep -Eo '[0-9]{4,}')"
    # one_TR_Dir is not local variable
-   one_TR_Dir="$(echo "$data"|sed -n "$((_pos + 1)) p"|grep -o '/.*$')";
+   one_TR_Dir="$(echo "$data"|sed -n "$((pos + 1)) p"|grep -o '/.*$')";
+  } || {
+    debug_func "qbit:completion-pos[$pos]"  #----debug---
   }
   # return completed precent
   [[ $compl_one && $size_one ]] && \
