@@ -172,7 +172,7 @@ qb_add_torrent_url() {
     esac
     echo 'qbit添加种子失败'
     sleep 5
-    debug_func "urls=$torrent2add path=$one_TR_Dir $qb_Cookie"
+    debug_func "urls=${torrent2add/passkey*/} path=$one_TR_Dir $qb_Cookie"
     curl -k -b "`echo "$qb_Cookie"|sed -E 's/^cookie:[ ]?//i'`" -X POST \
       -F "urls=$torrent2add" -F 'root_folder=true' -F "savepath=$one_TR_Dir" \
       -F 'skip_checking=true' "$qb_add" && debug_func 'qbit:used-curl-POST'
