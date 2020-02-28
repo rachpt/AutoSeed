@@ -187,6 +187,7 @@ id="$(http --verify=no --ignore-stdin -f --print=h POST "$postUrl"\
   'uplver'="$anonymous_mt"\
   file@"${torrent_Path}"\
   "$user_agent"\
+  "Referer: ${post_site[mt]}/upload.php"
   "$cookie_mt"|grep -om1 '[^a-z]detail[^;"]*id=[0-9]*'|grep -om1 '[0-9]*')"
 
   if [[ -z "$t_id" ]]; then
